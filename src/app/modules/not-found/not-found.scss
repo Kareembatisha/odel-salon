@@ -1,0 +1,26 @@
+@use "styles/variables" as v;
+
+.nf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-3;
+  min-height: 100vh;
+  padding: v.$space-6;
+  background: v.$bg-page;
+  text-align: center;
+
+  // Inside the shell the content area is (viewport − header) tall; a full 100vh would add a scrollbar.
+  :host(.nf-host--shell) & { min-height: calc(100vh - #{v.$header-height}); }
+
+  &__code {
+    font-family: v.$font-display;
+    font-size: clamp(96px, 20vw, 168px);
+    font-weight: v.$fw-semibold;
+    line-height: 1;
+    color: v.$primary-text;
+  }
+  &__title { font-size: v.$text-3xl; font-weight: v.$fw-semibold; }
+  &__text { max-width: 42ch; margin-bottom: v.$space-4; color: v.$text-secondary; }
+}

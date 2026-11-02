@@ -1,0 +1,30 @@
+@use "styles/variables" as v;
+
+:host { display: inline-flex; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  height: 24px;
+  padding-inline: v.$space-3;
+  border-radius: v.$radius-full;
+  font-size: v.$text-xs;
+  font-weight: v.$fw-semibold;
+  line-height: 1;
+  white-space: nowrap;
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &--success { background: v.$success-bg; color: v.$success-text; }
+  &--warning { background: v.$warning-bg; color: v.$warning-text; }
+  &--danger  { background: v.$danger-bg;  color: v.$danger-text; }
+  &--info    { background: v.$info-bg;    color: v.$info-text; }
+  &--neutral { background: v.$surface-hover; color: v.$text-secondary; box-shadow: inset 0 0 0 1px v.$border; }
+  &--vip     { background: v.$primary-soft; color: v.$primary-text; box-shadow: inset 0 0 0 1px v.$primary-soft-border; }
+}

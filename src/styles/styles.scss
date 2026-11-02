@@ -1,0 +1,215 @@
+// ============================================================
+// styles.scss — global entry point
+// ============================================================
+@use "variables" as v;
+@use "theme";
+@use "patterns" as p;
+
+// Fonts are loaded from index.html (preconnect + stylesheet link).
+
+// ── Tailwind (layout utilities only; preflight is off) ────
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// ── 1. Theme variables ────────────────────────────────────
+:root {
+  @include theme.palettes;
+  @include theme.light;
+  @include theme.fonts-ltr;
+}
+
+[data-theme="dark"] {
+  @include theme.dark;
+}
+
+[dir="rtl"] {
+  @include theme.fonts-rtl;
+}
+
+// ── 2. Base ───────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: v.$bg-page;
+  color: v.$text;
+  font-family: v.$font-ui;
+  font-size: v.$text-base;
+  font-weight: v.$fw-regular;
+  line-height: v.$lh-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// Smooth theme change, but only after first paint (class added by ThemeService).
+html.odl-theme-ready body,
+html.odl-theme-ready .odl-card {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
+}
+
+a {
+  color: v.$primary-text;
+}
+
+::selection {
+  background: v.tint(v.$primary, 35%);
+}
+
+:focus-visible {
+  @include p.focus-ring;
+  border-radius: v.$radius-xs;
+}
+
+button {
+  font-family: inherit;
+}
+
+// Numbers in tables/stats line up.
+.u-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-only {
+  @include p.sr-only;
+}
+
+// ── 3. Scrollbars ─────────────────────────────────────────
+* {
+  scrollbar-width: thin;
+  scrollbar-color: v.$border-strong transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: v.$border-strong;
+  border-radius: v.$radius-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: v.$text-muted;
+}
+
+// ── 4. Shared page primitives ─────────────────────────────
+// Page content wrapper: every routed page sits inside this.
+.odl-page {
+  width: 100%;
+  max-width: v.$content-max-width;
+  margin-inline: auto;
+  padding: v.$space-8;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-6;
+
+  @media (max-width: v.$bp-md) {
+    padding: v.$space-4;
+    gap: v.$space-4;
+  }
+}
+
+// Standard surface for any panel.
+.odl-card {
+  @include p.card;
+}
+
+// Checkbox (table selection, permission matrix). Native element, themed.
+input.odl-check {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  background: v.$surface;
+  border: 1.5px solid v.$border-strong;
+  border-radius: v.$radius-xs;
+  cursor: pointer;
+  transition: background v.$transition-fast, border-color v.$transition-fast;
+
+  &:hover:not(:disabled) { border-color: v.$text-muted; }
+  &:checked,
+  &:indeterminate { background: v.$primary; border-color: v.$primary; }
+  &:checked::after {
+    content: "";
+    width: 9px;
+    height: 5px;
+    margin-top: -2px;
+    border-inline-start: 2px solid v.$on-primary;
+    border-bottom: 2px solid v.$on-primary;
+    transform: rotate(-45deg);
+  }
+  &:indeterminate::after { content: ""; width: 8px; height: 2px; background: v.$on-primary; border-radius: 1px; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &:focus-visible { @include p.focus-ring; }
+}
+
+// Table cell truncation convention (pair with a `title` attribute).
+.cell-text {
+  display: block;
+  @include p.truncate;
+  max-width: 100%;
+}
+
+@keyframes odl-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── 5. PrimeNG touch-ups (theme handled by the preset) ────
+p-toast,
+.p-toast {
+  z-index: v.$z-toast !important;
+}
+
+// ── 6. Motion preferences ─────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// ── 7. Print / PDF export (PrintExportService) ────────────
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-section,
+  .print-section * {
+    visibility: visible;
+  }
+  .print-section {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+  }
+  .no-print {
+    display: none !important;
+  }
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+}

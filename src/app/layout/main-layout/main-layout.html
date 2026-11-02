@@ -1,0 +1,17 @@
+<a class="skip-link" href="#main-content">{{ 'LAYOUT.SKIP_TO_CONTENT' | translate }}</a>
+<app-toast />
+
+@if (routeLoading.isLoading()) {
+  <div class="route-progress" [style.width.%]="routeLoading.progress()" role="progressbar" aria-hidden="true"></div>
+}
+
+<div class="shell">
+  <app-sidebar />
+
+  <div class="shell__main">
+    <app-header />
+    <main id="main-content" class="shell__content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>

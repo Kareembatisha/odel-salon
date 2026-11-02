@@ -1,0 +1,115 @@
+<div class="dt">
+  <!-- Desktop / wide: real <table> -->
+  <div class="dt__scroll">
+    <table class="dt__table">
+      @if (caption()) { <caption class="sr-only">{{ caption() }}</caption> }
+      <colgroup>
+        @if (selectable()) { <col style="width: 52px" /> }
+        @for (col of columns(); track col.key()) { <col [style.width]="col.width() === '1fr' ? null : col.width()" /> }
+      </colgroup>
+      <thead>
+        <tr>
+          @if (selectable()) {
+            <th scope="col" class="dt__check">
+              <input type="checkbox" class="odl-check" [checked]="allSelected()" [indeterminate]="someSelected()"
+                [attr.aria-label]="selectAllLabel()" (change)="toggleAll()" />
+            </th>
+          }
+          @for (col of columns(); track col.key()) {
+            <th scope="col" [style.text-align]="col.align()">{{ col.label() }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (row of skeletonRows(); track row) {
+            <tr class="dt__row dt__row--skeleton">
+              @if (selectable()) { <td></td> }
+              @for (col of columns(); track col.key()) {
+                <td><app-skeleton [width]="$index === 0 ? '70%' : '55%'" height="14px" /></td>
+              }
+            </tr>
+          }
+        } @else {
+          @for (row of data(); track row.id; let i = $index) {
+            <tr class="dt__row" [class.dt__row--selected]="selection().includes(row.id)" (click)="rowClick.emit(row)">
+              @if (selectable()) {
+                <td class="dt__check" (click)="$event.stopPropagation()">
+                  <input type="checkbox" class="odl-check" [checked]="selection().includes(row.id)"
+                    [disabled]="lockedIds().includes(row.id)" [attr.aria-label]="selectRowLabel()" (change)="toggleRow(row.id)" />
+                </td>
+              }
+              @for (col of columns(); track col.key()) {
+                <td [style.text-align]="col.align()">
+                  <ng-container *ngTemplateOutlet="col.template; context: { $implicit: row, row: row, index: i }" />
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Narrow viewport: cards (only rendered when the host supplied odlCard) -->
+  @if (cardTemplate(); as card) {
+    <div class="dt__cards">
+      @if (selectable() && !loading() && data().length) {
+        <label class="dt__cards-selectall">
+          <input type="checkbox" class="odl-check" [checked]="allSelected()" [indeterminate]="someSelected()"
+            [attr.aria-label]="selectAllLabel()" (change)="toggleAll()" />
+          <span>{{ 'COMMON.SELECT_ALL' | translate }}</span>
+        </label>
+      }
+      @if (loading()) {
+        @for (row of skeletonRows(); track row) {
+          <div class="dt__card dt__card--skeleton">
+            <app-skeleton shape="circle" width="40px" height="40px" />
+            <div class="dt__card-skel-lines">
+              <app-skeleton width="60%" height="14px" />
+              <app-skeleton width="40%" height="12px" />
+            </div>
+          </div>
+        }
+      } @else {
+        @for (row of data(); track row.id; let i = $index) {
+          <div class="dt__card" [class.dt__card--selected]="selection().includes(row.id)" (click)="rowClick.emit(row)">
+            <ng-container *ngTemplateOutlet="card.template; context: cardContext(row, i)" />
+          </div>
+        }
+      }
+    </div>
+  }
+
+  @if (!loading() && !data().length) {
+    <app-empty-state [title]="emptyTitle() || ('COMMON.NO_RESULTS' | translate)" [description]="emptyDescription()" [icon]="emptyIcon()" [compact]="true">
+      <ng-content select="[empty-action]" />
+    </app-empty-state>
+  }
+
+  @if (totalRecords() > 0) {
+    <footer class="dt__footer">
+      <span class="dt__range u-num">
+        {{ 'COMMON.TABLE.SHOWING' | translate }}
+        <strong>{{ rangeStart() }}–{{ rangeEnd() }}</strong>
+        {{ 'COMMON.TABLE.OF' | translate }}
+        <strong>{{ totalRecords() }}</strong>
+      </span>
+
+      <nav class="dt__pager" [attr.aria-label]="'COMMON.TABLE.PAGINATION' | translate">
+        <button type="button" class="dt__page dt__page--arrow" [disabled]="page() === 1"
+          [attr.aria-label]="'COMMON.PREVIOUS' | translate" (click)="goTo(page() - 1)">
+          <i class="pi pi-angle-left"></i>
+        </button>
+        @for (p of visiblePages(); track p) {
+          <button type="button" class="dt__page u-num" [class.dt__page--active]="p === page()"
+            [attr.aria-current]="p === page() ? 'page' : null" (click)="goTo(p)">{{ p }}</button>
+        }
+        <button type="button" class="dt__page dt__page--arrow" [disabled]="page() === totalPages()"
+          [attr.aria-label]="'COMMON.NEXT' | translate" (click)="goTo(page() + 1)">
+          <i class="pi pi-angle-right"></i>
+        </button>
+      </nav>
+    </footer>
+  }
+</div>

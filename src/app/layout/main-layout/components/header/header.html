@@ -1,0 +1,69 @@
+<header class="hd">
+  <button
+    type="button"
+    class="hd__icon-btn"
+    [attr.aria-label]="'LAYOUT.TOGGLE_SIDEBAR' | translate"
+    (click)="toggleSidebar()"
+  >
+    <i class="pi pi-bars" aria-hidden="true"></i>
+  </button>
+
+  <nav class="hd__crumbs" [attr.aria-label]="'LAYOUT.BREADCRUMB' | translate">
+    <ol>
+      @for (crumb of breadcrumbs(); track $index) {
+        <li [class.hd__crumb--active]="crumb.isActive">
+          @if (crumb.route && !crumb.isActive) {
+            <a [routerLink]="crumb.route">{{ crumb.label | translate }}</a>
+          } @else {
+            <span [attr.aria-current]="crumb.isActive ? 'page' : null">{{ crumb.label | translate }}</span>
+          }
+          @if (!crumb.isActive) { <i class="pi pi-angle-right hd__sep" aria-hidden="true"></i> }
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <div class="hd__spacer"></div>
+
+  <div class="hd__tools">
+    <app-language-switcher />
+    <app-theme-switcher />
+    <button type="button" class="hd__icon-btn hd__bell" [attr.aria-label]="'LAYOUT.NOTIFICATIONS' | translate">
+      <i class="pi pi-bell" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="hd__profile">
+    <button
+      type="button"
+      class="hd__profile-btn"
+      [attr.aria-label]="'LAYOUT.PROFILE_MENU' | translate"
+      [attr.aria-expanded]="menuOpen()"
+      aria-haspopup="menu"
+      (click)="toggleMenu()"
+    >
+      <app-avatar size="md" [name]="user()?.fullName ?? ''" [src]="user()?.imageUrl" aria-hidden="true" />
+      <span class="hd__who">
+        <span class="hd__name">{{ user()?.fullName }}</span>
+        <span class="hd__role">{{ role() }}</span>
+      </span>
+      <i class="pi pi-angle-down hd__who-chevron" aria-hidden="true"></i>
+    </button>
+
+    @if (menuOpen()) {
+      <div class="hd__menu" role="menu">
+        <div class="hd__menu-head">
+          <span class="hd__menu-name">{{ user()?.fullName }}</span>
+          <span class="hd__menu-mail">{{ user()?.email }}</span>
+        </div>
+        <button type="button" role="menuitem" class="hd__menu-item" (click)="goTo('/main/profile')">
+          <i class="pi pi-user" aria-hidden="true"></i>{{ 'LAYOUT.PROFILE' | translate }}
+        </button>
+        <hr />
+        <button type="button" role="menuitem" class="hd__menu-item hd__menu-item--danger" (click)="logout()">
+          <i class="pi pi-sign-out" aria-hidden="true"></i>{{ 'LAYOUT.LOGOUT' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+</header>

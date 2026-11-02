@@ -1,0 +1,21 @@
+<article class="stat" [class]="'stat stat--' + tone()">
+  <div class="stat__head">
+    <span class="stat__label">{{ label() }}</span>
+    <span class="stat__icon" aria-hidden="true"><i [class]="icon()"></i></span>
+  </div>
+  <span class="stat__value u-num">{{ value() }}</span>
+  @if (trend() || hint()) {
+    <div class="stat__foot">
+      @if (trend()) {
+        <span class="stat__trend" [class]="'stat__trend stat__trend--' + trendDirection()">
+          @switch (trendDirection()) {
+            @case ('up') { <i class="pi pi-arrow-up-right" aria-hidden="true"></i> }
+            @case ('down') { <i class="pi pi-arrow-down-right" aria-hidden="true"></i> }
+          }
+          {{ trend() }}
+        </span>
+      }
+      @if (hint()) { <span class="stat__hint">{{ hint() }}</span> }
+    </div>
+  }
+</article>

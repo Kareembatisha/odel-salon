@@ -1,0 +1,90 @@
+@use "styles/variables" as v;
+
+:host {
+  display: inline-flex;
+}
+:host(:has(.btn--full)) {
+  display: flex;
+  width: 100%;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  border: 1px solid transparent;
+  border-radius: v.$radius-md;
+  font-family: v.$font-ui;
+  font-weight: v.$fw-semibold;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background v.$transition-normal, border-color v.$transition-normal, color v.$transition-normal,
+    transform v.$transition-fast;
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  &--full {
+    width: 100%;
+  }
+}
+
+.btn--sm { height: v.$btn-height-sm; padding-inline: v.$space-3; font-size: v.$text-sm; }
+.btn--md { height: v.$btn-height-md; padding-inline: v.$space-4; font-size: v.$text-base; }
+.btn--lg { height: v.$btn-height-lg; padding-inline: v.$space-6; font-size: v.$text-lg; }
+
+.btn--primary {
+  background: v.$primary;
+  color: v.$on-primary;
+  &:hover:not(:disabled) { background: v.$primary-hover; }
+  &:active:not(:disabled) { background: v.$primary-active; }
+}
+
+.btn--secondary,
+.btn--export {
+  background: v.$surface;
+  border-color: v.$border-strong;
+  color: v.$text;
+  &:hover:not(:disabled) { background: v.$surface-hover; border-color: v.$text-muted; }
+}
+
+.btn--outline {
+  background: transparent;
+  border-color: v.$primary;
+  color: v.$primary-text;
+  &:hover:not(:disabled) { background: v.$primary-soft; }
+}
+
+.btn--ghost {
+  background: transparent;
+  color: v.$text-secondary;
+  &:hover:not(:disabled) { background: v.$surface-hover; color: v.$text; }
+}
+
+.btn--danger {
+  background: v.$danger;
+  color: v.$on-danger;
+  &:hover:not(:disabled) { background: color-mix(in srgb, var(--odl-danger) 86%, black); }
+}
+
+.btn__icon { font-size: 0.95em; }
+
+.btn__spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}

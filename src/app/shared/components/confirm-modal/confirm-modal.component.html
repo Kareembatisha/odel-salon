@@ -1,0 +1,28 @@
+@if (isOpen()) {
+  <div class="backdrop" (click)="onBackdrop($event)" role="presentation">
+    <div
+      class="dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+      appFocusTrap
+      appFocusTrapInitial="button"
+      (appFocusTrapEscape)="cancel.emit()"
+    >
+      <span class="dialog__icon" [class]="'dialog__icon dialog__icon--' + variant()" aria-hidden="true">
+        <i [class]="variant() === 'danger' ? 'pi pi-trash' : 'pi pi-question-circle'"></i>
+      </span>
+      <h2 id="confirm-title" class="dialog__title">{{ title() }}</h2>
+      <p id="confirm-message" class="dialog__message">{{ message() }}</p>
+      <div class="dialog__actions">
+        <app-button variant="secondary" (clicked)="cancel.emit()">{{ cancelLabel() }}</app-button>
+        <app-button
+          [variant]="variant() === 'danger' ? 'danger' : 'primary'"
+          [loading]="busy()"
+          (clicked)="confirm.emit()"
+        >{{ confirmLabel() }}</app-button>
+      </div>
+    </div>
+  </div>
+}

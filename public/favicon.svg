@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Odel">
+  <rect width="48" height="48" rx="12" fill="#1F1D1A"/>
+  <circle cx="24" cy="24" r="12.5" stroke="#C29C45" stroke-width="2.6"/>
+  <path d="M33.5 12.5 14.5 35.5" stroke="#C29C45" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="33.5" cy="12.5" r="2.4" fill="#DFC072"/>
+</svg>

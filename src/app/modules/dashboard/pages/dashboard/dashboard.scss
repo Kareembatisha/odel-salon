@@ -1,0 +1,70 @@
+@use "styles/variables" as v;
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: v.$space-4;
+  @media (max-width: v.$bp-xl) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: v.$bp-xs) { grid-template-columns: 1fr; }
+
+  &__skeleton { display: flex; flex-direction: column; gap: v.$space-3; padding: v.$space-5; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 312px;
+  gap: v.$space-6;
+  align-items: start;
+  @media (max-width: v.$bp-xl) { grid-template-columns: minmax(0, 1fr); }
+
+  &__main { display: flex; flex-direction: column; gap: v.$space-3; min-width: 0; }
+  &__side { display: flex; flex-direction: column; gap: v.$space-4; }
+}
+
+.section-title { font-size: v.$text-xl; font-weight: v.$fw-semibold; color: v.$text; }
+.strong { font-weight: v.$fw-semibold; }
+
+.panel { display: flex; flex-direction: column; gap: v.$space-4; padding: v.$space-5; }
+
+// ── Chair meters ─────────────────────
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+
+  &__head { display: flex; align-items: baseline; justify-content: space-between; gap: v.$space-3; }
+  &__name { font-weight: v.$fw-semibold; }
+  &__count { color: v.$text-secondary; font-size: v.$text-sm; }
+  &__track { height: 8px; border-radius: v.$radius-full; background: v.$surface-hover; box-shadow: inset 0 0 0 1px v.$border; overflow: hidden; }
+  &__fill {
+    display: block;
+    height: 100%;
+    border-radius: v.$radius-full;
+    background: v.$text-muted;
+    transition: width v.$transition-slow;
+    &--vip { background: v.$primary; }
+  }
+  &__note { color: v.$text-muted; font-size: v.$text-xs; }
+}
+
+// ── Barbers: green = can take a booking now, red = in a session (Sprint 3 availability) ─────
+.barbers {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: v.$space-3;
+    padding-block: v.$space-3;
+    border-bottom: 1px solid v.$border;
+    &:last-child { border-bottom: 0; padding-bottom: 0; }
+    &:first-child { padding-top: 0; }
+  }
+  &__dot { width: 8px; height: 8px; border-radius: 50%; background: v.$success; flex-shrink: 0; &--busy { background: v.$danger; } }
+  &__name { flex: 1; min-width: 0; font-weight: v.$fw-medium; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  &__state { font-size: v.$text-sm; color: v.$success-text; white-space: nowrap; &--busy { color: v.$danger-text; } }
+}

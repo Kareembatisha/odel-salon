@@ -1,0 +1,77 @@
+// ============================================================
+// _colors.scss — SEMANTIC color tokens.
+//
+// Every value is a CSS variable (defined per theme in _theme.scss), so
+// components written against these tokens are automatically
+// light/dark-aware and brand-aware. Never hardcode a hex in a component.
+//
+// USAGE:  @use 'styles/variables' as v;   color: v.$text-secondary;
+// ============================================================
+
+// ── Surfaces ──────────────────────────────────────────────
+$bg-page: var(--odl-bg-page);
+$surface: var(--odl-surface);
+$surface-raised: var(--odl-surface-raised); // menus, popovers, modals
+$surface-sunken: var(--odl-surface-sunken); // table headers, inputs
+$surface-hover: var(--odl-surface-hover);
+
+// ── Borders ───────────────────────────────────────────────
+$border: var(--odl-border);
+$border-strong: var(--odl-border-strong);
+
+// ── Text ──────────────────────────────────────────────────
+$text: var(--odl-text);
+$text-secondary: var(--odl-text-secondary);
+$text-muted: var(--odl-text-muted);
+$text-placeholder: var(--odl-text-placeholder);
+$text-disabled: var(--odl-text-disabled);
+
+// ── Brand / primary ───────────────────────────────────────
+$primary: var(--odl-primary);              // fills
+$primary-hover: var(--odl-primary-hover);
+$primary-active: var(--odl-primary-active);
+$on-primary: var(--odl-on-primary);        // text/icons placed ON a primary fill
+$primary-soft: var(--odl-primary-soft);    // tinted backgrounds (active chip)
+$primary-soft-border: var(--odl-primary-soft-border);
+$primary-text: var(--odl-primary-text);    // brand-colored TEXT / icons on a surface
+$focus-ring: var(--odl-focus-ring);
+
+// ── Feedback ──────────────────────────────────────────────
+$success: var(--odl-success);
+$success-text: var(--odl-success-text);
+$success-bg: var(--odl-success-bg);
+$warning: var(--odl-warning);
+$warning-text: var(--odl-warning-text);
+$warning-bg: var(--odl-warning-bg);
+$danger: var(--odl-danger);
+$danger-text: var(--odl-danger-text);
+$danger-bg: var(--odl-danger-bg);
+$on-danger: var(--odl-on-danger);
+$info: var(--odl-info);
+$info-text: var(--odl-info-text);
+$info-bg: var(--odl-info-bg);
+
+// ── Sidebar (charcoal in both themes) ─────────────────────
+$sidebar-bg: var(--odl-sidebar-bg);
+$sidebar-border: var(--odl-sidebar-border);
+$sidebar-text: var(--odl-sidebar-text);
+$sidebar-text-strong: var(--odl-sidebar-text-strong);
+$sidebar-text-muted: var(--odl-sidebar-text-muted);
+$sidebar-hover: var(--odl-sidebar-hover);
+$sidebar-active-bg: var(--odl-sidebar-active-bg);
+$sidebar-active-text: var(--odl-sidebar-active-text);
+
+// ── Overlay & elevation ───────────────────────────────────
+$overlay: var(--odl-overlay);
+$shadow-sm: var(--odl-shadow-sm);
+$shadow-md: var(--odl-shadow-md);
+$shadow-lg: var(--odl-shadow-lg);
+
+// ── Skeleton ──────────────────────────────────────────────
+$skeleton-a: var(--odl-skeleton-a);
+$skeleton-b: var(--odl-skeleton-b);
+
+// ── Helper: translucent tint of any token ─────────────────
+@function tint($color, $percent) {
+  @return color-mix(in srgb, #{$color} #{$percent}, transparent);
+}

@@ -1,0 +1,56 @@
+import { PERMISSIONS, Permission } from '../../core/auth/permissions';
+import { environment } from '@env/environment';
+
+export interface NavItem {
+  id: string;
+  /** Translation key. */
+  labelKey: string;
+  /** PrimeIcons class. */
+  icon: string;
+  route?: string;
+  /**
+   * The permission that already guards this item's route (see modules/main.routes.ts).
+   * The sidebar hides items the user can't open; the route guard stays the real boundary.
+   */
+  permission?: Permission;
+  children?: NavItem[];
+}
+
+export interface NavSection {
+  id: string;
+  /** Translation key for the section label (omit for an unlabeled section). */
+  labelKey?: string;
+  items: NavItem[];
+  /** Pinned to the bottom of the sidebar. */
+  pinnedBottom?: boolean;
+}
+
+/**
+ * Sidebar structure. Only sections that exist are listed — add an item here
+ * in the same change that adds its route (modules/main.routes.ts).
+ */
+export const NAV_SECTIONS: NavSection[] = [
+  {
+    id: 'overview',
+    items: [{ id: 'dashboard', labelKey: 'LAYOUT.NAV.DASHBOARD', icon: 'pi pi-th-large', route: '/main' }],
+  },
+  {
+    id: 'access',
+    labelKey: 'LAYOUT.SECTIONS.ACCESS',
+    items: [
+      { id: 'users', labelKey: 'LAYOUT.NAV.USERS', icon: 'pi pi-users', route: '/main/users', permission: PERMISSIONS.User.View },
+      { id: 'roles', labelKey: 'LAYOUT.NAV.ROLES_PERMISSIONS', icon: 'pi pi-shield', route: '/main/roles', permission: PERMISSIONS.Role.View },
+    ],
+  },
+  // Developer reference — never shipped to production (environment.showDesignSystem = false).
+  ...(environment.showDesignSystem
+    ? [
+        {
+          id: 'developer',
+          labelKey: 'LAYOUT.SECTIONS.DEVELOPER',
+          pinnedBottom: true,
+          items: [{ id: 'design-system', labelKey: 'LAYOUT.NAV.DESIGN_SYSTEM', icon: 'pi pi-palette', route: '/main/design-system' }],
+        } satisfies NavSection,
+      ]
+    : []),
+];

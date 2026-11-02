@@ -1,0 +1,37 @@
+<form class="uf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="uf__body">
+    <app-float-label-input label="PROFILE.FULL_NAME" iconLeft="pi pi-user" autocomplete="off"
+      [errorMessage]="error('fullName')" formControlName="fullName" />
+    <app-float-label-input label="PROFILE.EMAIL" type="email" iconLeft="pi pi-envelope" autocomplete="off"
+      [errorMessage]="error('email')" formControlName="email" />
+
+    <div class="uf__phone">
+      <app-float-label-select label="PROFILE.COUNTRY_CODE" [options]="countries()" formControlName="countryCode" />
+      <app-float-label-input label="PROFILE.PHONE" type="tel" iconLeft="pi pi-phone" autocomplete="off"
+        [errorMessage]="error('phoneNumber')" formControlName="phoneNumber" />
+    </div>
+
+    <app-float-label-select label="USERS.FORM.ROLE" [options]="roleOptions()" [errorMessage]="error('roleId')" formControlName="roleId" />
+
+    @if (mode() === 'edit') {
+      <label class="uf__toggle">
+        <input type="checkbox" class="odl-check" [checked]="changePassword()" (change)="setChangePassword($any($event.target).checked)" />
+        <span>{{ 'USERS.FORM.CHANGE_PASSWORD' | translate }}</span>
+      </label>
+    }
+
+    @if (showPasswordFields()) {
+      <app-float-label-input [label]="mode() === 'edit' ? 'USERS.FORM.NEW_PASSWORD' : 'AUTH.PASSWORD_LABEL'" type="password" iconLeft="pi pi-lock"
+        autocomplete="new-password" hint="USERS.FORM.PASSWORD_HINT" [errorMessage]="error('password')" formControlName="password" />
+      <app-float-label-input label="AUTH.CONFIRM_PASSWORD_LABEL" type="password" iconLeft="pi pi-key"
+        autocomplete="new-password" [errorMessage]="error('passwordConfirmation')" formControlName="passwordConfirmation" />
+    }
+  </div>
+
+  <footer class="uf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()">
+      {{ (mode() === 'create' ? 'USERS.FORM.CREATE' : 'COMMON.SAVE') | translate }}
+    </app-button>
+  </footer>
+</form>

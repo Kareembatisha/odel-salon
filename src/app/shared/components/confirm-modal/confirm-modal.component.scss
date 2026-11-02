@@ -1,0 +1,50 @@
+@use "styles/variables" as v;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: v.$z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: v.$space-4;
+  background: v.$overlay;
+  backdrop-filter: blur(2px);
+  animation: fade 0.16s ease-out;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 420px;
+  padding: v.$space-8 v.$space-6 v.$space-6;
+  background: v.$surface-raised;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-xl;
+  box-shadow: v.$shadow-lg;
+  text-align: center;
+  animation: pop 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: v.$radius-full;
+    font-size: v.$text-xl;
+    &--danger { background: v.$danger-bg; color: v.$danger-text; }
+    &--primary { background: v.$primary-soft; color: v.$primary-text; }
+  }
+  &__title { margin-top: v.$space-4; font-size: v.$text-xl; font-weight: v.$fw-semibold; }
+  &__message { margin-top: v.$space-2; color: v.$text-secondary; }
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: v.$space-3;
+    margin-top: v.$space-6;
+    flex-wrap: wrap;
+  }
+}
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }

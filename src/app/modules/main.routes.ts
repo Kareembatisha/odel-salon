@@ -1,0 +1,74 @@
+import { Routes } from '@angular/router';
+
+import { environment } from '@env/environment';
+import { permissionGuard } from '../core/guards/permission.guard';
+import { PERMISSIONS } from '../core/auth/permissions';
+
+/**
+ * Every route under /main. Add a feature here together with its sidebar item
+ * (layout/main-layout/nav.config.ts) and its permission (core/auth/permissions.ts).
+ */
+export const MAIN_ROUTES: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    // Sign-in is enough: the backend does not (yet) grant a Dashboard permission.
+    data: { breadcrumb: 'LAYOUT.NAV.DASHBOARD' },
+    loadComponent: () => import('./dashboard/pages/dashboard/dashboard').then((m) => m.Dashboard),
+  },
+
+  // ── Access control ───────────────────────────────────
+  {
+    path: 'users',
+    canActivate: [permissionGuard],
+    data: { permission: PERMISSIONS.User.View, breadcrumb: 'LAYOUT.NAV.USERS' },
+    loadComponent: () => import('./users/pages/users-list/users-list').then((m) => m.UsersList),
+  },
+  {
+    path: 'roles',
+    canActivate: [permissionGuard],
+    data: { permission: PERMISSIONS.Role.View, breadcrumb: 'LAYOUT.NAV.ROLES_PERMISSIONS' },
+    loadComponent: () => import('./roles/pages/roles-list/roles-list').then((m) => m.RolesList),
+  },
+  {
+    path: 'roles/:id',
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Role.View,
+      breadcrumb: ['LAYOUT.NAV.ROLES_PERMISSIONS', 'ROLES.DETAILS.BREADCRUMB'],
+    },
+    loadComponent: () => import('./roles/pages/role-details/role-details').then((m) => m.RoleDetails),
+  },
+
+  // ── Account ──────────────────────────────────────────
+  {
+    path: 'profile',
+    data: { breadcrumb: 'LAYOUT.PROFILE' },
+    loadComponent: () => import('./profile-management/pages/profile-view/profile-view').then((m) => m.ProfileView),
+  },
+
+  // Dev-only reference of the design system (hidden from production builds)
+  ...(environment.showDesignSystem
+    ? [
+        {
+          path: 'design-system',
+          data: { breadcrumb: 'LAYOUT.NAV.DESIGN_SYSTEM' },
+          loadComponent: () => import('./design-system/pages/design-system/design-system').then((m) => m.DesignSystem),
+        },
+      ]
+    : []),
+
+  // 403 inside the shell (target of permissionGuard)
+  {
+    path: 'no-access',
+    data: { breadcrumb: 'NO_ACCESS.TITLE' },
+    loadComponent: () => import('./no-access/no-access').then((m) => m.NoAccess),
+  },
+
+  // Unknown URL under /main
+  {
+    path: '**',
+    data: { breadcrumb: 'NOT_FOUND.TITLE', inShell: true },
+    loadComponent: () => import('./not-found/not-found').then((m) => m.NotFound),
+  },
+];

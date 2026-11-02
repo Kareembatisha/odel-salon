@@ -1,0 +1,50 @@
+<app-toast />
+
+<div class="auth">
+  <!-- Brand panel -->
+  <aside class="auth__brand" aria-hidden="false">
+    <div class="auth__brand-top">
+      <img class="auth__mark" [src]="brand.logoMark" [alt]="brand.name" width="44" height="44" />
+      <span class="auth__wordmark">{{ lang.isRtl() ? brand.nameAr : brand.name }}</span>
+    </div>
+
+    <div class="auth__pitch">
+      <h2 class="auth__headline">{{ 'AUTH.HERO_TITLE' | translate }}</h2>
+      <p class="auth__lead">{{ 'AUTH.HERO_SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Razor-line motif: pure CSS, decorative -->
+    <span class="auth__motif" aria-hidden="true"></span>
+  </aside>
+
+  <!-- Form panel -->
+  <section class="auth__panel">
+    <div class="auth__tools">
+      <button type="button" class="auth__tool" (click)="lang.setLang(lang.isRtl() ? 'en' : 'ar')">
+        <i class="pi pi-globe" aria-hidden="true"></i>
+        {{ lang.isRtl() ? 'English' : 'العربية' }}
+      </button>
+      <button
+        type="button"
+        class="auth__tool auth__tool--icon"
+        [attr.aria-pressed]="theme.isDark()"
+        [attr.aria-label]="'LAYOUT.THEME' | translate"
+        (click)="theme.toggle()"
+      >
+        <i [class]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="auth__card">
+      <div class="auth__mobile-brand">
+        <img [src]="brand.logoMark" [alt]="brand.name" width="36" height="36" />
+        <span>{{ lang.isRtl() ? brand.nameAr : brand.name }}</span>
+      </div>
+      <router-outlet />
+    </div>
+
+    <footer class="auth__footer">
+      © {{ year }} {{ brand.copyrightHolder }}. {{ 'AUTH.ALL_RIGHTS' | translate }}
+    </footer>
+  </section>
+</div>

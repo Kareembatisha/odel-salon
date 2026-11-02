@@ -1,0 +1,110 @@
+<div
+  class="backdrop"
+  [class.backdrop--visible]="sidebar.mobileOpen()"
+  [attr.aria-hidden]="!sidebar.mobileOpen()"
+  (click)="sidebar.closeMobile()"
+></div>
+
+<aside
+  class="sb"
+  [class.sb--collapsed]="isCollapsedView()"
+  [class.sb--mobile-open]="sidebar.mobileOpen()"
+  [attr.aria-label]="'LAYOUT.PRIMARY_NAV' | translate"
+>
+  <!-- Brand -->
+  <div class="sb__brand">
+    <img class="sb__mark" [src]="brand.logoMark" [alt]="brand.name" width="36" height="36" />
+    @if (!isCollapsedView()) {
+      <span class="sb__wordmark">{{ lang.isRtl() ? brand.nameAr : brand.name }}</span>
+    }
+  </div>
+
+  <nav class="sb__scroll">
+    @for (section of topSections(); track section.id) {
+      <div class="sb__section">
+        @if (section.labelKey && !isCollapsedView()) {
+          <span class="sb__label">{{ section.labelKey | translate }}</span>
+        } @else if (section.labelKey) {
+          <hr class="sb__rule" />
+        }
+        <ul class="sb__list">
+          @for (item of section.items; track item.id) {
+            <li>
+              <button
+                type="button"
+                class="sb__item"
+                [class.sb__item--active]="activeItemId() === item.id"
+                [attr.aria-current]="activeItemId() === item.id ? 'page' : null"
+                [attr.title]="isCollapsedView() ? (item.labelKey | translate) : null"
+                [attr.aria-label]="item.labelKey | translate"
+                (click)="go(item)"
+              >
+                <i [class]="item.icon" aria-hidden="true"></i>
+                @if (!isCollapsedView()) { <span class="sb__text">{{ item.labelKey | translate }}</span> }
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+
+  <!-- Management (pinned) -->
+  @for (section of bottomSections(); track section.id) {
+    <nav class="sb__section sb__section--bottom">
+      @if (section.labelKey && !isCollapsedView()) {
+        <span class="sb__label">{{ section.labelKey | translate }}</span>
+      } @else if (section.labelKey) {
+        <hr class="sb__rule" />
+      }
+      @for (item of section.items; track item.id) {
+        @if (item.children) {
+          <button
+            type="button"
+            class="sb__item"
+            [class.sb__item--active]="isGroupActive(item) && !isExpanded(item)"
+            [attr.aria-expanded]="isExpanded(item)"
+            [attr.title]="isCollapsedView() ? (item.labelKey | translate) : null"
+            [attr.aria-label]="item.labelKey | translate"
+            (click)="isCollapsedView() ? sidebar.expand() : toggleGroup(item)"
+          >
+            <i [class]="item.icon" aria-hidden="true"></i>
+            @if (!isCollapsedView()) {
+              <span class="sb__text">{{ item.labelKey | translate }}</span>
+              <i class="pi pi-angle-down sb__chevron" [class.sb__chevron--open]="isExpanded(item)" aria-hidden="true"></i>
+            }
+          </button>
+
+          @if (!isCollapsedView() && isExpanded(item)) {
+            <ul class="sb__sub">
+              @for (child of item.children; track child.id) {
+                <li>
+                  <button
+                    type="button"
+                    class="sb__subitem"
+                    [class.sb__subitem--active]="activeItemId() === child.id"
+                    [attr.aria-current]="activeItemId() === child.id ? 'page' : null"
+                    (click)="go(child)"
+                  >{{ child.labelKey | translate }}</button>
+                </li>
+              }
+            </ul>
+          }
+        } @else {
+          <button
+            type="button"
+            class="sb__item"
+            [class.sb__item--active]="activeItemId() === item.id"
+            [attr.aria-current]="activeItemId() === item.id ? 'page' : null"
+            [attr.title]="isCollapsedView() ? (item.labelKey | translate) : null"
+            [attr.aria-label]="item.labelKey | translate"
+            (click)="go(item)"
+          >
+            <i [class]="item.icon" aria-hidden="true"></i>
+            @if (!isCollapsedView()) { <span class="sb__text">{{ item.labelKey | translate }}</span> }
+          </button>
+        }
+      }
+    </nav>
+  }
+</aside>

@@ -1,0 +1,90 @@
+<div class="odl-page">
+  <app-page-header [title]="'ROLES.TITLE' | translate" [subtitle]="'ROLES.SUBTITLE' | translate">
+    <app-button *appCan="P.Role.Create" variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
+      {{ 'ROLES.NEW' | translate }}
+    </app-button>
+  </app-page-header>
+
+  <div class="toolbar">
+    <app-search-input [placeholder]="'ROLES.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+
+    @if (selection().length) {
+      <div class="bulk" role="status">
+        <span class="bulk__count">{{ 'COMMON.SELECTED' | translate: { count: selection().length } }}</span>
+        <app-button variant="ghost" size="sm" (clicked)="selection.set([])">{{ 'COMMON.CLEAR_SELECTION' | translate }}</app-button>
+        <app-button variant="danger" size="sm" iconClass="pi pi-trash" (clicked)="askBulkDelete()">{{ 'COMMON.DELETE' | translate }}</app-button>
+      </div>
+    }
+  </div>
+
+  @if (hasError() && !rows().length) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else {
+    <app-data-table
+      [data]="rows()"
+      [totalRecords]="meta()?.totalCount ?? 0"
+      [page]="meta()?.currentPage ?? 1"
+      [pageSize]="meta()?.pageSize ?? 10"
+      [loading]="loading()"
+      [caption]="'ROLES.TITLE' | translate"
+      [selectable]="canDelete()"
+      [(selection)]="selection"
+      [lockedIds]="lockedIds()"
+      [selectAllLabel]="'COMMON.SELECT_ALL' | translate"
+      [selectRowLabel]="'COMMON.SELECT_ROW' | translate"
+      [emptyTitle]="'ROLES.EMPTY_TITLE' | translate"
+      [emptyDescription]="'ROLES.EMPTY_TEXT' | translate"
+      emptyIcon="pi pi-shield"
+      (pageChange)="onPage($event)"
+      (rowClick)="open($event)"
+    >
+      <ng-template odlCol="name" [label]="'ROLES.COL.ROLE' | translate" width="34%" let-row>
+        <span class="role"><span class="role__icon" aria-hidden="true"><i class="pi pi-shield"></i></span>
+          <span class="cell-text strong" [attr.title]="row.name">{{ row.name }}</span></span>
+      </ng-template>
+      <ng-template odlCol="users" [label]="'ROLES.COL.USERS' | translate" width="140px" let-row>
+        <span class="u-num">{{ 'ROLES.USERS_COUNT' | translate: { count: row.countUsers } }}</span>
+      </ng-template>
+      <ng-template odlCol="permissions" [label]="'ROLES.COL.PERMISSIONS' | translate" let-row>
+        <app-status-badge [variant]="row.permissions.length ? 'vip' : 'neutral'" [dot]="false">
+          {{ 'ROLES.PERMISSIONS_COUNT' | translate: { count: row.permissions.length } }}
+        </app-status-badge>
+      </ng-template>
+      <ng-template odlCol="actions" label="" align="end" width="150px" let-row>
+        <span class="row-actions">
+          <app-button variant="ghost" size="sm" iconClass="pi pi-sliders-h" [ariaLabel]="'ROLES.EDIT_PERMISSIONS' | translate" (clicked)="open(row)" />
+          @if (canEdit()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'ROLES.RENAME' | translate" (clicked)="openRename(row, $event)" />
+          }
+          @if (canDelete()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [disabled]="lockedIds().includes(row.id)"
+              [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+          }
+        </span>
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="(editing() ? 'ROLES.FORM.RENAME_TITLE' : 'ROLES.FORM.CREATE_TITLE') | translate"
+  [subtitle]="(editing() ? 'ROLES.FORM.RENAME_SUBTITLE' : 'ROLES.FORM.CREATE_SUBTITLE') | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="drawerOpen.set(false)"
+>
+  @if (drawerOpen()) {
+    <app-role-form [initialName]="editing()?.name ?? ''" [saving]="saving()" (submitted)="onNameSubmitted($event)" (cancelled)="drawerOpen.set(false)" />
+  }
+</app-drawer>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete().length > 0"
+  [title]="(pendingDelete().length > 1 ? 'ROLES.DELETE.TITLE_MANY' : 'ROLES.DELETE.TITLE_ONE') | translate"
+  [message]="deleteMessage()"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set([])"
+/>

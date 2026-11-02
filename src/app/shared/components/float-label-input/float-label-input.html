@@ -1,0 +1,51 @@
+<div
+  class="fli"
+  [class.fli--floated]="isFloated()"
+  [class.fli--focused]="isFocused()"
+  [class.fli--error]="errorMessage()"
+  [class.fli--disabled]="isDisabled()"
+  [class.fli--has-icon]="iconLeft()"
+>
+  <div class="fli__box" (click)="focusInput()">
+    @if (iconLeft()) {
+      <span class="fli__icon" aria-hidden="true"><i [class]="iconLeft()"></i></span>
+    }
+
+    <label class="fli__label">{{ label() | translate }}</label>
+
+    <input
+      #field
+      class="fli__input"
+      [type]="resolvedType()"
+      [value]="value()"
+      [disabled]="isDisabled()"
+      [autocomplete]="autocomplete()"
+      [attr.aria-label]="label() | translate"
+      [attr.aria-invalid]="errorMessage() ? true : null"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+    />
+
+    @if (type() === 'password') {
+      <button
+        type="button"
+        class="fli__toggle"
+        (click)="togglePassword(); $event.stopPropagation()"
+        [attr.aria-label]="(showPassword() ? 'COMMON.HIDE_PASSWORD' : 'COMMON.SHOW_PASSWORD') | translate"
+        [attr.aria-pressed]="showPassword()"
+      >
+        <i [class]="showPassword() ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
+      </button>
+    }
+  </div>
+
+  @if (errorMessage()) {
+    <span class="fli__message fli__message--error" role="alert">
+      <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+      {{ errorMessage() | translate }}
+    </span>
+  } @else if (hint()) {
+    <span class="fli__message">{{ hint() | translate }}</span>
+  }
+</div>

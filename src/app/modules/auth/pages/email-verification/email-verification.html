@@ -1,0 +1,67 @@
+<!-- Envelope icon -->
+<div class="envelope-wrap">
+  <i class="pi pi-envelope envelope-icon"></i>
+  <span class="check-badge">
+    <i class="pi pi-check"></i>
+  </span>
+</div>
+
+<!-- Card header -->
+<div class="card-header">
+  <h2 class="card-title">{{ 'AUTH.CHECK_EMAIL_TITLE' | translate }}</h2>
+  <p class="card-subtitle">
+    {{ 'AUTH.CHECK_EMAIL_SUBTITLE' | translate }}<br />
+    <strong class="email-value">{{ email }}</strong>
+  </p>
+</div>
+
+<!-- Form -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+
+  <div class="otp-row" (paste)="onPaste($event)">
+    @for (key of digitKeys; track key; let i = $index) {
+      <input
+        #digitInput
+        class="otp-box"
+        [class.otp-box--error]="form.controls[key].invalid && form.controls[key].touched"
+        type="text"
+        inputmode="numeric"
+        maxlength="1"
+        [formControlName]="key"
+        (input)="onDigitInput(i, $event)"
+        (keydown)="onDigitKeydown(i, $event)"
+      />
+    }
+  </div>
+
+  @if (submitError) {
+    <span class="otp-error">
+      <i class="pi pi-exclamation-circle"></i>
+      {{ submitError | translate }}
+    </span>
+  }
+
+  <p class="resend-text">
+    @if (secondsLeft > 0) {
+      {{ 'AUTH.RESEND_AVAILABLE_IN' | translate }} {{ formattedTime }}
+    } @else {
+      <a href="#" class="resend-link" (click)="$event.preventDefault(); resendCode()">
+        {{ 'AUTH.RESEND_CODE' | translate }}
+      </a>
+    }
+  </p>
+
+</form>
+
+<!-- Card footer -->
+<div class="card-footer">
+  <a href="#" class="change-email-link" (click)="$event.preventDefault(); changeEmail()">
+    {{ 'AUTH.CHANGE_EMAIL' | translate }}
+  </a>
+
+  <hr class="card-divider" />
+
+  <a href="#" class="back-login-link" (click)="$event.preventDefault(); backToLogin()">
+    {{ 'AUTH.BACK_TO_LOGIN' | translate }}
+  </a>
+</div>

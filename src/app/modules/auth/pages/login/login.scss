@@ -1,0 +1,5 @@
+@use "../auth-shared" as a;
+@use "styles/variables" as v;
+
+@include a.common;
+

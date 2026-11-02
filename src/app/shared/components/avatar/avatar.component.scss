@@ -1,0 +1,21 @@
+@use "styles/variables" as v;
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  background: v.$primary;
+  color: v.$on-primary;
+  font-weight: v.$fw-bold;
+  user-select: none;
+}
+:host(.av--sm) { width: 28px; height: 28px; font-size: v.$text-xs; }
+:host(.av--md) { width: 36px; height: 36px; font-size: v.$text-sm; }
+:host(.av--lg) { width: 56px; height: 56px; font-size: v.$text-xl; }
+:host(.av--xl) { width: 96px; height: 96px; font-size: v.$text-3xl; font-family: v.$font-display; }
+
+.av__img { width: 100%; height: 100%; object-fit: cover; display: block; }

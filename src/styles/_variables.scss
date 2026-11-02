@@ -1,0 +1,9 @@
+// ============================================================
+// _variables.scss — the single entry point for all design tokens.
+//
+//   @use 'styles/variables' as v;
+//   padding: v.$space-6;  color: v.$text-secondary;  font-family: v.$font-ui;
+// ============================================================
+@forward "colors";
+@forward "typography";
+@forward "spacing";

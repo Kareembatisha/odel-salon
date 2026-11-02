@@ -1,0 +1,358 @@
+{
+  "AUTH": {
+    "HERO_TITLE": "Every chair, every booking, every branch.",
+    "ALL_RIGHTS": "All rights reserved.",
+    "WELCOME": "Welcome",
+    "SUBTITLE": "Sign in to the admin dashboard",
+    "EMAIL_LABEL": "Email Address",
+    "PASSWORD_LABEL": "Password",
+    "FORGOT_PASSWORD": "Forgot Password?",
+    "SIGN_IN": "Sign In",
+    "NEED_HELP": "Need help?",
+    "CONTACT_ADMIN": "Contact your Administrator",
+    "EMAIL_REQUIRED": "Email address is required",
+    "EMAIL_INVALID": "Please enter a valid email address",
+    "PASSWORD_REQUIRED": "Password is required",
+    "PASSWORD_MIN": "Password must be at least 6 characters",
+    "BACK_TO_LOGIN": "Back to Login",
+    "FORGOT_TITLE": "Forgot Password?",
+    "FORGOT_SUBTITLE": "Enter your registered email address and we'll send you a reset link.",
+    "SEND_CODE": "Send Code",
+    "REMEMBER_PASSWORD": "Remember your password?",
+    "CHECK_EMAIL_TITLE": "Check Your Email",
+    "CHECK_EMAIL_SUBTITLE": "We've sent a verification Code to",
+    "RESEND_AVAILABLE_IN": "Resend available in",
+    "RESEND_CODE": "Resend Code",
+    "CHANGE_EMAIL": "Change Email Address",
+    "OTP_INVALID": "Please enter the 4-digit code",
+    "CREATE_PASSWORD_TITLE": "Create New Password",
+    "CREATE_PASSWORD_SUBTITLE": "Your new password must be different from previously used passwords.",
+    "NEW_PASSWORD_LABEL": "New Password",
+    "CONFIRM_PASSWORD_LABEL": "Confirm Password",
+    "CONFIRM_PASSWORD_REQUIRED": "Please confirm your password",
+    "PASSWORD_MISMATCH": "Passwords do not match",
+    "PASSWORD_WEAK": "Password does not meet the requirements",
+    "PASSWORD_STRENGTH": "Password Strength",
+    "STRENGTH_WEAK": "Weak",
+    "STRENGTH_MEDIUM": "Medium",
+    "STRENGTH_GOOD": "Good",
+    "STRENGTH_STRONG": "Strong",
+    "RULE_MIN_LENGTH": "Minimum 8 characters",
+    "RULE_UPPERCASE": "Uppercase letter",
+    "RULE_LOWERCASE": "Lowercase letter",
+    "RULE_NUMBER": "Number",
+    "RULE_SPECIAL": "Special character",
+    "SAVE_PASSWORD": "Save Password",
+    "CANCEL": "Cancel",
+    "PASSWORD_UPDATED_TITLE": "Password Updated!",
+    "PASSWORD_UPDATED_SUBTITLE": "Your password has been updated successfully. You can now use your new password to sign in.",
+    "ACCOUNT_SECURED": "Account Secured",
+    "GO_TO_LOGIN": "Go to Login",
+    "CHANGED_ON": "Changed on",
+    "AT": "at",
+    "SIGNING_IN": "Signing in...",
+    "SENDING": "Sending...",
+    "SAVING": "Saving...",
+    "LOGIN_SUCCESS": "Login successful",
+    "LOGOUT_SUCCESS": "Logout successful",
+    "CODE_SENT": "Verification code sent successfully.",
+    "CODE_VERIFIED": "Code verified successfully.",
+    "PASSWORD_RESET_SUCCESS": "Password reset successfully.",
+    "HERO_SUBTITLE": "Sign in to run today's schedule, keep the catalog current and see how each branch is doing."
+  },
+  "ERRORS": {
+    "NETWORK": "Couldn't reach the server. Please try again.",
+    "OFFLINE": "No internet connection. Please check your network.",
+    "TIMEOUT": "The request took too long. Please try again.",
+    "SESSION_EXPIRED": "Your session has expired. Please log in again.",
+    "FORBIDDEN": "You don't have permission to perform this action.",
+    "NOT_FOUND": "The requested resource was not found.",
+    "VALIDATION": "Please correct the highlighted fields.",
+    "CONFLICT": "This item was changed by someone else. Please refresh and try again.",
+    "FILE_TOO_LARGE": "This file is too large to upload.",
+    "UNSUPPORTED_FILE_TYPE": "This file type isn't supported.",
+    "RATE_LIMITED": "Too many requests. Please slow down and try again.",
+    "SERVER": "A server error occurred. Please try again later.",
+    "UNKNOWN": "An unexpected error occurred."
+  },
+  "NETWORK_STATUS": {
+    "OFFLINE": "You're offline. Some features may not work.",
+    "BACK_ONLINE": "You're back online."
+  },
+  "SUCCESS": {
+    "SAVED": "Saved successfully.",
+    "DELETED": "Deleted successfully.",
+    "UPDATED": "Updated successfully."
+  },
+  "FILE_VALIDATION": {
+    "EMPTY_FILE": "This file is empty.",
+    "FILE_TOO_LARGE": "This file is too large to upload.",
+    "UNSUPPORTED_TYPE": "This file type isn't supported."
+  },
+  "NOT_FOUND": {
+    "TITLE": "Page Not Found",
+    "DESCRIPTION": "Oops! The page you're looking for doesn't exist or has been moved.",
+    "BACK_HOME": "Back to Home"
+  },
+  "NO_ACCESS": {
+    "TITLE": "Access Denied",
+    "DESCRIPTION": "You don't have permission to view this page. Contact your administrator if you think this is a mistake.",
+    "GO_BACK": "Go Back",
+    "BACK_HOME": "Back to Home"
+  },
+  "COMMON": {
+    "CLOSE": "Close",
+    "CANCEL": "Cancel",
+    "SAVE": "Save changes",
+    "DELETE": "Delete",
+    "RETRY": "Try again",
+    "PREVIOUS": "Previous",
+    "NEXT": "Next",
+    "SHOW_PASSWORD": "Show password",
+    "HIDE_PASSWORD": "Hide password",
+    "NO_RESULTS": "Nothing to show yet",
+    "FAILED_STATE": {
+      "TITLE": "We couldn’t load this",
+      "SUBTITLE": "Check your connection and try again."
+    },
+    "TABLE": {
+      "SHOWING": "Showing",
+      "OF": "of",
+      "PAGINATION": "Pagination"
+    },
+    "CLEAR": "Clear",
+    "EDIT": "Edit",
+    "SELECTED": "{{count}} selected",
+    "CLEAR_SELECTION": "Clear selection",
+    "SELECT_ALL": "Select all rows",
+    "SELECT_ROW": "Select row"
+  },
+  "LAYOUT": {
+    "TOGGLE_SIDEBAR": "Toggle sidebar",
+    "PRIMARY_NAV": "Main navigation",
+    "BREADCRUMB": "Breadcrumb",
+    "SKIP_TO_CONTENT": "Skip to content",
+    "NOTIFICATIONS": "Notifications",
+    "LANGUAGE": "Change language",
+    "THEME": "Toggle dark mode",
+    "THEME_LIGHT": "Switch to light mode",
+    "THEME_DARK": "Switch to dark mode",
+    "PROFILE_MENU": "Account menu",
+    "PROFILE": "My profile",
+    "LOGOUT": "Log out",
+    "SECTIONS": {
+      "ACCESS": "Access control",
+      "DEVELOPER": "Developer"
+    },
+    "NAV": {
+      "DASHBOARD": "Dashboard",
+      "USERS": "Users",
+      "ROLES_PERMISSIONS": "Roles & permissions",
+      "DESIGN_SYSTEM": "Design system"
+    }
+  },
+  "DASHBOARD": {
+    "GREETING_MORNING": "Good morning",
+    "GREETING_AFTERNOON": "Good afternoon",
+    "GREETING_EVENING": "Good evening",
+    "SUBTITLE": "here is how the salon is doing right now",
+    "OVERVIEW": "Overview",
+    "VS_LAST_WEEK": "{{value}} vs last week",
+    "CHAIR_VIP": "VIP",
+    "CHAIR_REGULAR": "Regular",
+    "STATS": {
+      "BOOKINGS": "Bookings today",
+      "REVENUE": "Revenue today",
+      "BARBERS_FREE": "Barbers free now",
+      "BARBERS_HINT": "of {{total}} on shift",
+      "RATING": "Average rating",
+      "RATING_HINT": "{{count}} reviews"
+    },
+    "SCHEDULE": {
+      "TITLE": "Today’s schedule",
+      "EMPTY": "No bookings for the rest of today",
+      "TIME": "Time",
+      "CUSTOMER": "Customer",
+      "SERVICE": "Service",
+      "BARBER": "Barber",
+      "CHAIR": "Chair",
+      "STATUS": "Status"
+    },
+    "CHAIRS": {
+      "TITLE": "Chair availability",
+      "FREE": "{{free}} of {{total}} free",
+      "LOCKED": "{{count}} locked for maintenance"
+    },
+    "BARBERS": {
+      "TITLE": "Barbers on shift",
+      "FREE": "Free now",
+      "BUSY_UNTIL": "Busy until {{time}}"
+    }
+  },
+  "BOOKING_STATUS": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "in-progress": "In progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "no-show": "No-show"
+  },
+  "PROFILE": {
+    "TITLE": "My profile",
+    "SUBTITLE": "Your account and what you can access.",
+    "PERMISSIONS_COUNT": "{{count}} permissions",
+    "YOUR_ACCESS": "Your access",
+    "PHOTO": "Profile photo",
+    "PHOTO_CHANGE": "Change photo",
+    "PHOTO_REMOVE": "Remove",
+    "PHOTO_HINT": "JPG, PNG or WebP · up to 2 MB",
+    "PHOTO_PENDING": "The new photo is saved when you press Save changes.",
+    "DETAILS_TITLE": "Personal details",
+    "DETAILS_SUBTITLE": "The name and contact details shown across the dashboard.",
+    "FULL_NAME": "Full name",
+    "EMAIL": "Email address",
+    "COUNTRY_CODE": "Country",
+    "PHONE": "Phone number",
+    "SAVE": "Save changes",
+    "DISCARD": "Discard",
+    "PROFILE_UPDATED": "Profile updated successfully.",
+    "NAME_REQUIRED": "Full name is required",
+    "NAME_MAX": "Full name can be at most 100 characters",
+    "PHONE_INVALID": "Enter digits only, without the country code (6–15 digits)",
+    "SECURITY_TITLE": "Password",
+    "SECURITY_SUBTITLE": "Choose a strong password you don’t use anywhere else.",
+    "CURRENT_PASSWORD": "Current password",
+    "CURRENT_PASSWORD_REQUIRED": "Enter your current password",
+    "SAME_AS_CURRENT": "The new password must be different from the current one",
+    "UPDATE_PASSWORD": "Update password",
+    "PASSWORD_CHANGED": "Password changed successfully."
+  },
+  "PERMISSIONS": {
+    "MODULES": {
+      "Booking": "Bookings",
+      "Session": "Live sessions",
+      "Availability": "Availability",
+      "Branch": "Branches",
+      "Service": "Menu & services",
+      "Barber": "Barbers",
+      "Chair": "Chairs",
+      "Offer": "Offers",
+      "Points": "Points",
+      "Review": "Reviews",
+      "Report": "Reports",
+      "Settings": "Settings",
+      "User": "Users",
+      "Role": "Roles"
+    },
+    "ACTIONS": {
+      "View": "View",
+      "Create": "Create",
+      "Edit": "Edit",
+      "Delete": "Delete",
+      "Cancel": "Cancel",
+      "Manage": "Manage",
+      "Moderate": "Moderate",
+      "Export": "Export"
+    }
+  },
+  "ROLES": {
+    "TITLE": "Roles & permissions",
+    "SUBTITLE": "Decide what each role can see and do in the dashboard.",
+    "NEW": "New role",
+    "SEARCH": "Search roles…",
+    "EMPTY_TITLE": "No roles found",
+    "EMPTY_TEXT": "Create a role, then choose what it can access.",
+    "COL": {
+      "ROLE": "Role",
+      "USERS": "Users",
+      "PERMISSIONS": "Permissions"
+    },
+    "USERS_COUNT": "{{count}} users",
+    "PERMISSIONS_COUNT": "{{count}} permissions",
+    "EDIT_PERMISSIONS": "Edit permissions",
+    "RENAME": "Rename",
+    "CREATED": "Role created.",
+    "RENAMED": "Role renamed.",
+    "PERMISSIONS_SAVED": "Permissions saved.",
+    "DELETED": "Deleted.",
+    "FORM": {
+      "NAME": "Role name",
+      "NAME_REQUIRED": "Role name is required",
+      "NAME_MAX": "Role name can be at most 50 characters",
+      "CREATE": "Create role",
+      "CREATE_TITLE": "New role",
+      "CREATE_SUBTITLE": "Give the role a clear name, like “Receptionist”.",
+      "CREATE_HINT": "A new role has no permissions. You’ll choose them next.",
+      "RENAME_TITLE": "Rename role",
+      "RENAME_SUBTITLE": "The name is shown wherever users are listed."
+    },
+    "DELETE": {
+      "TITLE_ONE": "Delete this role?",
+      "TITLE_MANY": "Delete selected roles?",
+      "MESSAGE_ONE": "“{{name}}” will be removed permanently.",
+      "MESSAGE_MANY": "{{count}} roles will be removed permanently.",
+      "HAS_USERS": "Some of them still have users assigned, so the server may refuse."
+    },
+    "DETAILS": {
+      "BREADCRUMB": "Role",
+      "BACK": "All roles",
+      "SUBTITLE": "{{users}} users have this role.",
+      "ENABLED_OF": "{{enabled}} of {{total}} permissions enabled",
+      "SELECT_MODULE": "Select all in",
+      "READ_ONLY": "You can view this role but not change it.",
+      "OWN_ROLE": "This is your own role — changes apply to you too.",
+      "UNSAVED": "You have unsaved changes",
+      "SAVE": "Save permissions"
+    }
+  },
+  "USERS": {
+    "TITLE": "Users",
+    "SUBTITLE": "People who can sign in to the dashboard, and the role each one has.",
+    "NEW": "New user",
+    "SEARCH": "Search by name or email…",
+    "EMPTY_TITLE": "No users found",
+    "EMPTY_TEXT": "Try a different search or filter, or add a new user.",
+    "YOU": "You",
+    "ACTIVATE": "Activate user",
+    "DEACTIVATE": "Deactivate user",
+    "CREATED": "User created.",
+    "UPDATED": "User updated.",
+    "STATUS_UPDATED": "User status updated.",
+    "DELETED": "Deleted.",
+    "COL": {
+      "USER": "User",
+      "ROLE": "Role",
+      "STATUS": "Status"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "FILTER": {
+      "ROLE": "Filter by role",
+      "STATUS": "Filter by status",
+      "ALL_ROLES": "All roles",
+      "ALL_STATUSES": "All statuses"
+    },
+    "FORM": {
+      "ROLE": "Role",
+      "ROLE_PLACEHOLDER": "Select a role…",
+      "ROLE_REQUIRED": "Choose a role",
+      "PHONE_REQUIRED": "Phone number is required",
+      "CHANGE_PASSWORD": "Change password",
+      "NEW_PASSWORD": "New password",
+      "PASSWORD_HINT": "8+ characters with upper and lower case, a number and a symbol.",
+      "CREATE": "Create user",
+      "CREATE_TITLE": "New user",
+      "CREATE_SUBTITLE": "They can sign in right away with this email and password.",
+      "EDIT_TITLE": "Edit user",
+      "EDIT_SUBTITLE": "Update details, role or password."
+    },
+    "DELETE": {
+      "TITLE_ONE": "Delete this user?",
+      "TITLE_MANY": "Delete selected users?",
+      "MESSAGE_ONE": "{{name}} will lose access to the dashboard and can’t be restored.",
+      "MESSAGE_MANY": "{{count}} users will lose access and can’t be restored."
+    }
+  }
+}

@@ -1,0 +1,29 @@
+@use "styles/variables" as v;
+
+:host { display: block; }
+
+.failed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-16 v.$space-6;
+  text-align: center;
+
+  &--compact { padding: v.$space-8 v.$space-4; }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: v.$space-2;
+    border-radius: v.$radius-full;
+    background: v.$danger-bg;
+    color: v.$danger-text;
+    font-size: v.$text-2xl;
+  }
+  &__title { font-size: v.$text-xl; font-weight: v.$fw-semibold; }
+  &__text { max-width: 44ch; margin-bottom: v.$space-3; color: v.$text-secondary; }
+}

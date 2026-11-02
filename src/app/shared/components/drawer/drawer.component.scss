@@ -1,0 +1,56 @@
+@use "styles/variables" as v;
+
+.dr__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: v.$z-overlay;
+  background: v.$overlay;
+  animation: dr-fade 0.18s ease-out;
+}
+
+.dr {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: v.$z-modal;
+  display: flex;
+  flex-direction: column;
+  width: min(520px, 100vw);
+  background: v.$surface-raised;
+  border-inline-start: 1px solid v.$border;
+  box-shadow: v.$shadow-lg;
+  animation: dr-in 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$space-4;
+    padding: v.$space-6;
+    border-bottom: 1px solid v.$border;
+  }
+  &__title { font-size: v.$text-xl; font-weight: v.$fw-semibold; }
+  &__subtitle { margin-top: v.$space-1; color: v.$text-secondary; font-size: v.$text-sm; }
+
+  &__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    background: transparent;
+    border: 0;
+    border-radius: v.$radius-md;
+    color: v.$text-secondary;
+    cursor: pointer;
+    &:hover { background: v.$surface-hover; color: v.$text; }
+  }
+
+  &__body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+}
+
+@keyframes dr-fade { from { opacity: 0; } }
+@keyframes dr-in { from { transform: translateX(32px); opacity: 0; } }
+:host-context([dir="rtl"]) .dr { animation-name: dr-in-rtl; }
+@keyframes dr-in-rtl { from { transform: translateX(-32px); opacity: 0; } }

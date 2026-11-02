@@ -1,0 +1,92 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host { display: block; }
+
+.hd {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  height: v.$header-height;
+  padding-inline: v.$space-6;
+  background: v.$surface;
+  border-bottom: 1px solid v.$border;
+
+  @media (max-width: v.$bp-md) { padding-inline: v.$space-3; gap: v.$space-2; }
+
+  &__spacer { flex: 1 1 0; @media (max-width: v.$bp-md) { display: none; } }
+  &__icon-btn { @include p.icon-button(40px); i { font-size: v.$text-lg; } }
+
+  // ── Breadcrumbs ─────────────────────
+  &__crumbs {
+    flex: 1 1 auto;
+    min-width: 0;
+    ol { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; }
+    li { display: flex; align-items: center; min-width: 0; white-space: nowrap; font-size: v.$text-base; color: v.$text-muted; }
+    a { color: v.$text-secondary; text-decoration: none; &:hover { color: v.$text; text-decoration: underline; } }
+    @media (max-width: v.$bp-md) { li:not(.hd__crumb--active) { display: none; } }
+  }
+  &__crumb--active { color: v.$text; font-weight: v.$fw-semibold; @include p.truncate; }
+  &__sep { margin-inline: v.$space-2; font-size: v.$text-xs; color: v.$text-placeholder; }
+  :host-context([dir="rtl"]) &__sep { transform: scaleX(-1); }
+
+  &__tools { display: flex; align-items: center; gap: v.$space-2; }
+
+  // red/gold unread dot hook for Sprint 7 notifications
+  &__bell { position: relative; }
+
+  // ── Profile ─────────────────────────
+  &__profile { position: relative; }
+  &__profile-btn {
+    display: flex;
+    align-items: center;
+    gap: v.$space-3;
+    height: 44px;
+    padding-inline: v.$space-1 v.$space-3;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: v.$radius-full;
+    color: v.$text;
+    font: inherit;
+    cursor: pointer;
+    transition: background v.$transition-normal, border-color v.$transition-normal;
+    &:hover { background: v.$surface-hover; border-color: v.$border; }
+    @media (max-width: v.$bp-md) { padding-inline-end: v.$space-1; }
+  }
+  &__who { display: flex; flex-direction: column; align-items: flex-start; line-height: v.$lh-snug; @media (max-width: v.$bp-md) { display: none; } }
+  &__name { font-size: v.$text-sm; font-weight: v.$fw-semibold; max-width: 140px; @include p.truncate; }
+  &__role { font-size: v.$text-xs; color: v.$text-muted; }
+  &__who-chevron { font-size: v.$text-xs; color: v.$text-muted; @media (max-width: v.$bp-md) { display: none; } }
+
+  &__menu {
+    @include p.menu-surface;
+    position: absolute;
+    inset-block-start: calc(100% + v.$space-2);
+    inset-inline-end: 0;
+    z-index: v.$z-dropdown;
+    min-width: 232px;
+    padding: v.$space-1;
+    hr { margin: v.$space-1 0; border: 0; border-top: 1px solid v.$border; }
+  }
+  &__menu-head { display: flex; flex-direction: column; padding: v.$space-3; }
+  &__menu-name { font-weight: v.$fw-semibold; }
+  &__menu-mail { font-size: v.$text-sm; color: v.$text-muted; @include p.truncate; }
+  &__menu-item {
+    display: flex;
+    align-items: center;
+    gap: v.$space-3;
+    width: 100%;
+    height: 40px;
+    padding-inline: v.$space-3;
+    background: transparent;
+    border: 0;
+    border-radius: v.$radius-md;
+    color: v.$text;
+    font: inherit;
+    cursor: pointer;
+    text-align: start;
+    &:hover { background: v.$surface-hover; }
+    i { color: v.$text-muted; }
+    &--danger { color: v.$danger-text; i { color: inherit; } &:hover { background: v.$danger-bg; } }
+  }
+}

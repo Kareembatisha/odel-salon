@@ -1,0 +1,17 @@
+<button
+  [type]="type()"
+  [class]="'btn btn--' + variant() + ' btn--' + size()"
+  [class.btn--loading]="loading()"
+  [class.btn--full]="fullWidth()"
+  [disabled]="disabled() || loading()"
+  [attr.aria-busy]="loading() || null"
+  [attr.aria-label]="ariaLabel()"
+  (click)="onClick($event)"
+>
+  @if (loading()) {
+    <span class="btn__spinner" aria-hidden="true"></span>
+  } @else if (iconClass()) {
+    <i [class]="iconClass()" class="btn__icon" aria-hidden="true"></i>
+  }
+  <span class="btn__label"><ng-content /></span>
+</button>

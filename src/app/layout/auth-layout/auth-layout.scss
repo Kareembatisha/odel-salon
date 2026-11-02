@@ -1,0 +1,134 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host { display: block; min-height: 100%; }
+
+.auth {
+  display: grid;
+  grid-template-columns: minmax(380px, 5fr) 6fr;
+  min-height: 100vh;
+  background: v.$bg-page;
+
+  @media (max-width: v.$bp-lg) { grid-template-columns: 1fr; }
+
+  // ── Brand panel (charcoal in both themes) ──
+  &__brand {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: v.$space-12;
+    background: var(--odl-neutral-950);
+    color: var(--odl-neutral-100);
+    overflow: hidden;
+    @media (max-width: v.$bp-lg) { display: none; }
+  }
+  &__brand-top { display: flex; align-items: center; gap: v.$space-3; position: relative; z-index: 1; }
+  &__mark { border-radius: v.$radius-md; }
+  &__wordmark {
+    font-family: v.$font-display;
+    font-size: v.$text-3xl;
+    font-weight: v.$fw-semibold;
+    letter-spacing: v.$ls-wide;
+    color: #fff;
+  }
+
+  &__pitch { position: relative; z-index: 1; max-width: 30rem; }
+  &__headline {
+    font-family: v.$font-display;
+    font-size: v.$text-6xl;
+    font-weight: v.$fw-semibold;
+    line-height: 1.02;
+    letter-spacing: v.$ls-tight;
+    color: #fff;
+  }
+  :host-context([dir="rtl"]) &__headline { font-size: v.$text-5xl; font-weight: v.$fw-bold; line-height: 1.25; }
+  &__lead { margin-top: v.$space-5; color: var(--odl-neutral-300); font-size: v.$text-lg; line-height: v.$lh-relaxed; }
+
+  // Razor line: thin concentric rings crossed by one gold diagonal — echoes the logo mark.
+  &__motif {
+    position: absolute;
+    inset-inline-end: -200px;
+    inset-block-end: -200px;
+    width: 620px;
+    height: 620px;
+    border-radius: 50%;
+    background: repeating-radial-gradient(
+      circle at center,
+      transparent 0,
+      transparent 54px,
+      v.tint(var(--odl-primary-500), 26%) 54px,
+      v.tint(var(--odl-primary-500), 26%) 55px
+    );
+    -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 72%);
+    mask-image: radial-gradient(circle, #000 35%, transparent 72%);
+    &::after {
+      content: "";
+      position: absolute;
+      inset-inline-start: 22%;
+      inset-block: -25%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--odl-primary-500), transparent);
+      transform: rotate(32deg);
+      opacity: 0.8;
+    }
+  }
+
+  // ── Form panel ──
+  &__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: v.$space-6;
+    min-height: 100vh;
+  }
+
+  &__tools {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    align-self: flex-end;
+  }
+  &__tool {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+    height: 40px;
+    padding-inline: v.$space-3;
+    background: v.$surface;
+    border: 1px solid v.$border;
+    border-radius: v.$radius-md;
+    color: v.$text-secondary;
+    font: inherit;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-semibold;
+    cursor: pointer;
+    &:hover { color: v.$text; border-color: v.$border-strong; }
+    &--icon { width: 40px; justify-content: center; padding: 0; }
+  }
+
+  &__card {
+    @include p.card(v.$space-10);
+    width: 100%;
+    max-width: v.$auth-card-width;
+    margin-block: auto;
+    border-radius: v.$radius-xl;
+    box-shadow: v.$shadow-md;
+    @media (max-width: v.$bp-sm) { padding: v.$space-6 v.$space-5; }
+  }
+
+  &__mobile-brand {
+    display: none;
+    align-items: center;
+    gap: v.$space-3;
+    margin-bottom: v.$space-6;
+    font-family: v.$font-display;
+    font-size: v.$text-2xl;
+    font-weight: v.$fw-semibold;
+    img { border-radius: v.$radius-md; }
+    @media (max-width: v.$bp-lg) { display: flex; }
+  }
+
+  &__footer { padding-top: v.$space-6; color: v.$text-muted; font-size: v.$text-sm; text-align: center; }
+}

@@ -1,0 +1,49 @@
+// ============================================================
+// brands/odel/_brand.scss  —  BUILD-TIME BRAND IDENTITY
+//
+// Everything client-specific in the SCSS design system lives here:
+// the primary (accent) scale, the neutral (ink) scale and the brand
+// display typeface. Components never reference these directly — they
+// consume the semantic CSS variables emitted by styles/_theme.scss.
+//
+// To create another client build: copy this folder, edit the maps,
+// then add a configuration in angular.json (see brand-template).
+// ============================================================
+
+$brand-name: "Odel Salon";
+
+// Primary / accent — champagne gold
+$primary: (
+  50:  #fbf6e8,
+  100: #f5ebc9,
+  200: #ecd89c,
+  300: #dfc072,
+  400: #d1aa55,
+  500: #c29c45,   // fills (buttons, active indicators) — pair with ink text
+  600: #a3802f,
+  700: #7f6122,   // gold text on light surfaces (AA on white)
+  800: #5c4619,
+  900: #3d2e11,
+  950: #261c0a,
+);
+
+// Neutral — warm charcoal (never pure grey, never pure black)
+$neutral: (
+  0:   #ffffff,
+  25:  #fcfbf9,
+  50:  #f7f5f1,
+  100: #eeebe5,
+  200: #e0dcd3,
+  300: #c8c3b8,
+  400: #a6a094,
+  500: #7f7a6f,
+  600: #5f5b52,
+  700: #46433c,
+  800: #302e29,
+  900: #1f1d1a,
+  950: #141311,
+);
+
+// Brand display face (wordmark + page titles). Latin only — Arabic
+// falls back to the Arabic UI face so glyph weight stays consistent.
+$font-display: 'Cormorant Garamond', 'Times New Roman', serif;

@@ -1,0 +1,84 @@
+<div class="odl-page">
+  <a class="back" routerLink="/main/roles"><i class="pi pi-arrow-left" aria-hidden="true"></i>{{ 'ROLES.DETAILS.BACK' | translate }}</a>
+
+  @if (failed()) {
+    <div class="odl-card"><app-failed-state (retry)="load()" /></div>
+  } @else if (loading() || !role()) {
+    <div class="skeletons">
+      <app-skeleton width="40%" height="36px" />
+      <app-skeleton width="60%" height="16px" />
+      <div class="grid">
+        @for (n of [1, 2, 3, 4]; track n) { <app-skeleton height="180px" /> }
+      </div>
+    </div>
+  } @else {
+    <app-page-header [title]="role()!.name" [subtitle]="'ROLES.DETAILS.SUBTITLE' | translate: { users: role()!.countUsers }">
+      @if (canEdit()) {
+        <app-button variant="secondary" iconClass="pi pi-pencil" (clicked)="renameOpen.set(true)">{{ 'ROLES.RENAME' | translate }}</app-button>
+      }
+    </app-page-header>
+
+    <div class="summary">
+      <app-status-badge variant="vip" [dot]="false">
+        {{ 'ROLES.DETAILS.ENABLED_OF' | translate: { enabled: enabledCount(), total: totalCount() } }}
+      </app-status-badge>
+      @if (!canEdit()) {
+        <span class="note"><i class="pi pi-lock" aria-hidden="true"></i>{{ 'ROLES.DETAILS.READ_ONLY' | translate }}</span>
+      }
+      @if (isOwnRole() && canEdit()) {
+        <span class="note note--warn"><i class="pi pi-exclamation-triangle" aria-hidden="true"></i>{{ 'ROLES.DETAILS.OWN_ROLE' | translate }}</span>
+      }
+    </div>
+
+    <div class="grid">
+      @for (m of matrix(); track m.module) {
+        <section class="odl-card mod" [attr.aria-labelledby]="'mod-' + m.module">
+          <header class="mod__head">
+            <label class="mod__title">
+              <input type="checkbox" class="odl-check"
+                [checked]="state(m) === 'all'" [indeterminate]="state(m) === 'some'" [disabled]="!canEdit()"
+                [attr.aria-label]="('ROLES.DETAILS.SELECT_MODULE' | translate) + ' ' + moduleLabel(m.module)"
+                (change)="toggleModule(m)" />
+              <h2 [id]="'mod-' + m.module">{{ moduleLabel(m.module) }}</h2>
+            </label>
+            <span class="mod__count u-num">{{ moduleCount(m) }}/{{ m.permissions.length }}</span>
+          </header>
+
+          <ul class="mod__list">
+            @for (p of m.permissions; track p.value) {
+              <li>
+                <label class="perm" [class.perm--on]="p.isEnabled">
+                  <input type="checkbox" class="odl-check" [checked]="p.isEnabled" [disabled]="!canEdit()"
+                    (change)="togglePermission(p.value, $any($event.target).checked)" />
+                  <span>{{ actionLabel(p.name) }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+    </div>
+
+    @if (dirty() && canEdit()) {
+      <div class="savebar" role="region" [attr.aria-label]="'ROLES.DETAILS.UNSAVED' | translate">
+        <span class="savebar__text"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'ROLES.DETAILS.UNSAVED' | translate }}</span>
+        <span class="savebar__actions">
+          <app-button variant="secondary" [disabled]="saving()" (clicked)="discard()">{{ 'PROFILE.DISCARD' | translate }}</app-button>
+          <app-button variant="primary" [loading]="saving()" (clicked)="save()">{{ 'ROLES.DETAILS.SAVE' | translate }}</app-button>
+        </span>
+      </div>
+    }
+  }
+</div>
+
+<app-drawer
+  [open]="renameOpen()"
+  [title]="'ROLES.FORM.RENAME_TITLE' | translate"
+  [subtitle]="'ROLES.FORM.RENAME_SUBTITLE' | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="renameOpen.set(false)"
+>
+  @if (renameOpen()) {
+    <app-role-form [initialName]="role()?.name ?? ''" [saving]="saving()" (submitted)="rename($event)" (cancelled)="renameOpen.set(false)" />
+  }
+</app-drawer>

@@ -1,0 +1,59 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+.lang-switcher { position: relative; }
+
+.lang-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  height: 40px;
+  padding-inline: v.$space-3;
+  background: transparent;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-md;
+  color: v.$text-secondary;
+  font: inherit;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  cursor: pointer;
+  transition: background v.$transition-normal, color v.$transition-normal, border-color v.$transition-normal;
+  &:hover { background: v.$surface-hover; color: v.$text; border-color: v.$border-strong; }
+}
+
+.lang-code, .lang-chevron { @media (max-width: 480px) { display: none; } }
+.lang-chevron { font-size: v.$text-xs; transition: transform v.$transition-normal; &--open { transform: rotate(180deg); } }
+
+.lang-menu {
+  @include p.menu-surface;
+  position: absolute;
+  inset-block-start: calc(100% + v.$space-2);
+  inset-inline-end: 0;
+  z-index: v.$z-dropdown;
+  min-width: 168px;
+  margin: 0;
+  padding: v.$space-1;
+  list-style: none;
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: v.$space-3;
+  width: 100%;
+  height: 38px;
+  padding-inline: v.$space-3;
+  background: transparent;
+  border: 0;
+  border-radius: v.$radius-md;
+  color: v.$text;
+  font: inherit;
+  font-size: v.$text-base;
+  cursor: pointer;
+  &:hover { background: v.$surface-hover; }
+  &--active { color: v.$primary-text; font-weight: v.$fw-semibold; background: v.$primary-soft; }
+}
+.lang-option-native { font-weight: v.$fw-semibold; font-size: v.$text-sm; width: 28px; text-align: start; }
+.lang-option-name { flex: 1; text-align: start; }
+.lang-option-check { font-size: v.$text-sm; }

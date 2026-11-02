@@ -1,0 +1,132 @@
+<div class="odl-page">
+  <app-page-header [title]="'PROFILE.TITLE' | translate" [subtitle]="'PROFILE.SUBTITLE' | translate" />
+
+  @if (hasError() && !profile()) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else {
+    <div class="layout">
+      <!-- ── Identity ───────────────────────────── -->
+      <aside class="side">
+        <section class="odl-card identity" [attr.aria-label]="'PROFILE.PHOTO' | translate">
+          @if (loading() && !profile()) {
+            <app-skeleton shape="circle" width="96px" height="96px" />
+            <app-skeleton width="60%" height="20px" />
+            <app-skeleton width="80%" height="14px" />
+          } @else {
+            <app-avatar size="xl" [name]="details.controls.fullName.value || profile()?.fullName || ''" [src]="shownImage()" />
+            <div class="identity__text">
+              <h2 class="identity__name">{{ profile()?.fullName }}</h2>
+              <p class="identity__mail">{{ profile()?.email }}</p>
+              <app-status-badge variant="vip" [dot]="false">{{ profile()?.role }}</app-status-badge>
+            </div>
+
+            <div class="identity__photo">
+              <input #file type="file" class="sr-only" accept="image/jpeg,image/png,image/webp" (change)="onPickPhoto($event)" tabindex="-1"
+                [attr.aria-label]="'PROFILE.PHOTO_CHANGE' | translate" />
+              <app-button variant="outline" size="sm" iconClass="pi pi-camera" (clicked)="file.click()">
+                {{ 'PROFILE.PHOTO_CHANGE' | translate }}
+              </app-button>
+              @if (hasPhoto()) {
+                <app-button variant="ghost" size="sm" iconClass="pi pi-trash" (clicked)="removePhoto()">
+                  {{ 'PROFILE.PHOTO_REMOVE' | translate }}
+                </app-button>
+              }
+            </div>
+            <p class="identity__hint">{{ 'PROFILE.PHOTO_HINT' | translate }}</p>
+            @if (pendingImage() || removeImage()) {
+              <p class="identity__pending"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'PROFILE.PHOTO_PENDING' | translate }}</p>
+            }
+          }
+        </section>
+
+        <section class="odl-card access">
+          <h2 class="card-title">{{ 'PROFILE.YOUR_ACCESS' | translate }}</h2>
+          <p class="access__count">{{ 'PROFILE.PERMISSIONS_COUNT' | translate: { count: permissions().length } }}</p>
+          <ul class="access__list" tabindex="0" [attr.aria-label]="'PROFILE.YOUR_ACCESS' | translate">
+            @for (p of permissions(); track p) { <li class="u-num">{{ p }}</li> }
+          </ul>
+        </section>
+      </aside>
+
+      <!-- ── Forms ──────────────────────────────── -->
+      <div class="main">
+        <section class="odl-card form-card" aria-labelledby="details-title">
+          <header class="form-card__head">
+            <h2 id="details-title" class="card-title">{{ 'PROFILE.DETAILS_TITLE' | translate }}</h2>
+            <p class="card-sub">{{ 'PROFILE.DETAILS_SUBTITLE' | translate }}</p>
+          </header>
+
+          @if (loading() && !profile()) {
+            <div class="fields">
+              <app-skeleton height="56px" /><app-skeleton height="56px" /><app-skeleton height="56px" />
+            </div>
+          } @else {
+            <form [formGroup]="details" (ngSubmit)="saveDetails()" novalidate class="fields">
+              <app-float-label-input label="PROFILE.FULL_NAME" iconLeft="pi pi-user" autocomplete="name"
+                [errorMessage]="fieldError('fullName')" formControlName="fullName" />
+              <app-float-label-input label="PROFILE.EMAIL" type="email" iconLeft="pi pi-envelope" autocomplete="email"
+                [errorMessage]="fieldError('email')" formControlName="email" />
+
+              <div class="phone">
+                <app-float-label-select label="PROFILE.COUNTRY_CODE" [options]="countryOptions()" formControlName="countryCode" />
+                <app-float-label-input label="PROFILE.PHONE" type="tel" iconLeft="pi pi-phone" autocomplete="tel-national"
+                  [errorMessage]="fieldError('phoneNumber')" formControlName="phoneNumber" />
+              </div>
+
+              <div class="actions">
+                <app-button variant="secondary" [disabled]="!detailsChanged || saving()" (clicked)="discardDetails()">
+                  {{ 'PROFILE.DISCARD' | translate }}
+                </app-button>
+                <app-button type="submit" variant="primary" [loading]="saving()" [disabled]="!detailsChanged">
+                  {{ 'PROFILE.SAVE' | translate }}
+                </app-button>
+              </div>
+            </form>
+          }
+        </section>
+
+        <section class="odl-card form-card" aria-labelledby="security-title">
+          <header class="form-card__head">
+            <h2 id="security-title" class="card-title">{{ 'PROFILE.SECURITY_TITLE' | translate }}</h2>
+            <p class="card-sub">{{ 'PROFILE.SECURITY_SUBTITLE' | translate }}</p>
+          </header>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="submitPassword()" novalidate class="fields">
+            <app-float-label-input label="PROFILE.CURRENT_PASSWORD" type="password" iconLeft="pi pi-lock" autocomplete="current-password"
+              [errorMessage]="passwordError('currentPassword')" formControlName="currentPassword" />
+            <app-float-label-input label="AUTH.NEW_PASSWORD_LABEL" type="password" iconLeft="pi pi-key" autocomplete="new-password"
+              [errorMessage]="passwordError('newPassword')" formControlName="newPassword" />
+
+            @if (passwordForm.controls.newPassword.value) {
+              <div class="strength" aria-live="polite">
+                <div class="strength__bar" aria-hidden="true">
+                  @for (n of [1, 2, 3, 4]; track n) {
+                    <span class="strength__seg" [class.strength__seg--on]="n <= strengthLevel()" [attr.data-level]="strengthLevel()"></span>
+                  }
+                </div>
+                <span class="strength__label" [attr.data-level]="strengthLevel()">{{ strengthLabel() | translate }}</span>
+              </div>
+              <ul class="rules">
+                @for (rule of rules; track rule.key) {
+                  <li class="rules__item" [class.rules__item--done]="passedRules().has(rule.key)">
+                    <i [class]="passedRules().has(rule.key) ? 'pi pi-check-circle' : 'pi pi-circle'" aria-hidden="true"></i>
+                    {{ rule.labelKey | translate }}
+                  </li>
+                }
+              </ul>
+            }
+
+            <app-float-label-input label="AUTH.CONFIRM_PASSWORD_LABEL" type="password" iconLeft="pi pi-key" autocomplete="new-password"
+              [errorMessage]="passwordError('newPasswordConfirmation')" formControlName="newPasswordConfirmation" />
+
+            <div class="actions">
+              <app-button type="submit" variant="primary" [loading]="changingPassword()">
+                {{ 'PROFILE.UPDATE_PASSWORD' | translate }}
+              </app-button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+  }
+</div>

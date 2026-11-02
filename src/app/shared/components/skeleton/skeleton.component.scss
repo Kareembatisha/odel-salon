@@ -1,0 +1,5 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host { display: block; max-width: 100%; }
+.sk { display: block; @include p.skeleton; &--circle { border-radius: 50%; } }

@@ -1,0 +1,108 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host { display: block; width: 100%; }
+
+.fli {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+
+  &__box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    background: v.$surface;
+    border: 1px solid v.$border-strong;
+    border-radius: v.$radius-md;
+    cursor: text;
+    transition: border-color v.$transition-normal, box-shadow v.$transition-normal, background v.$transition-normal;
+
+    &:hover { border-color: v.$text-muted; }
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    flex-shrink: 0;
+    color: v.$text-muted;
+    font-size: v.$text-lg;
+    transition: color v.$transition-normal;
+  }
+
+  &__label {
+    position: absolute;
+    inset-inline-start: v.$space-4;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: calc(100% - 64px);
+    color: v.$text-muted;
+    font-size: v.$text-base;
+    pointer-events: none;
+    @include p.truncate;
+    transition: top v.$transition-normal, font-size v.$transition-normal, color v.$transition-normal;
+  }
+
+  &--has-icon &__label { inset-inline-start: 44px; }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 20px v.$space-4 4px;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: v.$text;
+    font-family: inherit;
+    font-size: v.$text-base;
+    font-weight: v.$fw-medium;
+  }
+  &--has-icon &__input { padding-inline-start: 0; }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 100%;
+    background: transparent;
+    border: 0;
+    color: v.$text-muted;
+    cursor: pointer;
+    &:hover { color: v.$text; }
+  }
+
+  // Lifted label
+  &--floated &__label {
+    top: 13px;
+    font-size: v.$text-xs;
+    font-weight: v.$fw-semibold;
+  }
+
+  &--focused &__box {
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 24%);
+  }
+  &--focused &__label,
+  &--focused &__icon { color: v.$primary-text; }
+
+  &--error &__box { border-color: v.$danger; }
+  &--error.fli--focused &__box { box-shadow: 0 0 0 3px v.tint(v.$danger, 22%); }
+  &--error &__label { color: v.$danger-text; }
+
+  &--disabled &__box { background: v.$surface-sunken; cursor: not-allowed; opacity: 0.7; }
+
+  &__message {
+    display: flex;
+    align-items: center;
+    gap: v.$space-1;
+    padding-inline: v.$space-1;
+    color: v.$text-muted;
+    font-size: v.$text-sm;
+    &--error { color: v.$danger-text; }
+  }
+}

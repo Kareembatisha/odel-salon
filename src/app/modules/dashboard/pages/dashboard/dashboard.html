@@ -1,0 +1,144 @@
+<div class="odl-page">
+  <app-page-header
+    [title]="(greetingKey() | translate) + (firstName() ? ', ' + firstName() : '')"
+    [subtitle]="today() + ' — ' + ('DASHBOARD.SUBTITLE' | translate)"
+  />
+
+  @if (hasError()) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else {
+    <!-- Key numbers -->
+    <section class="stats" [attr.aria-label]="'DASHBOARD.OVERVIEW' | translate">
+      @if (loading() && !summary()) {
+        @for (n of skeletonStats; track n) {
+          <div class="odl-card stats__skeleton">
+            <app-skeleton width="50%" height="14px" />
+            <app-skeleton width="40%" height="36px" />
+            <app-skeleton width="60%" height="14px" />
+          </div>
+        }
+      } @else if (summary(); as s) {
+        <app-stat-card
+          [label]="'DASHBOARD.STATS.BOOKINGS' | translate"
+          [value]="s.bookingsToday"
+          icon="pi pi-calendar"
+          tone="gold"
+          [trend]="trendText(s.bookingsTrendPct)"
+          [trendDirection]="trendDirection(s.bookingsTrendPct)"
+        />
+        <app-stat-card
+          [label]="'DASHBOARD.STATS.REVENUE' | translate"
+          [value]="money()(s.revenueToday)"
+          icon="pi pi-wallet"
+          tone="success"
+          [trend]="trendText(s.revenueTrendPct)"
+          [trendDirection]="trendDirection(s.revenueTrendPct)"
+        />
+        <app-stat-card
+          [label]="'DASHBOARD.STATS.BARBERS_FREE' | translate"
+          [value]="freeBarbers()"
+          icon="pi pi-users"
+          tone="info"
+          [hint]="'DASHBOARD.STATS.BARBERS_HINT' | translate: { total: s.barbers.length }"
+        />
+        <app-stat-card
+          [label]="'DASHBOARD.STATS.RATING' | translate"
+          [value]="s.averageRating"
+          icon="pi pi-star"
+          tone="warning"
+          [hint]="'DASHBOARD.STATS.RATING_HINT' | translate: { count: s.reviewCount }"
+        />
+      }
+    </section>
+
+    <div class="grid">
+      <!-- Schedule -->
+      <section class="grid__main" [attr.aria-labelledby]="'schedule-title'">
+        <h2 id="schedule-title" class="section-title">{{ 'DASHBOARD.SCHEDULE.TITLE' | translate }}</h2>
+        <app-data-table
+          [data]="summary()?.upcoming ?? []"
+          [totalRecords]="summary()?.upcoming?.length ?? 0"
+          [pageSize]="10"
+          [loading]="loading() && !summary()"
+          [caption]="'DASHBOARD.SCHEDULE.TITLE' | translate"
+          [emptyTitle]="'DASHBOARD.SCHEDULE.EMPTY' | translate"
+          emptyIcon="pi pi-calendar"
+        >
+          <ng-template odlCol="time" [label]="'DASHBOARD.SCHEDULE.TIME' | translate" width="84px" let-row>
+            <span class="u-num strong">{{ row.time }}</span>
+          </ng-template>
+          <ng-template odlCol="customer" [label]="'DASHBOARD.SCHEDULE.CUSTOMER' | translate" let-row>
+            <span class="cell-text" [attr.title]="row.customer">{{ row.customer }}</span>
+          </ng-template>
+          <ng-template odlCol="service" [label]="'DASHBOARD.SCHEDULE.SERVICE' | translate" let-row>
+            <span class="cell-text" [attr.title]="row.service">{{ row.service }}</span>
+          </ng-template>
+          <ng-template odlCol="barber" [label]="'DASHBOARD.SCHEDULE.BARBER' | translate" let-row>
+            <span class="cell-text">{{ row.barber }}</span>
+          </ng-template>
+          <ng-template odlCol="chair" [label]="'DASHBOARD.SCHEDULE.CHAIR' | translate" width="104px" let-row>
+            <app-status-badge [variant]="row.chairType === 'vip' ? 'vip' : 'neutral'" [dot]="false">
+              {{ (row.chairType === 'vip' ? 'DASHBOARD.CHAIR_VIP' : 'DASHBOARD.CHAIR_REGULAR') | translate }}
+            </app-status-badge>
+          </ng-template>
+          <ng-template odlCol="status" [label]="'DASHBOARD.SCHEDULE.STATUS' | translate" width="148px" let-row>
+            <app-status-badge [variant]="badge(row.status)">{{ 'BOOKING_STATUS.' + row.status | translate }}</app-status-badge>
+          </ng-template>
+        </app-data-table>
+      </section>
+
+      <!-- Side column -->
+      <aside class="grid__side">
+        <section class="odl-card panel" [attr.aria-labelledby]="'chairs-title'">
+          <h2 id="chairs-title" class="section-title">{{ 'DASHBOARD.CHAIRS.TITLE' | translate }}</h2>
+          @if (summary(); as s) {
+            @for (chair of s.chairs; track chair.type) {
+              <div class="meter">
+                <div class="meter__head">
+                  <span class="meter__name">
+                    {{ (chair.type === 'vip' ? 'DASHBOARD.CHAIR_VIP' : 'DASHBOARD.CHAIR_REGULAR') | translate }}
+                  </span>
+                  <span class="meter__count u-num">{{ 'DASHBOARD.CHAIRS.FREE' | translate: { free: free(chair), total: chair.total } }}</span>
+                </div>
+                <div class="meter__track" role="img" [attr.aria-label]="usage(chair) + '%'">
+                  <span class="meter__fill" [class.meter__fill--vip]="chair.type === 'vip'" [style.width.%]="usage(chair)"></span>
+                </div>
+                @if (chair.locked) {
+                  <span class="meter__note">{{ 'DASHBOARD.CHAIRS.LOCKED' | translate: { count: chair.locked } }}</span>
+                }
+              </div>
+            }
+          } @else {
+            <app-skeleton height="44px" />
+            <app-skeleton height="44px" />
+          }
+        </section>
+
+        <section class="odl-card panel" [attr.aria-labelledby]="'barbers-title'">
+          <h2 id="barbers-title" class="section-title">{{ 'DASHBOARD.BARBERS.TITLE' | translate }}</h2>
+          @if (summary(); as s) {
+            <ul class="barbers">
+              @for (b of s.barbers; track b.id) {
+                <li class="barbers__row">
+                  <span class="barbers__dot" [class.barbers__dot--busy]="b.state === 'busy'" aria-hidden="true"></span>
+                  <span class="barbers__name">{{ b.name }}</span>
+                  <span class="barbers__state" [class.barbers__state--busy]="b.state === 'busy'">
+                    @if (b.state === 'free') {
+                      {{ 'DASHBOARD.BARBERS.FREE' | translate }}
+                    } @else {
+                      {{ 'DASHBOARD.BARBERS.BUSY_UNTIL' | translate: { time: b.freeAt } }}
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          } @else {
+            <app-skeleton height="20px" />
+            <app-skeleton height="20px" />
+            <app-skeleton height="20px" />
+          }
+        </section>
+      </aside>
+    </div>
+  }
+</div>

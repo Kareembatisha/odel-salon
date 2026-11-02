@@ -1,0 +1,54 @@
+<!-- Card header -->
+<div class="card-header">
+  <h2 class="card-title">{{ 'AUTH.WELCOME' | translate }}</h2>
+  <p class="card-subtitle">{{ 'AUTH.SUBTITLE' | translate }}</p>
+</div>
+
+<!-- Form -->
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+  <!-- Email -->
+  <app-float-label-input
+    label="AUTH.EMAIL_LABEL"
+    type="email"
+    iconLeft="pi pi-envelope"
+    autocomplete="email"
+    [errorMessage]="email.touched && email.hasError('required') ? 'AUTH.EMAIL_REQUIRED'
+                  : email.touched && email.hasError('email')    ? 'AUTH.EMAIL_INVALID'
+                  : ''"
+    formControlName="email"
+  />
+
+  <!-- Password -->
+  <app-float-label-input
+    label="AUTH.PASSWORD_LABEL"
+    type="password"
+    iconLeft="pi pi-lock"
+    autocomplete="current-password"
+    [errorMessage]="password.touched && password.hasError('required')  ? 'AUTH.PASSWORD_REQUIRED'
+                  : password.touched && password.hasError('minlength') ? 'AUTH.PASSWORD_MIN'
+                  : ''"
+    formControlName="password"
+  />
+
+  <!-- Forgot password -->
+  <div class="form-row-meta">
+    <a href="#" class="forgot-link" (click)="$event.preventDefault(); goToForgotPassword()">
+      {{ 'AUTH.FORGOT_PASSWORD' | translate }}
+    </a>
+  </div>
+
+  <button type="submit" class="submit-btn" [disabled]="loading()">
+    {{ (loading() ? 'AUTH.SIGNING_IN' : 'AUTH.SIGN_IN') | translate }}
+  </button>
+</form>
+
+<!-- Card footer -->
+<div class="card-footer">
+  <hr class="card-divider" />
+  <p class="help-text">
+    {{ 'AUTH.NEED_HELP' | translate }}
+    <a href="#" class="help-link" (click)="$event.preventDefault()">
+      {{ 'AUTH.CONTACT_ADMIN' | translate }}
+    </a>
+  </p>
+</div>

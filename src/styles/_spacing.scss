@@ -1,0 +1,62 @@
+// ============================================================
+// _spacing.scss — spacing, radius, layout sizes, z-index, motion, breakpoints
+// ============================================================
+
+// 4px grid
+$space-0: 0;
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-7: 28px;
+$space-8: 32px;
+$space-10: 40px;
+$space-12: 48px;
+$space-14: 56px;
+$space-16: 64px;
+$space-20: 80px;
+
+// Radius is hierarchical, not uniform: the larger the surface, the larger the radius.
+$radius-xs: 4px;     // checkboxes, tiny chips
+$radius-sm: 6px;     // badges, table action buttons
+$radius-md: 10px;    // buttons, inputs
+$radius-lg: 14px;    // cards, panels
+$radius-xl: 20px;    // modals, auth card
+$radius-full: 999px; // pills, avatars
+
+// Component sizes
+$input-height: 52px;
+$btn-height-sm: 34px;
+$btn-height-md: 42px;
+$btn-height-lg: 50px;
+$sidebar-width: 264px;
+$sidebar-rail-width: 76px;
+$header-height: 68px;
+$content-max-width: 1440px;
+$auth-card-width: 460px;
+
+// Z-index scale
+$z-base: 0;
+$z-raised: 10;
+$z-dropdown: 100;
+$z-sticky: 200;
+$z-sidebar: 300;
+$z-overlay: 400;
+$z-modal: 500;
+$z-toast: 600;
+$z-tooltip: 700;
+
+// Breakpoints (max-width queries)
+$bp-xs: 360px;
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 900px;   // sidebar becomes off-canvas
+$bp-xl: 1280px;
+$bp-2xl: 1440px;
+
+// Motion — short and purposeful; all disabled by prefers-reduced-motion in styles.scss
+$transition-fast: 0.12s ease;
+$transition-normal: 0.18s ease;
+$transition-slow: 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);

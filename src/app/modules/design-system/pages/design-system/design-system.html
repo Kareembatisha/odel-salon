@@ -1,0 +1,142 @@
+<div class="odl-page">
+  <app-page-header
+    title="Design system"
+    subtitle="Tokens and components every Odel screen is built from. Switch light/dark and English/Arabic in the header to review each."
+  >
+    <app-button variant="secondary" [iconClass]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'" (clicked)="theme.toggle()">
+      {{ theme.isDark() ? 'Light mode' : 'Dark mode' }}
+    </app-button>
+  </app-page-header>
+
+  <!-- Color -->
+  <section class="odl-card block">
+    <h2 class="block__title">Brand scale — champagne gold</h2>
+    <p class="block__note">Fills use 500 with charcoal text. Gold <em>text</em> on light surfaces uses 700 (AA contrast).</p>
+    <div class="ramp">
+      @for (s of primarySteps; track s) {
+        <div class="ramp__chip"><span class="ramp__swatch" [style.background]="'var(--odl-primary-' + s + ')'"></span><span class="u-num">{{ s }}</span></div>
+      }
+    </div>
+
+    <h2 class="block__title">Neutral scale — warm charcoal</h2>
+    <div class="ramp">
+      @for (s of neutralSteps; track s) {
+        <div class="ramp__chip"><span class="ramp__swatch" [style.background]="'var(--odl-neutral-' + s + ')'"></span><span class="u-num">{{ s }}</span></div>
+      }
+    </div>
+
+    <h2 class="block__title">Semantic tokens (follow the theme)</h2>
+    <div class="tokens">
+      @for (t of semantic; track t.css) {
+        <div class="token"><span class="token__swatch" [style.background]="'var(' + t.css + ')'"></span>
+          <span class="token__text"><strong>{{ t.name }}</strong><code>{{ t.css }}</code></span></div>
+      }
+    </div>
+  </section>
+
+  <!-- Type -->
+  <section class="odl-card block">
+    <h2 class="block__title">Typography</h2>
+    <p class="block__note">Manrope for UI, a Cormorant serif for the wordmark, titles and big numbers; IBM Plex Arabic replaces both in RTL.</p>
+    @for (t of typeScale; track t.token) {
+      <div class="type">
+        <code>{{ t.token }}</code>
+        <span [style.font-size.px]="t.px" [class.type__display]="t.display">{{ t.sample }}</span>
+      </div>
+    }
+  </section>
+
+  <!-- Buttons + badges -->
+  <section class="odl-card block">
+    <h2 class="block__title">Buttons</h2>
+    <div class="row">
+      <app-button variant="primary" iconClass="pi pi-plus">Add branch</app-button>
+      <app-button variant="outline">Edit hours</app-button>
+      <app-button variant="secondary">Cancel</app-button>
+      <app-button variant="export" iconClass="pi pi-download">Export</app-button>
+      <app-button variant="ghost">Skip</app-button>
+      <app-button variant="danger" iconClass="pi pi-trash">Delete</app-button>
+      <app-button variant="primary" [loading]="true">Saving</app-button>
+      <app-button variant="primary" [disabled]="true">Disabled</app-button>
+    </div>
+    <div class="row">
+      <app-button size="sm">Small</app-button>
+      <app-button size="md">Medium</app-button>
+      <app-button size="lg">Large</app-button>
+    </div>
+
+    <h2 class="block__title">Status badges</h2>
+    <div class="row">
+      @for (v of badgeVariants; track v) { <app-status-badge [variant]="v">{{ v }}</app-status-badge> }
+    </div>
+
+    <h2 class="block__title">Toasts</h2>
+    <div class="row">
+      <app-button variant="secondary" size="sm" (clicked)="showToast('success')">Success</app-button>
+      <app-button variant="secondary" size="sm" (clicked)="showToast('info')">Info</app-button>
+      <app-button variant="secondary" size="sm" (clicked)="showToast('warning')">Warning</app-button>
+      <app-button variant="secondary" size="sm" (clicked)="showToast('error')">Error</app-button>
+    </div>
+  </section>
+
+  <!-- Inputs -->
+  <section class="odl-card block">
+    <h2 class="block__title">Inputs</h2>
+    <div class="fields">
+      <app-float-label-input label="AUTH.EMAIL_LABEL" type="email" iconLeft="pi pi-envelope" [formControl]="email" />
+      <app-float-label-input label="AUTH.PASSWORD_LABEL" type="password" iconLeft="pi pi-lock" [formControl]="password" />
+      <app-float-label-input label="AUTH.EMAIL_LABEL" iconLeft="pi pi-envelope" [formControl]="invalid" errorMessage="AUTH.EMAIL_INVALID" />
+    </div>
+  </section>
+
+  <!-- Stat cards -->
+  <section class="stats">
+    <app-stat-card label="Bookings today" [value]="42" icon="pi pi-calendar" tone="gold" trend="+12% vs last week" trendDirection="up" />
+    <app-stat-card label="Revenue" value="EGP 18,450" icon="pi pi-wallet" tone="success" trend="+8%" trendDirection="up" />
+    <app-stat-card label="No-shows" [value]="3" icon="pi pi-user-minus" tone="danger" trend="-2" trendDirection="down" />
+    <app-stat-card label="Rating" [value]="4.8" icon="pi pi-star" tone="warning" hint="126 reviews" />
+  </section>
+
+  <!-- Table -->
+  <section class="block-plain">
+    <div class="block-plain__head">
+      <h2 class="block__title">Data table</h2>
+      <app-button variant="secondary" size="sm" iconClass="pi pi-refresh" (clicked)="reloadTable()">Simulate loading</app-button>
+    </div>
+    <app-data-table [data]="rows" [totalRecords]="23" [page]="page()" [pageSize]="3" [loading]="tableLoading()" caption="Barbers" (pageChange)="page.set($event)">
+      <ng-template odlCol="name" label="Barber" width="30%" let-row><span class="cell-text">{{ row.name }}</span></ng-template>
+      <ng-template odlCol="branch" label="Branch" let-row>{{ row.branch }}</ng-template>
+      <ng-template odlCol="tier" label="Tier" width="120px" let-row>
+        <app-status-badge [variant]="row.tier === 'VIP' ? 'vip' : 'neutral'" [dot]="false">{{ row.tier }}</app-status-badge>
+      </ng-template>
+      <ng-template odlCol="state" label="Status" width="130px" let-row>
+        <app-status-badge [variant]="row.active ? 'success' : 'neutral'">{{ row.active ? 'Active' : 'Inactive' }}</app-status-badge>
+      </ng-template>
+      <ng-template odlCol="actions" label="" align="end" width="110px" let-row>
+        <app-button variant="ghost" size="sm" iconClass="pi pi-trash" ariaLabel="Delete" (clicked)="confirmOpen.set(true)" />
+      </ng-template>
+    </app-data-table>
+  </section>
+
+  <!-- States -->
+  <section class="states">
+    <div class="odl-card"><app-empty-state icon="pi pi-map-marker" title="No branches yet" description="Add your first branch to start taking bookings." [compact]="true">
+      <app-button variant="primary" size="sm" iconClass="pi pi-plus">Add branch</app-button></app-empty-state></div>
+    <div class="odl-card"><app-failed-state [compact]="true" /></div>
+    <div class="odl-card skeletons">
+      <app-skeleton width="45%" height="18px" /><app-skeleton height="14px" /><app-skeleton width="80%" height="14px" />
+      <div class="row"><app-skeleton shape="circle" width="40px" height="40px" /><app-skeleton width="120px" height="40px" /></div>
+    </div>
+  </section>
+</div>
+
+<app-confirm-modal
+  [isOpen]="confirmOpen()"
+  title="Delete barber?"
+  message="Karim Adel will be removed from every branch. Existing bookings keep their history."
+  confirmLabel="Delete"
+  cancelLabel="Keep barber"
+  [busy]="busy()"
+  (confirm)="confirmDelete()"
+  (cancel)="confirmOpen.set(false)"
+/>

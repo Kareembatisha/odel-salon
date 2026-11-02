@@ -1,0 +1,157 @@
+// ============================================================
+// _theme.scss — emits the CSS custom properties that carry the theme.
+//
+// WHY CSS VARIABLES (and not compile-time SCSS colors):
+// light/dark, and the active brand, must switch at runtime without
+// rebuilding stylesheets. SCSS tokens in _colors.scss therefore resolve
+// to `var(--odl-*)`; the actual values live here, once, per theme.
+//
+// Brand-specific scales come from the build-time brand partial
+// (brands/<brand>/_brand.scss, found through stylePreprocessorOptions).
+// ============================================================
+@use "sass:map";
+@use "sass:color";
+@use "brand" as b;
+
+// ── Palettes (identical in both themes) ───────────────────
+@mixin palettes {
+  @each $step, $value in b.$primary {
+    --odl-primary-#{$step}: #{$value};
+  }
+  @each $step, $value in b.$neutral {
+    --odl-neutral-#{$step}: #{$value};
+  }
+}
+
+// ── Light theme ───────────────────────────────────────────
+@mixin light {
+  color-scheme: light;
+
+  --odl-bg-page: #{map.get(b.$neutral, 50)};
+  --odl-surface: #{map.get(b.$neutral, 0)};
+  --odl-surface-raised: #{map.get(b.$neutral, 0)};
+  --odl-surface-sunken: #{map.get(b.$neutral, 25)};
+  --odl-surface-hover: #{map.get(b.$neutral, 50)};
+
+  --odl-border: #{map.get(b.$neutral, 100)};
+  --odl-border-strong: #{map.get(b.$neutral, 200)};
+
+  --odl-text: #{map.get(b.$neutral, 900)};
+  --odl-text-secondary: #{map.get(b.$neutral, 600)};
+  // Muted text must reach 4.5:1 on white AND on the warm page background. The brand's
+  // neutral-500 is 4.27:1 / 3.92:1, so darken it slightly (derived from the brand map,
+  // so a different brand keeps the guarantee).
+  --odl-text-muted: #{color.mix(map.get(b.$neutral, 500), map.get(b.$neutral, 900), 78%)};
+  --odl-text-placeholder: #{map.get(b.$neutral, 400)};
+  --odl-text-disabled: #{map.get(b.$neutral, 300)};
+
+  --odl-primary: #{map.get(b.$primary, 500)};
+  --odl-primary-hover: #{map.get(b.$primary, 400)};
+  --odl-primary-active: #{map.get(b.$primary, 600)};
+  --odl-on-primary: #{map.get(b.$neutral, 900)};
+  --odl-primary-soft: #{map.get(b.$primary, 50)};
+  --odl-primary-soft-border: #{map.get(b.$primary, 200)};
+  --odl-primary-text: #{map.get(b.$primary, 700)};
+  --odl-focus-ring: #{map.get(b.$primary, 500)};
+
+  --odl-success: #2e7d57;
+  --odl-success-text: #1f6040;
+  --odl-success-bg: #e4f2ea;
+  --odl-warning: #b7791f;
+  --odl-warning-text: #8a5a12;
+  --odl-warning-bg: #fbf0d9;
+  --odl-danger: #b5443a;
+  --odl-danger-text: #92322a;
+  --odl-danger-bg: #f9e4e1;
+  --odl-on-danger: #ffffff;
+  --odl-info: #3b6a8f;
+  --odl-info-text: #2d5373;
+  --odl-info-bg: #e3edf5;
+
+  --odl-sidebar-bg: #{map.get(b.$neutral, 900)};
+  --odl-sidebar-border: #{map.get(b.$neutral, 800)};
+  --odl-sidebar-text: #{map.get(b.$neutral, 300)};
+  --odl-sidebar-text-strong: #{map.get(b.$neutral, 0)};
+  --odl-sidebar-text-muted: #{color.mix(map.get(b.$neutral, 500), map.get(b.$neutral, 400), 50%)};
+  --odl-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --odl-sidebar-active-bg: rgba(194, 156, 69, 0.16);
+  --odl-sidebar-active-text: #{map.get(b.$primary, 300)};
+
+  --odl-overlay: rgba(20, 19, 17, 0.5);
+  --odl-shadow-sm: 0 1px 2px rgba(31, 29, 26, 0.06);
+  --odl-shadow-md: 0 6px 18px rgba(31, 29, 26, 0.08);
+  --odl-shadow-lg: 0 20px 50px rgba(31, 29, 26, 0.16);
+
+  --odl-skeleton-a: #{map.get(b.$neutral, 100)};
+  --odl-skeleton-b: #{map.get(b.$neutral, 50)};
+}
+
+// ── Dark theme ────────────────────────────────────────────
+@mixin dark {
+  color-scheme: dark;
+
+  --odl-bg-page: #{map.get(b.$neutral, 950)};
+  --odl-surface: #1a1816;
+  --odl-surface-raised: #221f1c;
+  --odl-surface-sunken: #161412;
+  --odl-surface-hover: #24211e;
+
+  --odl-border: #2c2925;
+  --odl-border-strong: #3b3732;
+
+  --odl-text: #f3f0ea;
+  --odl-text-secondary: #bdb7ab;
+  --odl-text-muted: #948e82;
+  --odl-text-placeholder: #6f6a60;
+  --odl-text-disabled: #55514a;
+
+  --odl-primary: #{map.get(b.$primary, 400)};
+  --odl-primary-hover: #{map.get(b.$primary, 300)};
+  --odl-primary-active: #{map.get(b.$primary, 500)};
+  --odl-on-primary: #{map.get(b.$neutral, 950)};
+  --odl-primary-soft: rgba(209, 170, 85, 0.12);
+  --odl-primary-soft-border: rgba(209, 170, 85, 0.3);
+  --odl-primary-text: #{map.get(b.$primary, 300)};
+  --odl-focus-ring: #{map.get(b.$primary, 400)};
+
+  --odl-success: #4cae7f;
+  --odl-success-text: #86d0a6;
+  --odl-success-bg: rgba(76, 174, 127, 0.15);
+  --odl-warning: #d99a3a;
+  --odl-warning-text: #ebbf6e;
+  --odl-warning-bg: rgba(217, 154, 58, 0.15);
+  --odl-danger: #d9695e;
+  --odl-danger-text: #f0a198;
+  --odl-danger-bg: rgba(217, 105, 94, 0.16);
+  --odl-on-danger: #1a0c0a;
+  --odl-info: #6b9bc2;
+  --odl-info-text: #9bc1de;
+  --odl-info-bg: rgba(107, 155, 194, 0.16);
+
+  --odl-sidebar-bg: #100f0d;
+  --odl-sidebar-border: #24211e;
+  --odl-sidebar-text: #bdb7ab;
+  --odl-sidebar-text-strong: #f3f0ea;
+  --odl-sidebar-text-muted: #{color.mix(map.get(b.$neutral, 500), map.get(b.$neutral, 400), 50%)};
+  --odl-sidebar-hover: rgba(255, 255, 255, 0.05);
+  --odl-sidebar-active-bg: rgba(209, 170, 85, 0.14);
+  --odl-sidebar-active-text: #{map.get(b.$primary, 300)};
+
+  --odl-overlay: rgba(0, 0, 0, 0.62);
+  --odl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --odl-shadow-md: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --odl-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+
+  --odl-skeleton-a: #24211e;
+  --odl-skeleton-b: #2e2a26;
+}
+
+// ── Typography variables (language aware) ─────────────────
+@mixin fonts-ltr {
+  --odl-font-ui: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --odl-font-display: #{b.$font-display};
+}
+@mixin fonts-rtl {
+  --odl-font-ui: 'IBM Plex Arabic', 'Segoe UI', system-ui, sans-serif;
+  --odl-font-display: 'IBM Plex Arabic', 'Segoe UI', system-ui, sans-serif;
+}

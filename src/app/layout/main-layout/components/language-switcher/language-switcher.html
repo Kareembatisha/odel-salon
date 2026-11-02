@@ -1,0 +1,37 @@
+<div class="lang-switcher">
+  <button
+    type="button"
+    class="lang-trigger flex items-center gap-2"
+    [attr.aria-label]="'LAYOUT.LANGUAGE' | translate"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="listbox"
+    (click)="toggle()"
+  >
+    <i class="pi pi-globe"></i>
+    <span class="lang-code">{{ currentOption().nativeLabel }}</span>
+    <i class="pi pi-angle-down lang-chevron" [class.lang-chevron--open]="isOpen()"></i>
+  </button>
+
+  @if (isOpen()) {
+  <ul class="lang-menu" role="listbox">
+    @for (option of options; track option.code) {
+    <li>
+      <button
+        type="button"
+        class="lang-option flex items-center justify-between"
+        role="option"
+        [attr.aria-selected]="option.code === languageService.currentLang()"
+        [class.lang-option--active]="option.code === languageService.currentLang()"
+        (click)="select(option)"
+      >
+        <span class="lang-option-native">{{ option.nativeLabel }}</span>
+        <span class="lang-option-name" [class.lang-option-name--ar]="option.code === 'ar'">{{ option.label }}</span>
+        @if (option.code === languageService.currentLang()) {
+        <i class="pi pi-check lang-option-check"></i>
+        }
+      </button>
+    </li>
+    }
+  </ul>
+  }
+</div>

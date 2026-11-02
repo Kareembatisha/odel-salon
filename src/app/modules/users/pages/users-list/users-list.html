@@ -1,0 +1,155 @@
+<div class="odl-page">
+  <app-page-header [title]="'USERS.TITLE' | translate" [subtitle]="'USERS.SUBTITLE' | translate">
+    <app-button *appCan="P.User.Create" variant="primary" iconClass="pi pi-user-plus" (clicked)="openCreate()">
+      {{ 'USERS.NEW' | translate }}
+    </app-button>
+  </app-page-header>
+
+  <div class="toolbar">
+    <app-search-input [placeholder]="'USERS.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+    <app-filter-select [label]="'USERS.FILTER.ROLE' | translate" [options]="roleFilterOptions()"
+      [value]="query().roleId !== undefined ? '' + query().roleId : ''" (changed)="onRoleFilter($event)" />
+    <app-filter-select [label]="'USERS.FILTER.STATUS' | translate" [options]="statusFilterOptions()"
+      [value]="query().status === undefined ? '' : '' + query().status" (changed)="onStatusFilter($event)" />
+
+    @if (selection().length) {
+      <div class="bulk" role="status">
+        <span class="bulk__count">{{ 'COMMON.SELECTED' | translate: { count: selection().length } }}</span>
+        <app-button variant="ghost" size="sm" (clicked)="selection.set([])">{{ 'COMMON.CLEAR_SELECTION' | translate }}</app-button>
+        <app-button variant="danger" size="sm" iconClass="pi pi-trash" (clicked)="askBulkDelete()">{{ 'COMMON.DELETE' | translate }}</app-button>
+      </div>
+    }
+  </div>
+
+  @if (hasError() && !rows().length) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else {
+    <app-data-table
+      [data]="rows()"
+      [totalRecords]="meta()?.totalCount ?? 0"
+      [page]="meta()?.currentPage ?? 1"
+      [pageSize]="meta()?.pageSize ?? 10"
+      [loading]="loading()"
+      [caption]="'USERS.TITLE' | translate"
+      [selectable]="canDelete()"
+      [(selection)]="selection"
+      [lockedIds]="lockedIds()"
+      [selectAllLabel]="'COMMON.SELECT_ALL' | translate"
+      [selectRowLabel]="'COMMON.SELECT_ROW' | translate"
+      [emptyTitle]="'USERS.EMPTY_TITLE' | translate"
+      [emptyDescription]="'USERS.EMPTY_TEXT' | translate"
+      emptyIcon="pi pi-users"
+      (pageChange)="onPage($event)"
+      (rowClick)="openEdit($event)"
+    >
+      <ng-template odlCol="user" [label]="'USERS.COL.USER' | translate" width="38%" let-row>
+        <span class="who">
+          <app-avatar size="md" [name]="row.fullName" [src]="row.imageUrl" />
+          <span class="who__text">
+            <span class="cell-text who__name" [attr.title]="row.fullName">{{ row.fullName }}@if (isSelf(row)) { <span class="who__you">{{ 'USERS.YOU' | translate }}</span> }</span>
+            <span class="cell-text who__mail" [attr.title]="row.email">{{ row.email }}</span>
+          </span>
+        </span>
+      </ng-template>
+      <ng-template odlCol="role" [label]="'USERS.COL.ROLE' | translate" width="170px" let-row>
+        <app-status-badge variant="vip" [dot]="false">{{ row.role }}</app-status-badge>
+      </ng-template>
+      <ng-template odlCol="status" [label]="'USERS.COL.STATUS' | translate" width="170px" let-row>
+        <span class="status" (click)="$event.stopPropagation()">
+          @if (canEdit()) {
+            <app-switch [checked]="row.status" [disabled]="isSelf(row) || saving()"
+              [label]="(row.status ? 'USERS.DEACTIVATE' : 'USERS.ACTIVATE') | translate" (toggled)="toggle(row)" />
+          }
+          <app-status-badge [variant]="row.status ? 'success' : 'neutral'">
+            {{ (row.status ? 'USERS.STATUS.ACTIVE' : 'USERS.STATUS.INACTIVE') | translate }}
+          </app-status-badge>
+        </span>
+      </ng-template>
+      <ng-template odlCol="actions" label="" align="end" width="120px" let-row>
+        <span class="row-actions">
+          @if (canEdit()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="openEdit(row)" />
+          }
+          @if (canDelete()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [disabled]="isSelf(row)"
+              [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+          }
+        </span>
+      </ng-template>
+
+      <!-- Narrow viewport (< 768px): same data and actions as the table, laid out as a card
+           so Status and the row actions are never pushed off-screen by horizontal scroll. -->
+      <ng-template odlCard let-row let-selected="selected" let-locked="locked" let-toggleSelected="toggleSelected">
+        <div class="card__top">
+          @if (canDelete()) {
+            <input type="checkbox" class="odl-check" [checked]="selected" [disabled]="locked"
+              [attr.aria-label]="'COMMON.SELECT_ROW' | translate" (click)="$event.stopPropagation()" (change)="toggleSelected()" />
+          }
+          <app-avatar size="md" [name]="row.fullName" [src]="row.imageUrl" />
+          <span class="card__who">
+            <span class="card__name">{{ row.fullName }}@if (isSelf(row)) { <span class="who__you">{{ 'USERS.YOU' | translate }}</span> }</span>
+            <span class="card__mail">{{ row.email }}</span>
+          </span>
+        </div>
+
+        <div class="card__meta">
+          <app-status-badge variant="vip" [dot]="false">{{ row.role }}</app-status-badge>
+          <app-status-badge [variant]="row.status ? 'success' : 'neutral'">
+            {{ (row.status ? 'USERS.STATUS.ACTIVE' : 'USERS.STATUS.INACTIVE') | translate }}
+          </app-status-badge>
+        </div>
+
+        <div class="card__actions" (click)="$event.stopPropagation()">
+          @if (canEdit()) {
+            <app-switch [checked]="row.status" [disabled]="isSelf(row) || saving()"
+              [label]="(row.status ? 'USERS.DEACTIVATE' : 'USERS.ACTIVATE') | translate" (toggled)="toggle(row)" />
+          }
+          <span class="card__spacer"></span>
+          @if (canEdit()) {
+            <app-button variant="secondary" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="openEdit(row)" />
+          }
+          @if (canDelete()) {
+            <app-button variant="secondary" size="sm" iconClass="pi pi-trash" [disabled]="isSelf(row)"
+              [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+          }
+        </div>
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="(drawerMode() === 'create' ? 'USERS.FORM.CREATE_TITLE' : 'USERS.FORM.EDIT_TITLE') | translate"
+  [subtitle]="(drawerMode() === 'create' ? 'USERS.FORM.CREATE_SUBTITLE' : 'USERS.FORM.EDIT_SUBTITLE') | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="drawerOpen.set(false)"
+>
+  @if (drawerOpen()) {
+    @if (drawerLoading()) {
+      <div class="drawer-loading">
+        @for (n of [1, 2, 3, 4]; track n) { <app-skeleton height="56px" /> }
+      </div>
+    } @else {
+      <app-user-form
+        [mode]="drawerMode()"
+        [details]="editDetails()"
+        [roles]="roleList()"
+        [saving]="saving()"
+        (submitted)="onSubmitted($event)"
+        (cancelled)="drawerOpen.set(false)"
+      />
+    }
+  }
+</app-drawer>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete().length > 0"
+  [title]="(pendingDelete().length > 1 ? 'USERS.DELETE.TITLE_MANY' : 'USERS.DELETE.TITLE_ONE') | translate"
+  [message]="deleteMessage()"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set([])"
+/>

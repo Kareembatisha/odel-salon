@@ -1,0 +1,84 @@
+// ============================================================
+// _patterns.scss — shared mixins so recurring visual patterns are written
+// once and stay consistent across modules.
+//
+//   @use 'styles/patterns' as p;
+//   .panel { @include p.card; }
+// ============================================================
+@use "variables" as v;
+
+/// Standard surface: used by cards, tables, panels.
+@mixin card($padding: v.$space-6) {
+  background: v.$surface;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-sm;
+  padding: $padding;
+}
+
+/// Keyboard focus ring (use on custom controls).
+@mixin focus-ring($offset: 2px) {
+  outline: 2px solid v.$focus-ring;
+  outline-offset: $offset;
+}
+
+/// Single-line truncation with ellipsis.
+@mixin truncate {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/// Visually hidden but available to screen readers.
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/// Shimmer placeholder block (see app-skeleton).
+@mixin skeleton($radius: v.$radius-sm) {
+  border-radius: $radius;
+  background: linear-gradient(90deg, v.$skeleton-a 25%, v.$skeleton-b 50%, v.$skeleton-a 75%);
+  background-size: 200% 100%;
+  animation: odl-shimmer 1.4s ease-in-out infinite;
+}
+
+/// Icon button (header, table actions).
+@mixin icon-button($size: 40px) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: $size;
+  height: $size;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: v.$radius-md;
+  background: transparent;
+  color: v.$text-secondary;
+  cursor: pointer;
+  transition: background v.$transition-normal, color v.$transition-normal, border-color v.$transition-normal;
+
+  &:hover {
+    background: v.$surface-hover;
+    color: v.$text;
+  }
+  &:focus-visible {
+    @include focus-ring;
+  }
+}
+
+/// Popover/menu surface.
+@mixin menu-surface {
+  background: v.$surface-raised;
+  border: 1px solid v.$border-strong;
+  border-radius: v.$radius-lg;
+  box-shadow: v.$shadow-lg;
+}

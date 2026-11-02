@@ -1,0 +1,42 @@
+@use "styles/variables" as v;
+
+:host { display: block; min-width: 220px; flex: 1 1 260px; max-width: 360px; }
+
+.si {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  height: 42px;
+  padding-inline: v.$space-3;
+  background: v.$surface;
+  border: 1px solid v.$border-strong;
+  border-radius: v.$radius-md;
+  color: v.$text-muted;
+  transition: border-color v.$transition-normal, box-shadow v.$transition-normal;
+
+  &:focus-within { border-color: v.$primary; box-shadow: 0 0 0 3px v.tint(v.$primary, 22%); }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: v.$text;
+    font: inherit;
+    font-size: v.$text-base;
+    &::placeholder { color: v.$text-placeholder; }
+    &::-webkit-search-cancel-button { display: none; }
+  }
+
+  &__clear {
+    display: inline-flex;
+    padding: v.$space-1;
+    background: transparent;
+    border: 0;
+    border-radius: v.$radius-full;
+    color: v.$text-muted;
+    cursor: pointer;
+    &:hover { color: v.$text; background: v.$surface-hover; }
+  }
+}

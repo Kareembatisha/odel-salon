@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <title>Odel Salon — Admin</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#141311" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Arabic:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap"
+  />
+
+  <script>
+    // Applies the persisted language/direction and theme BEFORE Angular boots,
+    // so RTL and dark-mode users never see a flash of the wrong layout/colors.
+    (function () {
+      try {
+        var lang = localStorage.getItem('odl_lang') || 'en';
+        var theme = localStorage.getItem('odl_theme') || 'light';
+        var el = document.documentElement;
+        el.setAttribute('lang', lang);
+        el.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+        el.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <odl-root></odl-root>
+</body>
+</html>

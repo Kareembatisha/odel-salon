@@ -1,0 +1,38 @@
+@use "styles/variables" as v;
+
+:host { display: block; }
+
+.ph {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: v.$space-4;
+
+  &__text { min-width: 0; flex: 1 1 320px; }
+
+  &__title {
+    font-family: v.$font-display;
+    font-size: v.$text-3xl + 4px;
+    font-weight: v.$fw-semibold;
+    line-height: v.$lh-tight;
+    letter-spacing: v.$ls-tight;
+    color: v.$text;
+  }
+
+  &__subtitle {
+    margin-top: v.$space-1;
+    max-width: 62ch;
+    color: v.$text-secondary;
+    font-size: v.$text-base;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: v.$space-3;
+    &:empty { display: none; }
+  }
+}
+
+:host-context([dir="rtl"]) .ph__title { font-size: v.$text-3xl; font-weight: v.$fw-bold; }
