@@ -1,0 +1,567 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host {
+  display: block;
+  width: 100%;
+  color: v.$text;
+}
+
+// ========================================
+// Page Layout - 12 Columns
+// ========================================
+
+.branch-form {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: v.$space-5;
+
+  width: 100%;
+  max-width: v.$content-max-width;
+  margin-inline: auto;
+  padding-block: v.$space-4 v.$space-8;
+}
+
+.form-section {
+  @include p.card(v.$space-6);
+
+  min-width: 0;
+}
+
+// Main sections distribution
+.basic-info {
+  grid-column: 1 / -1;
+}
+
+.booking-types {
+  grid-column: span 4;
+}
+
+.working-hours {
+  grid-column: span 8;
+}
+
+.form-actions {
+  grid-column: 1 / -1;
+}
+
+// ========================================
+// Section Header
+// ========================================
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: v.$space-3;
+  margin-bottom: v.$space-5;
+}
+
+.section-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+
+  border-radius: v.$radius-md;
+  background: v.$primary-soft;
+  color: v.$primary;
+
+  font-size: v.$text-lg;
+}
+
+.section-heading {
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    color: v.$text;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+    line-height: 1.5;
+  }
+
+  p {
+    margin: v.$space-1 0 0;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    line-height: 1.6;
+  }
+}
+
+// ========================================
+// Basic Information
+// ========================================
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: v.$space-4;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  min-width: 0;
+
+  label {
+    color: v.$text;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-medium;
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+    height: v.$input-height;
+    padding-inline: v.$space-4;
+
+    border: 1px solid v.$border;
+    border-radius: v.$radius-md;
+    outline: none;
+
+    background: v.$surface-sunken;
+    color: v.$text;
+    font: inherit;
+    font-size: v.$text-base;
+
+    transition:
+      border-color v.$transition-fast,
+      box-shadow v.$transition-fast,
+      background v.$transition-fast;
+
+    &::placeholder {
+      color: v.$text-placeholder;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: v.$border-strong;
+    }
+
+    &:focus {
+      border-color: v.$primary;
+      background: v.$surface;
+      box-shadow: 0 0 0 3px v.tint(v.$primary, 15%);
+    }
+
+    &:disabled {
+      color: v.$text-disabled;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.error-message {
+  color: v.$danger-text;
+  font-size: v.$text-xs;
+}
+
+// ========================================
+// Booking Types
+// ========================================
+
+.booking-grid {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+}
+
+.booking-option {
+  position: relative;
+  display: block;
+  min-width: 0;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: v.$space-3;
+
+    min-height: 76px;
+    padding: v.$space-3;
+
+    border: 1px solid v.$border;
+    border-radius: v.$radius-md;
+    background: v.$surface;
+
+    transition:
+      border-color v.$transition-fast,
+      background v.$transition-fast,
+      box-shadow v.$transition-fast;
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-1;
+    min-width: 0;
+
+    strong {
+      color: v.$text;
+      font-size: v.$text-sm;
+      font-weight: v.$fw-semibold;
+    }
+
+    small {
+      color: v.$text-secondary;
+      font-size: v.$text-xs;
+      line-height: 1.6;
+    }
+  }
+
+  &__check {
+    display: grid;
+    place-items: center;
+    flex: 0 0 20px;
+
+    width: 20px;
+    height: 20px;
+
+    border: 1px solid v.$border-strong;
+    border-radius: v.$radius-xs;
+
+    color: transparent;
+    font-size: 11px;
+
+    transition:
+      background v.$transition-fast,
+      border-color v.$transition-fast;
+  }
+
+  input:checked + &__content {
+    border-color: v.$primary;
+    background: v.$primary-soft;
+  }
+
+  input:checked + &__content &__check {
+    border-color: v.$primary;
+    background: v.$primary;
+    color: v.$on-primary;
+  }
+
+  input:focus-visible + &__content {
+    @include p.focus-ring;
+  }
+
+  &:hover &__content {
+    border-color: v.$primary;
+  }
+}
+
+// ========================================
+// Working Hours
+// ========================================
+
+.working-hours-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: v.$space-3;
+}
+
+.working-day {
+  min-width: 0;
+  padding: v.$space-3;
+
+  border: 1px solid v.$border;
+  border-radius: v.$radius-md;
+  background: v.$surface;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: v.$space-2;
+    min-width: 0;
+    margin-bottom: v.$space-3;
+  }
+
+  &__name {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    min-width: 0;
+
+    strong {
+      color: v.$text;
+      font-size: v.$text-sm;
+      font-weight: v.$fw-semibold;
+    }
+  }
+
+  &__dot {
+    flex: 0 0 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: v.$radius-full;
+    background: v.$text-muted;
+
+    &--open {
+      background: v.$success;
+    }
+  }
+
+  &__times {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: v.$space-2;
+
+    .form-field {
+      gap: v.$space-1;
+
+      label {
+        font-size: v.$text-xs;
+        color: v.$text-secondary;
+      }
+
+      input {
+        height: 38px;
+        padding-inline: v.$space-2;
+        font-size: v.$text-sm;
+      }
+    }
+  }
+
+  &__closed {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+
+    min-height: 38px;
+    color: v.$text-muted;
+    font-size: v.$text-xs;
+
+    i {
+      font-size: v.$text-sm;
+    }
+  }
+}
+
+// ========================================
+// Day Toggle
+// ========================================
+
+.day-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__track {
+    position: relative;
+    display: block;
+
+    width: 34px;
+    height: 19px;
+
+    border-radius: v.$radius-full;
+    background: v.$surface-sunken;
+    border: 1px solid v.$border-strong;
+
+    transition: background v.$transition-fast;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset-block-start: 2px;
+      inset-inline-start: 2px;
+
+      width: 13px;
+      height: 13px;
+
+      border-radius: v.$radius-full;
+      background: v.$surface;
+      box-shadow: v.$shadow-sm;
+
+      transition: transform v.$transition-fast;
+    }
+  }
+
+  input:checked + &__track {
+    background: v.$primary;
+    border-color: v.$primary;
+
+    &::after {
+      transform: translateX(15px);
+    }
+  }
+
+  input:focus-visible + &__track {
+    @include p.focus-ring;
+  }
+
+  &__label {
+    color: v.$text-secondary;
+    font-size: v.$text-xs;
+    font-weight: v.$fw-medium;
+  }
+}
+
+// RTL toggle adjustment
+:host-context([dir="rtl"]) {
+  .day-toggle input:checked + .day-toggle__track::after {
+    transform: translateX(-15px);
+  }
+}
+
+// ========================================
+// Form Actions
+// ========================================
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: v.$space-3;
+
+  padding-top: v.$space-2;
+}
+
+.btn-cancel,
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+
+  min-height: v.$btn-height-md;
+  padding-inline: v.$space-5;
+
+  border-radius: v.$radius-md;
+  font: inherit;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  text-decoration: none;
+  cursor: pointer;
+
+  transition:
+    background v.$transition-fast,
+    border-color v.$transition-fast,
+    color v.$transition-fast,
+    box-shadow v.$transition-fast;
+
+  &:focus-visible {
+    @include p.focus-ring;
+  }
+}
+
+.btn-cancel {
+  border: 1px solid v.$border;
+  background: v.$surface;
+  color: v.$text-secondary;
+
+  &:hover {
+    border-color: v.$border-strong;
+    background: v.$surface-hover;
+    color: v.$text;
+  }
+}
+
+.btn-submit {
+  border: 1px solid v.$primary;
+  background: v.$primary;
+  color: v.$on-primary;
+
+  &:hover:not(:disabled) {
+    background: v.$primary-hover;
+    border-color: v.$primary-hover;
+  }
+
+  &:active:not(:disabled) {
+    background: v.$primary-active;
+    border-color: v.$primary-active;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+// ========================================
+// Responsive Layout
+// ========================================
+
+@media (max-width: v.$bp-xl) {
+  .booking-types {
+    grid-column: 1 / -1;
+  }
+
+  .working-hours {
+    grid-column: 1 / -1;
+  }
+
+  .booking-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .working-hours-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: v.$bp-md) {
+  .branch-form {
+    gap: v.$space-4;
+  }
+
+  .form-section {
+    padding: v.$space-4;
+  }
+
+  .booking-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .working-hours-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: v.$bp-sm) {
+  .form-grid,
+  .working-hours-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field--full {
+    grid-column: auto;
+  }
+
+  .working-day__times {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .btn-cancel,
+    .btn-submit {
+      width: 100%;
+    }
+  }
+}

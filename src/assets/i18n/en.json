@@ -387,6 +387,56 @@
       "VISIBILITY": "Filter by visibility",
       "ALL": "All"
     },
-    "SHOWN_IN_APP": "Shown in app"
+    "SHOWN_IN_APP": "Shown in app",
+
+    "FORM": {
+      "CREATE_TITLE": "Create Branch",
+      "EDIT_TITLE": "Edit Branch",
+      "BASIC_INFO": "Basic Information",
+      "NAME_AR": "Branch Name (Arabic)",
+      "NAME_AR_PLACEHOLDER": "Enter branch name in Arabic",
+      "NAME_EN": "Branch Name (English)",
+      "NAME_EN_PLACEHOLDER": "Enter branch name in English",
+      "ADDRESS": "Address",
+      "ADDRESS_PLACEHOLDER": "Enter branch address",
+      "PHONE": "Phone Number",
+      "MAP_URL": "Google Maps URL",
+      "MAP_URL_PLACEHOLDER": "Enter Google Maps URL",
+      "BOOKING_TYPES": "Booking Types",
+      "BOOKING_TYPES_HINT": "Select at least one booking type.",
+      "REGULAR_BOOKING": "Regular Booking",
+      "VIP_BOOKING": "VIP Booking",
+      "HOME_BOOKING": "Home Booking",
+      "WORKING_HOURS": "Working Hours",
+      "OPEN": "Open",
+      "OPENING_TIME": "Opening Time",
+      "CLOSING_TIME": "Closing Time",
+      "BASIC_INFO_HINT": "Enter the branch details and contact information.",
+      "REGULAR_HINT": "Standard in-branch appointments.",
+      "VIP_HINT": "Premium appointments for VIP customers.",
+      "HOME_HINT": "Appointments at the customer's location.",
+      "WORKING_HOURS_HINT": "Set the opening and closing times for each day.",
+      "CLOSED": "Closed",
+      "DAY_OFF": "Day off"
+    },
+
+    "DAYS": {
+      "Saturday": "Saturday",
+      "Sunday": "Sunday",
+      "Monday": "Monday",
+      "Tuesday": "Tuesday",
+      "Wednesday": "Wednesday",
+      "Thursday": "Thursday",
+      "Friday": "Friday"
+    },
+
+    "VALIDATION": {
+      "NAME_AR_REQUIRED": "Arabic name is required.",
+      "NAME_EN_REQUIRED": "English name is required.",
+      "ADDRESS_REQUIRED": "Address is required.",
+      "PHONE_INVALID": "Please enter a valid Egyptian phone number.",
+      "URL_INVALID": "Please enter a valid URL.",
+      "BOOKING_TYPE_REQUIRED": "Please select at least one booking type."
+    }
   }
 }

@@ -387,6 +387,54 @@
       "VISIBILITY": "التصفية حسب الظهور",
       "ALL": "الكل"
     },
-    "SHOWN_IN_APP": "ظاهر في التطبيق"
+    "SHOWN_IN_APP": "ظاهر في التطبيق",
+
+    "FORM": {
+      "CREATE_TITLE": "إضافة فرع جديد",
+      "EDIT_TITLE": "تعديل الفرع",
+      "BASIC_INFO": "البيانات الأساسية",
+      "NAME_AR": "اسم الفرع بالعربية",
+      "NAME_AR_PLACEHOLDER": "أدخل اسم الفرع بالعربية",
+      "NAME_EN": "اسم الفرع بالإنجليزية",
+      "NAME_EN_PLACEHOLDER": "أدخل اسم الفرع بالإنجليزية",
+      "ADDRESS": "العنوان",
+      "ADDRESS_PLACEHOLDER": "أدخل عنوان الفرع",
+      "PHONE": "رقم الهاتف",
+      "MAP_URL": "رابط خرائط جوجل",
+      "MAP_URL_PLACEHOLDER": "أدخل رابط الموقع على خرائط جوجل",
+      "BOOKING_TYPES": "أنواع الحجز",
+      "BOOKING_TYPES_HINT": "يجب اختيار نوع حجز واحد على الأقل.",
+      "REGULAR_BOOKING": "حجز عادي",
+      "VIP_BOOKING": "حجز VIP",
+      "HOME_BOOKING": "حجز منزلي",
+      "WORKING_HOURS": "مواعيد العمل",
+      "OPEN": "مفتوح",
+      "OPENING_TIME": "وقت الفتح",
+      "CLOSING_TIME": "وقت الإغلاق",
+      "BASIC_INFO_HINT": "أدخل بيانات الفرع ومعلومات التواصل.",
+      "REGULAR_HINT": "حجوزات عادية داخل الفرع.",
+      "VIP_HINT": "حجوزات مميزة لعملاء VIP.",
+      "HOME_HINT": "حجوزات في موقع العميل.",
+      "WORKING_HOURS_HINT": "حدد مواعيد الفتح والإغلاق لكل يوم.",
+      "CLOSED": "مغلق",
+      "DAY_OFF": "إجازة"
+    },
+    "DAYS": {
+      "Saturday": "السبت",
+      "Sunday": "الأحد",
+      "Monday": "الإثنين",
+      "Tuesday": "الثلاثاء",
+      "Wednesday": "الأربعاء",
+      "Thursday": "الخميس",
+      "Friday": "الجمعة"
+    },
+    "VALIDATION": {
+      "NAME_AR_REQUIRED": "اسم الفرع بالعربية مطلوب.",
+      "NAME_EN_REQUIRED": "اسم الفرع بالإنجليزية مطلوب.",
+      "ADDRESS_REQUIRED": "العنوان مطلوب.",
+      "PHONE_INVALID": "يرجى إدخال رقم هاتف مصري صحيح.",
+      "URL_INVALID": "يرجى إدخال رابط صحيح.",
+      "BOOKING_TYPE_REQUIRED": "يرجى اختيار نوع حجز واحد على الأقل."
+    }
   }
 }

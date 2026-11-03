@@ -36,3 +36,63 @@ export interface BranchesQuery {
   /** true = shown only, false = hidden only, undefined = all. */
   isVisible?: boolean;
 }
+
+
+/**
+ * Day of week enum from API.
+ */
+export enum BranchDayOfWeek {
+  Sunday = 0,
+  Monday = 1,
+  Tuesday = 2,
+  Wednesday = 3,
+  Thursday = 4,
+  Friday = 5,
+  Saturday = 6,
+}
+
+/**
+ * Working hours for a single day.
+ */
+export interface BranchWorkingHour {
+  dayOfWeek: BranchDayOfWeek;
+  isOpen: boolean;
+  openTime: string | null;
+  closeTime: string | null;
+}
+
+/**
+ * GET /branches/{id}
+ */
+export interface BranchDetails {
+  id: number;
+  nameAr: string;
+  nameEn: string;
+  address: string;
+  mapUrl: string | null;
+  phone: string;
+  allowsRegular: boolean;
+  allowsVip: boolean;
+  allowsHome: boolean;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+  workingHours: BranchWorkingHour[];
+}
+
+/**
+ * Shared request body for:
+ * POST /branches
+ * PUT /branches/{id}
+ */
+export interface BranchPayload {
+  nameAr: string;
+  nameEn: string;
+  address: string;
+  mapUrl: string | null;
+  phone: string;
+  allowsRegular: boolean;
+  allowsVip: boolean;
+  allowsHome: boolean;
+  workingHours: BranchWorkingHour[];
+}

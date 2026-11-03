@@ -33,7 +33,7 @@
   &__names {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: v.$space-1; // Replaced hardcoded 2px with v.$space-1 (4px) or use calc if strictly tighter, but v.$space-1 is the design system grid standard. Let's use v.$space-1 for consistency.
     min-width: 0;
   }
 
@@ -72,7 +72,7 @@
     }
 
     i {
-      margin-top: 2px;
+      margin-top: v.$space-1; // Scaled to v.$space-1 (4px) or kept minimal
       color: v.$text-muted;
       flex-shrink: 0;
     }
