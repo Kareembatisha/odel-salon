@@ -19,6 +19,22 @@ export interface MockUser {
   imageUrl: string | null;
 }
 
+export interface MockBranch {
+  id: number;
+  nameAr: string;
+  nameEn: string;
+  address: string;
+  phone: string;
+  allowsRegular: boolean;
+  allowsVip: boolean;
+  allowsHome: boolean;
+  isVisible: boolean;
+  /** Totals — include suspended barbers / inactive chairs, exactly like the real list endpoint. */
+  barbersCount: number;
+  regularChairsCount: number;
+  vipChairsCount: number;
+}
+
 export const MOCK_MANAGER_PERMISSIONS: string[] = [
   'Booking.View', 'Booking.Cancel', 'Session.View', 'Session.Manage', 'Availability.View',
   'Branch.View', 'Service.View', 'Barber.View', 'Chair.View', 'Offer.View', 'Review.View', 'Report.View',
@@ -52,6 +68,23 @@ export class MockDb {
     this.user(12, 'Rana Mostafa', 'rana.mostafa@odel.com', 3, false, '1011223355'),
   ];
 
+  branches: MockBranch[] = [
+    this.branch(1, 'الزمالك', 'Zamalek', '8 Hassan Sabry St, Zamalek, Cairo', '+201020304050', [true, true, false], true, [4, 3, 1]),
+    this.branch(2, 'المعادي', 'Maadi', 'Road 9, Maadi, Cairo', '+201112345678', [true, true, false], true, [5, 4, 1]),
+    this.branch(3, 'مدينة نصر', 'Nasr City', '12 Abbas El Akkad St, Nasr City, Cairo', '+201001102194', [true, true, true], true, [6, 4, 2]),
+    this.branch(4, 'مصر الجديدة', 'Heliopolis', '25 El Korba St, Heliopolis, Cairo', '+201223344556', [true, false, true], true, [3, 3, 0]),
+    this.branch(5, 'القاهرة الجديدة', 'New Cairo', 'Tagamoa 1, Street 90, New Cairo', '+201551122334', [true, true, true], true, [8, 5, 3]),
+    this.branch(6, 'الشيخ زايد', 'Sheikh Zayed', 'Arkan Plaza, Sheikh Zayed City, Giza', '+201066778899', [true, true, false], true, [4, 3, 2]),
+    this.branch(7, 'السادس من أكتوبر', '6th of October', 'Mall of Egypt, 26th of July Corridor, 6th of October', '+201144556677', [true, false, true], true, [5, 4, 0]),
+    this.branch(8, 'الدقي', 'Dokki', '14 Mesaha Square, Dokki, Giza', '+201288990011', [true, false, false], true, [2, 2, 0]),
+    this.branch(9, 'المهندسين', 'Mohandessin', '30 Gameat El Dowal El Arabeya St, Mohandessin, Giza', '+201017788990', [true, true, false], false, [3, 2, 1]),
+    this.branch(10, 'سموحة - الإسكندرية', 'Smouha, Alexandria', '45 Fawzy Moaz St, Smouha, Alexandria', '+201099887766', [true, true, true], true, [6, 4, 2]),
+    this.branch(11, 'ستانلي - الإسكندرية', 'Stanley, Alexandria', 'Stanley Bridge Corniche, Alexandria', '+201233221100', [true, true, false], true, [4, 3, 1]),
+    this.branch(12, 'طنطا', 'Tanta', '7 El Geish St, Tanta, Gharbia', '+201011223344', [true, false, false], false, [0, 0, 0]),
+    this.branch(13, 'المنصورة', 'Mansoura', 'El Gomhoreya St, Mansoura, Dakahlia', '+201188776655', [true, true, false], false, [2, 1, 0]),
+    this.branch(14, 'الغردقة', 'Hurghada', 'Sheraton Road, Hurghada, Red Sea', '+201555443322', [true, true, true], false, [1, 0, 0]),
+  ];
+
   nextRoleId = 4;
   nextUserId = 13;
 
@@ -61,5 +94,24 @@ export class MockDb {
 
   private user(id: number, fullName: string, email: string, roleId: number, status: boolean, phoneNumber: string): MockUser {
     return { id, fullName, email, countryCode: '+20', phoneNumber, roleId, status, imageUrl: null };
+  }
+
+  /** `types` = [regular, vip, home]; `counts` = [barbers, regular chairs, VIP chairs]. */
+  private branch(
+    id: number,
+    nameAr: string,
+    nameEn: string,
+    address: string,
+    phone: string,
+    types: [boolean, boolean, boolean],
+    isVisible: boolean,
+    counts: [number, number, number],
+  ): MockBranch {
+    return {
+      id, nameAr, nameEn, address, phone,
+      allowsRegular: types[0], allowsVip: types[1], allowsHome: types[2],
+      isVisible,
+      barbersCount: counts[0], regularChairsCount: counts[1], vipChairsCount: counts[2],
+    };
   }
 }

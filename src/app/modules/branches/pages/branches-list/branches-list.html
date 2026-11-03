@@ -1,0 +1,64 @@
+<div class="odl-page">
+  <app-page-header [title]="'BRANCHES.TITLE' | translate" [subtitle]="'BRANCHES.SUBTITLE' | translate">
+    @if (canCreate()) {
+      <app-button variant="primary" iconClass="pi pi-plus" (clicked)="addBranch()">
+        {{ 'BRANCHES.NEW' | translate }}
+      </app-button>
+    }
+  </app-page-header>
+
+  <div class="toolbar">
+    <app-search-input [placeholder]="'BRANCHES.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+    <app-filter-select [label]="'BRANCHES.FILTER.VISIBILITY' | translate" [options]="visibilityFilterOptions()"
+      [value]="query().isVisible === undefined ? '' : '' + query().isVisible" (changed)="onVisibilityFilter($event)" />
+  </div>
+
+  @if (loading()) {
+    <div class="grid" aria-busy="true">
+      @for (n of skeletons; track n) {
+        <div class="odl-card sk-card">
+          <div class="sk-card__head">
+            <div class="sk-card__names">
+              <app-skeleton width="55%" height="20px" />
+              <app-skeleton width="35%" height="14px" />
+            </div>
+            <app-skeleton width="72px" height="22px" />
+          </div>
+          <app-skeleton width="90%" height="14px" />
+          <app-skeleton width="45%" height="14px" />
+          <div class="sk-card__badges">
+            <app-skeleton width="64px" height="22px" />
+            <app-skeleton width="48px" height="22px" />
+          </div>
+          <div class="sk-card__counts">
+            <app-skeleton height="36px" />
+            <app-skeleton height="36px" />
+            <app-skeleton height="36px" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (hasError()) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else if (!branches().length) {
+    <div class="odl-card">
+      @if (isFiltered()) {
+        <app-empty-state [title]="'BRANCHES.NO_RESULTS_TITLE' | translate" [description]="'BRANCHES.NO_RESULTS_TEXT' | translate" icon="pi pi-search" />
+      } @else {
+        <app-empty-state [title]="'BRANCHES.EMPTY_TITLE' | translate" [description]="'BRANCHES.EMPTY_TEXT' | translate" icon="pi pi-building" />
+      }
+    </div>
+  } @else {
+    <div class="grid">
+      @for (branch of branches(); track branch.id) {
+        <app-branch-card [branch]="branch" [canEdit]="canEdit()" [canDelete]="canDelete()" (edit)="editBranch($event)" (delete)="deleteBranch($event)" (toggleStatus)="toggleBranchStatus($event)" />
+      }
+    </div>
+    <app-pagination
+      [totalRecords]="meta()?.totalCount ?? 0"
+      [page]="meta()?.currentPage ?? 1"
+      [pageSize]="meta()?.pageSize ?? 12"
+      (pageChange)="onPage($event)"
+    />
+  }
+</div>

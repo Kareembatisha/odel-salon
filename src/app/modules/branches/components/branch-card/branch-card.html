@@ -1,0 +1,120 @@
+<article
+  class="branch odl-card"
+  [attr.aria-labelledby]="'branch-name-' + branch().id"
+>
+  <!-- Card Content -->
+  <div class="branch__content">
+    <!-- Header -->
+    <header class="branch__head">
+      <div class="branch__names">
+        <h3
+          class="branch__name"
+          [id]="'branch-name-' + branch().id"
+          [attr.lang]="primaryLang()"
+        >
+          {{ primaryName() }}
+        </h3>
+
+        <span class="branch__alt" [attr.lang]="secondaryLang()">
+          {{ secondaryName() }}
+        </span>
+      </div>
+
+      <app-status-badge [variant]="visibilityVariant()">
+        {{ (branch().isVisible ? 'BRANCHES.STATUS.VISIBLE' :
+        'BRANCHES.STATUS.HIDDEN') | translate }}
+      </app-status-badge>
+    </header>
+
+    <!-- Contact Information -->
+    <ul class="branch__info">
+      <li>
+        <i class="pi pi-map-marker" aria-hidden="true"></i>
+        <span class="branch__text" dir="auto" [title]="branch().address">
+          {{ branch().address }}
+        </span>
+        <span class="sr-only">{{ 'BRANCHES.ADDRESS' | translate }}</span>
+      </li>
+
+      <li>
+        <i class="pi pi-phone" aria-hidden="true"></i>
+        <span class="branch__text u-num" dir="ltr"> {{ branch().phone }} </span>
+        <span class="sr-only">{{ 'BRANCHES.PHONE' | translate }}</span>
+      </li>
+    </ul>
+
+    <!-- Booking Types -->
+    <div class="branch__types">
+      <span class="branch__badges">
+        @if (branch().allowsRegular) {
+        <app-status-badge variant="neutral" [dot]="false">
+          {{ 'BRANCHES.TYPE.REGULAR' | translate }}
+        </app-status-badge>
+        } @if (branch().allowsVip) {
+        <app-status-badge variant="vip" [dot]="false">
+          {{ 'BRANCHES.TYPE.VIP' | translate }}
+        </app-status-badge>
+        } @if (branch().allowsHome) {
+        <app-status-badge variant="info" [dot]="false">
+          {{ 'BRANCHES.TYPE.HOME' | translate }}
+        </app-status-badge>
+        } @if (!hasBookingTypes()) {
+        <span class="branch__none">—</span>
+        }
+      </span>
+    </div>
+
+    <!-- Counts -->
+    <dl class="branch__counts">
+      <div class="branch__count">
+        <dd class="u-num">{{ branch().barbersCount }}</dd>
+        <dt>{{ 'BRANCHES.COUNT.BARBERS' | translate }}</dt>
+      </div>
+
+      <div class="branch__count">
+        <dd class="u-num">{{ branch().regularChairsCount }}</dd>
+        <dt>{{ 'BRANCHES.COUNT.REGULAR_CHAIRS' | translate }}</dt>
+      </div>
+
+      <div class="branch__count">
+        <dd class="u-num">{{ branch().vipChairsCount }}</dd>
+        <dt>{{ 'BRANCHES.COUNT.VIP_CHAIRS' | translate }}</dt>
+      </div>
+    </dl>
+  </div>
+
+  <!-- Card Footer -->
+  @if (canEdit() || canDelete()) {
+  <footer class="branch__footer">
+    @if (canEdit()) {
+    <div class="branch__visibility">
+      <app-switch
+        [checked]="branch().isVisible"
+        [label]="'BRANCHES.SHOWN_IN_APP' | translate"
+        (toggled)="toggleStatus.emit(branch())"
+      />
+    </div>
+    }
+
+    <div class="branch__actions">
+      @if (canEdit()) {
+      <app-button
+        variant="ghost"
+        size="sm"
+        iconClass="pi pi-pencil"
+        [ariaLabel]="'COMMON.EDIT' | translate"
+        (clicked)="edit.emit(branch())"
+      />
+      } @if (canDelete()) {
+      <app-button
+        variant="ghost"
+        size="sm"
+        iconClass="pi pi-trash"
+        [ariaLabel]="'COMMON.DELETE' | translate"
+        (clicked)="delete.emit(branch())"
+      />
+      }
+    </div>
+  </footer>
+  }
+</article>

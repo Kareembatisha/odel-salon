@@ -40,6 +40,14 @@ export const MAIN_ROUTES: Routes = [
     loadComponent: () => import('./roles/pages/role-details/role-details').then((m) => m.RoleDetails),
   },
 
+  // ── Salon ────────────────────────────────────────────
+  {
+    path: 'branches',
+    canActivate: [permissionGuard],
+    data: { permission: PERMISSIONS.Branch.View, breadcrumb: 'LAYOUT.NAV.BRANCHES' },
+    loadComponent: () => import('./branches/pages/branches-list/branches-list').then((m) => m.BranchesList),
+  },
+
   // ── Account ──────────────────────────────────────────
   {
     path: 'profile',

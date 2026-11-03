@@ -12,6 +12,10 @@ import { tokenInterceptor } from './core/interceptors/token.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { langInterceptor } from './core/interceptors/lang.interceptor';
 import { GlobalErrorHandler } from './core/services/global-error-handler';
+import { environment } from '@env/environment';
+import { BranchApiRepository } from '@modules/branches/repository/branch-api.repository';
+import { BranchMockRepository } from '@modules/branches/repository/branch-mock.repository';
+import { BRANCH_REPOSITORY } from '@modules/branches/repository/branch.repository';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -26,9 +30,18 @@ export const appConfig: ApplicationConfig = {
     // Catches uncaught errors app-wide so a single bad field can't blank the page.
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
 
+    {
+      provide: BRANCH_REPOSITORY,
+      useClass: environment.useMock
+        ? BranchMockRepository
+        : BranchApiRepository,
+    },
+
     // HTTP + interceptors (token first, lang alongside it on the way out,
     // error catches on the way back).
-    provideHttpClient(withInterceptors([tokenInterceptor, langInterceptor, errorInterceptor])),
+    provideHttpClient(
+      withInterceptors([tokenInterceptor, langInterceptor, errorInterceptor]),
+    ),
 
     // ⚠️ MessageService is NOT provided here — it lives at component level
     //    inside AppToast to avoid NG0200 circular dependency.
@@ -40,8 +53,8 @@ export const appConfig: ApplicationConfig = {
           // ThemeService toggles <html data-theme="dark">.
           darkModeSelector: '[data-theme="dark"]',
           cssLayer: {
-            name: 'primeng',
-            order: 'tailwind-base, primeng, tailwind-utilities',
+            name: "primeng",
+            order: "tailwind-base, primeng, tailwind-utilities",
           },
         },
       },
@@ -49,7 +62,7 @@ export const appConfig: ApplicationConfig = {
 
     importProvidersFrom(
       TranslateModule.forRoot({
-        fallbackLang: 'en',
+        fallbackLang: "en",
         loader: {
           provide: TranslateLoader,
           useFactory: httpLoaderFactory,

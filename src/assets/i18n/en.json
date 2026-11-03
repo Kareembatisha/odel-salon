@@ -142,12 +142,14 @@
     "LOGOUT": "Log out",
     "SECTIONS": {
       "ACCESS": "Access control",
+      "SALON": "Salon",
       "DEVELOPER": "Developer"
     },
     "NAV": {
       "DASHBOARD": "Dashboard",
       "USERS": "Users",
       "ROLES_PERMISSIONS": "Roles & permissions",
+      "BRANCHES": "Branches",
       "DESIGN_SYSTEM": "Design system"
     }
   },
@@ -354,5 +356,37 @@
       "MESSAGE_ONE": "{{name}} will lose access to the dashboard and can’t be restored.",
       "MESSAGE_MANY": "{{count}} users will lose access and can’t be restored."
     }
+  },
+  "BRANCHES": {
+    "TITLE": "Branches",
+    "SUBTITLE": "Your salon locations, what each one offers, and how many barbers and chairs it has.",
+    "NEW": "Add branch",
+    "SEARCH": "Search by name, address or phone…",
+    "EMPTY_TITLE": "No branches yet",
+    "EMPTY_TEXT": "Branches will appear here once they have been added.",
+    "NO_RESULTS_TITLE": "No branches match your search",
+    "NO_RESULTS_TEXT": "Try a different search term or visibility filter.",
+    "ADDRESS": "Address",
+    "PHONE": "Phone",
+    "BOOKING_TYPES": "Booking types",
+    "TYPE": {
+      "REGULAR": "Regular",
+      "VIP": "VIP",
+      "HOME": "Home"
+    },
+    "COUNT": {
+      "BARBERS": "Barbers",
+      "REGULAR_CHAIRS": "Regular chairs",
+      "VIP_CHAIRS": "VIP chairs"
+    },
+    "STATUS": {
+      "VISIBLE": "Visible",
+      "HIDDEN": "Hidden"
+    },
+    "FILTER": {
+      "VISIBILITY": "Filter by visibility",
+      "ALL": "All"
+    },
+    "SHOWN_IN_APP": "Shown in app"
   }
 }

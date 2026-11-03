@@ -1,0 +1,154 @@
+@use "styles/variables" as v;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.branch {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-3;
+    padding: v.$space-4;
+    flex: 1;
+    min-width: 0;
+  }
+
+  // Header
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$space-2;
+    min-width: 0;
+  }
+
+  &__names {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__name {
+    margin: 0;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+    line-height: v.$lh-snug;
+    color: v.$text;
+    overflow-wrap: anywhere;
+  }
+
+  &__alt {
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    line-height: v.$lh-snug;
+    overflow-wrap: anywhere;
+  }
+
+  // Contact information
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-2;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: v.$space-2;
+      min-width: 0;
+    }
+
+    i {
+      margin-top: 2px;
+      color: v.$text-muted;
+      flex-shrink: 0;
+    }
+  }
+
+  &__text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Booking types
+  &__types {
+    min-width: 0;
+  }
+
+  &__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: v.$space-2;
+  }
+
+  &__none {
+    color: v.$text-muted;
+  }
+
+  // Statistics
+  &__counts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: v.$space-3;
+    margin: 0;
+    padding-top: v.$space-3;
+    border-top: 1px solid v.$border;
+  }
+
+  &__count {
+    display: flex;
+    align-items: center;
+    gap: v.$space-1;
+    min-width: 0;
+
+    dd {
+      margin: 0;
+      color: v.$text;
+      font-size: v.$text-sm;
+      font-weight: v.$fw-semibold;
+    }
+
+    dt {
+      color: v.$text-secondary;
+      font-size: v.$text-xs;
+    }
+  }
+
+  // Footer
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: v.$space-2;
+    padding: v.$space-2 v.$space-4;
+    border-top: 1px solid v.$border;
+    background: var(--surface-secondary, transparent);
+  }
+
+  &__visibility {
+    min-width: 0;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    flex-shrink: 0;
+  }
+}

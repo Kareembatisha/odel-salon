@@ -42,6 +42,13 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: 'roles', labelKey: 'LAYOUT.NAV.ROLES_PERMISSIONS', icon: 'pi pi-shield', route: '/main/roles', permission: PERMISSIONS.Role.View },
     ],
   },
+  {
+    id: 'salon',
+    labelKey: 'LAYOUT.SECTIONS.SALON',
+    items: [
+      { id: 'branches', labelKey: 'LAYOUT.NAV.BRANCHES', icon: 'pi pi-building', route: '/main/branches', permission: PERMISSIONS.Branch.View },
+    ],
+  },
   // Developer reference — never shipped to production (environment.showDesignSystem = false).
   ...(environment.showDesignSystem
     ? [
