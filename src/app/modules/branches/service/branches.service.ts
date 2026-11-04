@@ -1,12 +1,22 @@
 import { Injectable, inject, signal } from "@angular/core";
-import { Observable, Subscription, catchError, finalize, of } from "rxjs";
+import {
+  Observable,
+  Subscription,
+  catchError,
+  finalize,
+  map,
+  of,
+  tap,
+} from "rxjs";
 
+import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
 import {
   BranchDetails,
   BranchListItem,
   BranchPayload,
   BranchesQuery,
+  DeleteBranchesRequest,
 } from "../model/branch.model";
 import { BRANCH_REPOSITORY } from "../repository/branch.repository";
 
@@ -22,15 +32,16 @@ const PAGE_SIZE = 12;
 // ============================================================
 
 /**
- * BranchesService — list state (server-side search, visibility filter, paging).
- *
- * Phase 1 is read-only; mutations arrive with their phases.
+ * BranchesService — list state (server-side search, visibility filter, paging)
+ * and branch mutations.
  *
  * Owns the query/result/loading signals that back the branch list screen,
- * and re-issues the list request whenever the query changes. Single-branch
- * reads and mutations are thin pass-throughs to {@link BRANCH_REPOSITORY},
- * exposed here only so consumers depend on a single facade rather than
- * reaching for the repository directly.
+ * and re-issues the list request whenever the query changes.
+ *
+ * Mutations resolve to a plain result (`id`/`true` on success, `null`/`false`
+ * on failure). The service toasts a localized success message; failures were
+ * already explained by the error interceptor, so callers only decide what to
+ * do next (navigate, close a dialog…).
  */
 @Injectable({ providedIn: "root" })
 export class BranchesService {
@@ -39,6 +50,7 @@ export class BranchesService {
   // ----------------------------------------------------------
 
   private readonly repository = inject(BRANCH_REPOSITORY);
+  private readonly notify = inject(NotificationService);
 
   // ----------------------------------------------------------
   // Private State
@@ -52,6 +64,7 @@ export class BranchesService {
   });
   private readonly _loading = signal(false);
   private readonly _hasError = signal(false);
+  private readonly _saving = signal(false);
 
   /**
    * In-flight list request — a newer one cancels it so a slow, stale
@@ -74,6 +87,8 @@ export class BranchesService {
   readonly query = this._query.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly hasError = this._hasError.asReadonly();
+  /** A mutation (create / update / toggle / delete) is in flight. */
+  readonly saving = this._saving.asReadonly();
 
   // ----------------------------------------------------------
   // List Commands
@@ -142,41 +157,121 @@ export class BranchesService {
     this.load();
   }
 
+  /**
+   * Branches for dropdowns (e.g. the chairs filter and form). Independent of the list
+   * screen's search / paging / loading state — it never touches those signals.
+   * Capped at the API maximum page size (100); a failure yields an empty list.
+   */
+  loadOptions(): Observable<Array<Pick<BranchListItem, "id" | "nameAr" | "nameEn">>> {
+    return this.repository.getBranches({ pageNumber: 1, pageSize: 100 }).pipe(
+      map((res) =>
+        (res.data ?? []).map((b) => ({ id: b.id, nameAr: b.nameAr, nameEn: b.nameEn })),
+      ),
+      catchError(() => of([])),
+    );
+  }
+
   // ----------------------------------------------------------
-  // Repository Pass-Throughs
+  // Detail
   // ----------------------------------------------------------
 
   /**
-   * Fetch a single branch by id.
+   * Fetch a single branch with its working hours.
    *
-   * Error handling is the repository's concern — this method does not
-   * wrap or translate failures, so callers observe whatever the active
-   * implementation emits.
+   * Resolves to `null` when the branch can't be loaded (HTTP error already
+   * toasted by the interceptor, or a `status: false` body such as the mock's
+   * 404) so pages can show a failed state instead of handling errors.
    */
-  getBranchById(id: number): Observable<ApiResponse<BranchDetails>> {
-    return this.repository.getBranchById(id);
+  getBranch(id: number): Observable<BranchDetails | null> {
+    return this.repository.getBranchById(id).pipe(
+      map((res) => (res.status ? res.data : null)),
+      catchError(() => of(null)),
+    );
+  }
+
+  // ----------------------------------------------------------
+  // Mutations
+  // ----------------------------------------------------------
+
+  /**
+   * Create a branch → its new id, or `null` on failure.
+   *
+   * Does not reload the list: the list page resets and reloads itself on
+   * entry, and the caller navigates away after a successful save.
+   */
+  createBranch(payload: BranchPayload): Observable<number | null> {
+    return this.mutate(
+      this.repository.createBranch(payload),
+      "BRANCHES.CREATED",
+    ).pipe(map((res) => res?.data ?? null));
+  }
+
+  /** Update a branch → `true` on success. Same list-refresh contract as {@link createBranch}. */
+  updateBranch(id: number, payload: BranchPayload): Observable<boolean> {
+    return this.mutate(
+      this.repository.updateBranch(id, payload),
+      "BRANCHES.UPDATED",
+    ).pipe(map((res) => res !== null));
+  }
+
+  /** Show / hide a branch in the app → `true` on success; reloads the list. */
+  toggleStatus(id: number): Observable<boolean> {
+    return this.mutate(
+      this.repository.toggleBranchStatus(id),
+      "BRANCHES.STATUS_UPDATED",
+    ).pipe(
+      map((res) => res !== null),
+      tap((ok) => ok && this.load()),
+    );
+  }
+
+  /** Permanently delete branches (all-or-nothing) → `true` on success; reloads the list. */
+  remove(ids: number[]): Observable<boolean> {
+    const payload: DeleteBranchesRequest = { ids };
+
+    return this.mutate(
+      this.repository.deleteBranches(payload),
+      "BRANCHES.DELETED",
+    ).pipe(
+      map((res) => res !== null),
+      tap((ok) => ok && this.reloadAfterRemoval(ids.length)),
+    );
   }
 
   /**
-   * Create a branch and return its new id.
-   *
-   * Does **not** refresh the list — the caller is expected to call
-   * {@link load} (or navigate back to the list) after a successful save.
+   * Reload after a delete. If it emptied the current page, step back one page
+   * first — otherwise the user lands on a page that no longer exists.
    */
-  createBranch(payload: BranchPayload): Observable<ApiResponse<number>> {
-    return this.repository.createBranch(payload);
+  private reloadAfterRemoval(removed: number): void {
+    const pageEmptied =
+      this._branches().length <= removed && this._query().pageNumber > 1;
+
+    if (pageEmptied) {
+      this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));
+    }
+
+    this.load();
   }
 
   /**
-   * Update a branch.
-   *
-   * Does **not** refresh the list — see {@link createBranch} for the
-   * refresh contract.
+   * Runs a mutation with the `saving` flag, toasts our own i18n success key
+   * (the backend message is English-only), and turns every failure into `null`.
+   * A `status: false` body counts as a failure too (the mock answers 404 that way).
    */
-  updateBranch(
-    id: number,
-    payload: BranchPayload,
-  ): Observable<ApiResponse<null>> {
-    return this.repository.updateBranch(id, payload);
+  private mutate<T>(
+    request: Observable<ApiResponse<T>>,
+    successKey: string,
+  ): Observable<ApiResponse<T> | null> {
+    this._saving.set(true);
+
+    return request.pipe(
+      map((res) => {
+        if (!res.status) throw new Error(res.message);
+        return res;
+      }),
+      tap(() => this.notify.success(successKey)),
+      catchError(() => of(null)),
+      finalize(() => this._saving.set(false)),
+    );
   }
 }

@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Observable, Subject } from 'rxjs';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { Router } from '@angular/router';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LanguageService } from '@core/services/language.service';
 import { ApiResponse } from '@shared/model/api_response.model';
@@ -11,8 +12,7 @@ import { FilterSelectComponent } from '../../../../shared/components/filter-sele
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
 import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
 import { BranchListItem, BranchesQuery } from '../../model/branch.model';
-import { BranchApiRepository } from '../../repository/branch-api.repository';
-import { BranchMockRepository } from '../../repository/branch-mock.repository';
+import { BRANCH_REPOSITORY } from '../../repository/branch.repository';
 import { BranchesList } from './branches-list';
 
 function branch(id: number, over: Partial<BranchListItem> = {}): BranchListItem {
@@ -32,6 +32,20 @@ function response(items: BranchListItem[], totalCount = items.length, currentPag
 
 class FakeRepository {
   calls: BranchesQuery[] = [];
+  toggled: number[] = [];
+  deleted: number[][] = [];
+  toggleResult: Subject<ApiResponse<null>> | null = null;
+  deleteResult: Subject<ApiResponse<null>> | null = null;
+  toggleBranchStatus(id: number): Observable<ApiResponse<null>> {
+    this.toggled.push(id);
+    this.toggleResult = new Subject<ApiResponse<null>>();
+    return this.toggleResult;
+  }
+  deleteBranches(p: { ids: number[] }): Observable<ApiResponse<null>> {
+    this.deleted.push(p.ids);
+    this.deleteResult = new Subject<ApiResponse<null>>();
+    return this.deleteResult;
+  }
   pending: Array<Subject<ApiResponse<BranchListItem[]>>> = [];
   getBranches(q: BranchesQuery): Observable<ApiResponse<BranchListItem[]>> {
     this.calls.push(q);
@@ -47,6 +61,7 @@ describe('BranchesList', () => {
   let repo: FakeRepository;
   let fixture: ComponentFixture<BranchesList>;
   let permissions: Set<string>;
+  let navigate: ReturnType<typeof vi.spyOn>;
 
   const el = () => fixture.nativeElement as HTMLElement;
   const text = () => el().textContent ?? '';
@@ -58,13 +73,12 @@ describe('BranchesList', () => {
     TestBed.configureTestingModule({
       imports: [BranchesList, TranslateModule.forRoot()],
       providers: [
-        // The service picks mock vs API from the build environment — cover both so the spec doesn't depend on it.
-        { provide: BranchMockRepository, useValue: repo },
-        { provide: BranchApiRepository, useValue: repo },
+        { provide: BRANCH_REPOSITORY, useValue: repo },
         { provide: AuthService, useValue: { hasPermission: (p: string) => permissions.has(p) } },
       ],
     });
     TestBed.inject(TranslateService).use('en');
+    navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     fixture = TestBed.createComponent(BranchesList);
     fixture.detectChanges();
   }
@@ -263,46 +277,158 @@ describe('BranchesList', () => {
       expect(labels()).toEqual(['COMMON.DELETE']);
     });
 
-    it('shows both with both permissions, on every card, and clicking does nothing yet', async () => {
+    it('shows both with both permissions, on every card', async () => {
       setup(['Branch.View', 'Branch.Edit', 'Branch.Delete']);
       repo.resolve(response([branch(2), branch(1)]));
       await settle();
       expect(el().querySelectorAll('.branch__actions').length).toBe(2);
       expect(labels()).toEqual(['COMMON.EDIT', 'COMMON.DELETE']);
+    });
+
+    it('Edit opens the edit page of that branch', async () => {
+      setup(['Branch.View', 'Branch.Edit']);
+      repo.resolve(response([branch(2), branch(1)]));
+      await settle();
+
+      (el().querySelectorAll('.branch__actions button')[1] as HTMLButtonElement).click();
+      expect(navigate).toHaveBeenCalledWith(['main/branches', 1, 'edit']);
+    });
+
+    it('clicking the branch name opens its details, even with Branch.View only', async () => {
+      setup(['Branch.View']);
+      repo.resolve(response([branch(7)]));
+      await settle();
+
+      (el().querySelector('.branch__link') as HTMLButtonElement).click();
+      expect(navigate).toHaveBeenCalledWith(['main/branches', 7]);
+    });
+
+    it('"Add branch" opens the create page', async () => {
+      setup(['Branch.View', 'Branch.Create']);
+      repo.resolve(response([branch(1)]));
+      await settle();
+
+      (el().querySelector('app-page-header app-button button') as HTMLButtonElement).click();
+      expect(navigate).toHaveBeenCalledWith(['main/branches/new']);
+    });
+  });
+
+  describe('delete', () => {
+    const dialog = () => el().querySelector('app-confirm-modal [role="alertdialog"]');
+    const trash = (i = 0) => el().querySelectorAll('.branch__actions button')[i * 2 + 1] as HTMLButtonElement;
+    const dialogButton = (n: number) => el().querySelectorAll('app-confirm-modal .dialog__actions button')[n] as HTMLButtonElement;
+
+    beforeEach(async () => {
+      setup(['Branch.View', 'Branch.Edit', 'Branch.Delete']);
+      repo.resolve(response([branch(2), branch(1)], 2));
+      await settle();
+    });
+
+    it('asks for confirmation first and sends nothing', async () => {
+      expect(dialog()).toBeNull();
+      trash().click();
+      await settle();
+
+      expect(dialog()).not.toBeNull();
+      expect(dialog()?.textContent).toContain('BRANCHES.DELETE.TITLE');
+      expect(repo.deleted).toEqual([]);
+    });
+
+    it('Cancel closes the dialog without deleting', async () => {
+      trash().click();
+      await settle();
+      dialogButton(0).click();
+      await settle();
+
+      expect(dialog()).toBeNull();
+      expect(repo.deleted).toEqual([]);
+    });
+
+    it('Delete sends the id, then closes and reloads the list', async () => {
+      trash(1).click();
+      await settle();
+      dialogButton(1).click();
+      await settle();
+      expect(repo.deleted).toEqual([[1]]);
 
       const calls = repo.calls.length;
-      el().querySelectorAll<HTMLButtonElement>('.branch__actions button').forEach((b) => b.click());
+      repo.deleteResult!.next({ status: true, statusCode: 200, message: 'ok', errors: null, meta: null, data: null });
+      repo.deleteResult!.complete();
       await settle();
-      expect(repo.calls.length).toBe(calls);
-      expect(cards().length).toBe(2);
+
+      expect(dialog()).toBeNull();
+      expect(repo.calls.length).toBe(calls + 1);
+    });
+
+    it('keeps the dialog open when the delete is rejected', async () => {
+      trash().click();
+      await settle();
+      dialogButton(1).click();
+      repo.deleteResult!.error(new Error('409'));
+      await settle();
+
+      expect(dialog()).not.toBeNull();
     });
   });
 
   describe('status toggle', () => {
     const toggle = () => el().querySelector('app-branch-card app-switch button[role="switch"]') as HTMLButtonElement | null;
 
-    it('shows a read-only Visible/Hidden badge, not a switch, without Branch.Edit', async () => {
+    it('shows only the Visible/Hidden badge, not a switch, without Branch.Edit', async () => {
       setup(['Branch.View']);
       repo.resolve(response([branch(1, { isVisible: false })]));
       await settle();
       expect(toggle()).toBeNull();
-      expect(cards()[0].querySelector('.branch__status app-status-badge')?.textContent).toContain('BRANCHES.STATUS.HIDDEN');
+      expect(cards()[0].querySelector('.branch__head app-status-badge')?.textContent).toContain('BRANCHES.STATUS.HIDDEN');
     });
 
-    it('shows a switch reflecting isVisible with Branch.Edit, and clicking it changes nothing yet', async () => {
+    it('shows a switch reflecting isVisible with Branch.Edit', async () => {
       setup(['Branch.View', 'Branch.Edit']);
       repo.resolve(response([branch(2, { isVisible: true }), branch(1, { isVisible: false })]));
       await settle();
 
       const switches = Array.from(el().querySelectorAll('app-branch-card app-switch button')) as HTMLButtonElement[];
       expect(switches.map((s) => s.getAttribute('aria-checked'))).toEqual(['true', 'false']);
-      expect(el().querySelector('app-branch-card .branch__status app-status-badge')).toBeNull();
+    });
+
+    it('clicking the switch toggles that branch and reloads the list once it succeeds', async () => {
+      setup(['Branch.View', 'Branch.Edit']);
+      repo.resolve(response([branch(2, { isVisible: true }), branch(1, { isVisible: false })]));
+      await settle();
 
       const calls = repo.calls.length;
-      switches.forEach((s) => s.click());
-      await settle();
+      (el().querySelectorAll('app-branch-card app-switch button')[1] as HTMLButtonElement).click();
+      expect(repo.toggled).toEqual([1]);
       expect(repo.calls.length).toBe(calls);
-      expect((Array.from(el().querySelectorAll('app-branch-card app-switch button')) as HTMLButtonElement[]).map((s) => s.getAttribute('aria-checked'))).toEqual(['true', 'false']);
+
+      repo.toggleResult!.next({ status: true, statusCode: 200, message: 'ok', errors: null, meta: null, data: null });
+      repo.toggleResult!.complete();
+      expect(repo.calls.length).toBe(calls + 1);
+    });
+
+    it('does not reload when the toggle is rejected (e.g. no active barber)', async () => {
+      setup(['Branch.View', 'Branch.Edit']);
+      repo.resolve(response([branch(1, { isVisible: false })]));
+      await settle();
+
+      const calls = repo.calls.length;
+      (el().querySelector('app-branch-card app-switch button') as HTMLButtonElement).click();
+      repo.toggleResult!.error(new Error('400'));
+      await settle();
+
+      expect(repo.calls.length).toBe(calls);
+    });
+
+    it('ignores a second toggle while one is still in flight', async () => {
+      setup(['Branch.View', 'Branch.Edit']);
+      repo.resolve(response([branch(2), branch(1)]));
+      await settle();
+
+      const switches = el().querySelectorAll('app-branch-card app-switch button');
+      (switches[0] as HTMLButtonElement).click();
+      (switches[1] as HTMLButtonElement).click();
+
+      expect(repo.toggled).toEqual([2]);
     });
   });
 });

@@ -4,12 +4,15 @@ import {
   OnInit,
   computed,
   inject,
+  signal,
 } from "@angular/core";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 import { PERMISSIONS } from "@core/auth/permissions";
+import { LanguageService } from "@core/services/language.service";
 import { AuthService } from "../../../auth/service/auth.service";
 import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
+import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
 import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
 import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
 import {
@@ -42,6 +45,7 @@ const SKELETON_CARDS = 6;
     FailedStateComponent,
     SkeletonComponent,
     PaginationComponent,
+    ConfirmModalComponent,
     BranchCard,
   ],
   templateUrl: "./branches-list.html",
@@ -52,6 +56,7 @@ export class BranchesList implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly language = inject(LanguageService);
 
   /** Lazy on purpose: reading PERMISSIONS in a field initializer came back undefined in combined test runs. */
   protected readonly canCreate = computed(() =>
@@ -68,6 +73,15 @@ export class BranchesList implements OnInit {
   protected readonly loading = this.branchesService.loading;
   protected readonly hasError = this.branchesService.hasError;
   protected readonly query = this.branchesService.query;
+  protected readonly saving = this.branchesService.saving;
+
+  /** Branch waiting for delete confirmation (null = dialog closed). */
+  protected readonly pendingDelete = signal<BranchListItem | null>(null);
+  protected readonly pendingDeleteName = computed(() => {
+    const b = this.pendingDelete();
+    if (!b) return "";
+    return this.language.currentLang() === "ar" ? b.nameAr : b.nameEn;
+  });
 
   protected readonly skeletons = Array.from(
     { length: SKELETON_CARDS },
@@ -113,19 +127,36 @@ export class BranchesList implements OnInit {
     this.branchesService.load();
   }
 
-  /** Phase 2 hook: "Add branch" will navigate to the create page. Intentionally inert for now. */
   protected addBranch(): void {
     this.router.navigate(["main/branches/new"]);
   }
 
-  /** Phase 2 hook: will open the branch form. Intentionally inert for now. */
-  protected editBranch(_branch: BranchListItem): void {
-    this.router.navigate(["main/branches", _branch.id, "edit"]);
+  protected viewBranch(branch: BranchListItem): void {
+    this.router.navigate(["main/branches", branch.id]);
   }
 
-  /** Phase 3 hook: will show/hide the branch in the app. Intentionally inert for now. */
-  protected toggleBranchStatus(_branch: BranchListItem): void {}
+  protected editBranch(branch: BranchListItem): void {
+    this.router.navigate(["main/branches", branch.id, "edit"]);
+  }
 
-  /** Phase 3 hook: will ask for confirmation, then delete. Intentionally inert for now. */
-  protected deleteBranch(_branch: BranchListItem): void {}
+  /** Flip visibility; the service toasts the result and reloads the list. */
+  protected toggleBranchStatus(branch: BranchListItem): void {
+    if (this.saving()) return;
+
+    this.branchesService.toggleStatus(branch.id).subscribe();
+  }
+
+  protected deleteBranch(branch: BranchListItem): void {
+    this.pendingDelete.set(branch);
+  }
+
+  protected confirmDelete(): void {
+    const branch = this.pendingDelete();
+
+    if (!branch) return;
+
+    this.branchesService.remove([branch.id]).subscribe((ok) => {
+      if (ok) this.pendingDelete.set(null);
+    });
+  }
 }

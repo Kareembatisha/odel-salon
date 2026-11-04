@@ -73,7 +73,8 @@
     "UNSUPPORTED_FILE_TYPE": "This file type isn't supported.",
     "RATE_LIMITED": "Too many requests. Please slow down and try again.",
     "SERVER": "A server error occurred. Please try again later.",
-    "UNKNOWN": "An unexpected error occurred."
+    "UNKNOWN": "An unexpected error occurred.",
+    "RETRY_AFTER": "Try again in {{seconds}}s"
   },
   "NETWORK_STATUS": {
     "OFFLINE": "You're offline. Some features may not work.",
@@ -150,6 +151,7 @@
       "USERS": "Users",
       "ROLES_PERMISSIONS": "Roles & permissions",
       "BRANCHES": "Branches",
+      "CHAIRS": "Chairs",
       "DESIGN_SYSTEM": "Design system"
     }
   },
@@ -388,7 +390,6 @@
       "ALL": "All"
     },
     "SHOWN_IN_APP": "Shown in app",
-
     "FORM": {
       "CREATE_TITLE": "Create Branch",
       "EDIT_TITLE": "Edit Branch",
@@ -417,9 +418,14 @@
       "HOME_HINT": "Appointments at the customer's location.",
       "WORKING_HOURS_HINT": "Set the opening and closing times for each day.",
       "CLOSED": "Closed",
-      "DAY_OFF": "Day off"
+      "DAY_OFF": "Day off",
+      "CREATE": "Create branch",
+      "CREATE_SUBTITLE": "Add a new salon location. It stays hidden in the app until you show it.",
+      "EDIT_SUBTITLE": "Update this branch’s details, booking types and working hours.",
+      "PHONE_HINT": "Egyptian mobile, e.g. +201001234567",
+      "MAP_URL_HINT": "Optional — paste the share link from Google Maps.",
+      "HOURS_CLOSE_NEXT_DAY": "A closing time up to 06:00 is counted as the next day."
     },
-
     "DAYS": {
       "Saturday": "Saturday",
       "Sunday": "Sunday",
@@ -429,14 +435,149 @@
       "Thursday": "Thursday",
       "Friday": "Friday"
     },
-
     "VALIDATION": {
       "NAME_AR_REQUIRED": "Arabic name is required.",
       "NAME_EN_REQUIRED": "English name is required.",
       "ADDRESS_REQUIRED": "Address is required.",
       "PHONE_INVALID": "Please enter a valid Egyptian phone number.",
       "URL_INVALID": "Please enter a valid URL.",
-      "BOOKING_TYPE_REQUIRED": "Please select at least one booking type."
+      "BOOKING_TYPE_REQUIRED": "Please select at least one booking type.",
+      "NAME_AR_MAX": "Arabic name can’t exceed 100 characters.",
+      "NAME_EN_MAX": "English name can’t exceed 100 characters.",
+      "ADDRESS_MAX": "Address can’t exceed 250 characters.",
+      "PHONE_REQUIRED": "Phone number is required.",
+      "HOURS_REQUIRED": "Set both opening and closing times.",
+      "HOURS_INVALID": "Enter a valid time.",
+      "HOURS_MIN_DURATION": "A working day must be at least one hour long.",
+      "HOURS_OVERNIGHT": "An overnight closing time can’t be later than 06:00."
+    },
+    "CREATED": "Branch created.",
+    "UPDATED": "Branch updated.",
+    "STATUS_UPDATED": "Branch visibility updated.",
+    "DELETED": "Branch deleted.",
+    "BACK": "Back to branches",
+    "VIEW_DETAILS": "View branch details",
+    "DELETE": {
+      "TITLE": "Delete this branch?",
+      "MESSAGE": "“{{name}}” will be permanently deleted. This can’t be undone. A branch can only be deleted once it has no chairs or barbers — hide it instead to keep its history."
+    },
+    "DETAILS": {
+      "BREADCRUMB": "Branch details",
+      "SUBTITLE": "Contact information, booking types and weekly working hours.",
+      "INFO": "Branch information",
+      "MAP": "Open in Google Maps",
+      "NO_MAP": "No map link added",
+      "BOOKING_TYPES_HINT": "What customers can book at this branch.",
+      "NO_BOOKING_TYPES": "No booking types enabled",
+      "WORKING_HOURS_HINT": "Opening and closing time for each day.",
+      "OVERNIGHT": "Closes the next day",
+      "RECORD": "Record",
+      "CREATED_AT": "Created",
+      "UPDATED_AT": "Last updated",
+      "NOT_UPDATED": "Not updated yet"
+    },
+    "SHOW_IN_APP": "Show in app",
+    "VISIBILITY_HINT": "Hidden branches don’t appear in the customer app. Existing bookings are kept.",
+    "ERRORS": {
+      "NOT_FOUND": "Branch not found.",
+      "IDS_REQUIRED": "Select at least one branch.",
+      "DELETE_BLOCKED_CHAIRS": "“{{name}}” can’t be deleted because it has {{count}} chair(s). Delete the chairs first or hide the branch instead.",
+      "DELETE_BLOCKED_BARBERS": "“{{name}}” can’t be deleted because it has {{count}} barber(s). Delete the barbers first or hide the branch instead.",
+      "SHOW_NEEDS_CHAIR": "Add an active chair of this type before showing the branch.",
+      "SHOW_NEEDS_BARBER": "The branch needs at least one active barber before it can be shown."
     }
+  },
+  "CHAIRS": {
+    "TITLE": "Chairs",
+    "SUBTITLE": "The chairs in each branch, split into Regular and VIP, and whether each one is open for booking.",
+    "NEW": "Add chair",
+    "SEARCH": "Search by chair name…",
+    "EMPTY_TITLE": "No chairs yet",
+    "EMPTY_TEXT": "Add a chair to a branch so customers can book it.",
+    "NO_RESULTS_TITLE": "No chairs found",
+    "NO_RESULTS_TEXT": "Try a different search or filter.",
+    "SWITCH": {
+      "LABEL": "Available for booking",
+      "HINT": "Inactive chairs are never used for new bookings."
+    },
+    "CREATED": "Chair added.",
+    "UPDATED": "Chair updated.",
+    "STATUS_UPDATED": "Chair status updated.",
+    "DELETED": "Chair deleted.",
+    "TYPE": {
+      "REGULAR": "Regular",
+      "VIP": "VIP"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "FILTER": {
+      "BRANCH": "Filter by branch",
+      "TYPE": "Filter by type",
+      "STATUS": "Filter by status",
+      "ALL_BRANCHES": "All branches",
+      "ALL_TYPES": "All types",
+      "ALL_STATUSES": "All statuses"
+    },
+    "STATS": {
+      "LABEL": "Chairs summary",
+      "REGULAR_ACTIVE": "Active regular chairs",
+      "VIP_ACTIVE": "Active VIP chairs",
+      "INACTIVE": "Inactive chairs",
+      "ALL_BRANCHES": "All branches"
+    },
+    "FORM": {
+      "BRANCH": "Branch",
+      "BRANCH_PLACEHOLDER": "Select a branch…",
+      "BRANCH_REQUIRED": "Choose a branch",
+      "BRANCH_LOCKED": "A chair can’t move to another branch.",
+      "NAME": "Chair name",
+      "NAME_HINT": "For example R1 or V2. Must be unique within the branch.",
+      "NAME_REQUIRED": "Chair name is required",
+      "NAME_MAX": "The name can’t be longer than 50 characters",
+      "TYPE": "Type",
+      "CREATE": "Add chair",
+      "CREATE_TITLE": "New chair",
+      "CREATE_SUBTITLE": "New chairs are active and can be booked straight away.",
+      "EDIT_TITLE": "Edit chair",
+      "EDIT_SUBTITLE": "Rename the chair or change its type."
+    },
+    "CHANGE_TYPE": {
+      "ACTION": "Change type",
+      "TITLE": "Change chair type?",
+      "MESSAGE": "{{name}} will change from {{from}} to {{to}}. Future bookings will treat it as a {{to}} chair.",
+      "CONFIRM": "Change type"
+    },
+    "DELETE": {
+      "TITLE_ONE": "Delete this chair?",
+      "MESSAGE_ONE": "{{name}} will be permanently deleted. This can’t be undone."
+    },
+    "ERRORS": {
+      "NOT_FOUND": "This chair no longer exists.",
+      "BRANCH_NOT_FOUND": "This branch no longer exists.",
+      "NAME_REQUIRED": "Chair name is required",
+      "NAME_TOO_LONG": "The name can’t be longer than 50 characters",
+      "NAME_TAKEN": "A chair with this name already exists in this branch.",
+      "IDS_REQUIRED": "Select at least one chair.",
+      "LAST_ACTIVE_VIP": "{{name}} is the last active VIP chair in a visible branch that offers VIP booking. Hide the branch or disable VIP booking first.",
+      "LAST_ACTIVE_REGULAR": "{{name}} is the last active Regular chair in a visible branch that offers Regular booking. Hide the branch or disable Regular booking first."
+    }
+  },
+  "VALIDATION_FIELDS": {
+    "NameAr": "Arabic name",
+    "NameEn": "English name",
+    "Address": "Address",
+    "Phone": "Phone number",
+    "MapUrl": "Map link",
+    "WorkingHours": "Working hours",
+    "AllowsRegular": "Regular chairs",
+    "AllowsVip": "VIP chairs",
+    "AllowsHome": "Home booking",
+    "Barbers": "Barbers",
+    "Name": "Chair name",
+    "BranchId": "Branch",
+    "Type": "Type",
+    "Ids": "Chairs"
   }
 }

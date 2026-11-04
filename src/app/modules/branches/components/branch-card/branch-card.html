@@ -12,7 +12,14 @@
           [id]="'branch-name-' + branch().id"
           [attr.lang]="primaryLang()"
         >
-          {{ primaryName() }}
+          <button
+            type="button"
+            class="branch__link"
+            [title]="'BRANCHES.VIEW_DETAILS' | translate"
+            (click)="view.emit(branch())"
+          >
+            {{ primaryName() }}
+          </button>
         </h3>
 
         <span class="branch__alt" [attr.lang]="secondaryLang()">
@@ -87,13 +94,20 @@
   @if (canEdit() || canDelete()) {
   <footer class="branch__footer">
     @if (canEdit()) {
-    <div class="branch__visibility">
+    <!-- The text is the label: clicking it flips the switch, and the tooltip explains the effect. -->
+    <label
+      class="branch__visibility"
+      [class.branch__visibility--disabled]="busy()"
+      [title]="'BRANCHES.VISIBILITY_HINT' | translate"
+    >
       <app-switch
         [checked]="branch().isVisible"
-        [label]="'BRANCHES.SHOWN_IN_APP' | translate"
+        [disabled]="busy()"
+        [label]="'BRANCHES.SHOW_IN_APP' | translate"
         (toggled)="toggleStatus.emit(branch())"
       />
-    </div>
+      <span class="branch__visibility-text">{{ 'BRANCHES.SHOW_IN_APP' | translate }}</span>
+    </label>
     }
 
     <div class="branch__actions">

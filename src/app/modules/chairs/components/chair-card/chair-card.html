@@ -1,0 +1,102 @@
+<article
+  class="chair odl-card"
+  [class.chair--inactive]="!chair().isActive"
+  [attr.aria-labelledby]="'chair-name-' + chair().id"
+>
+  <div class="chair__content">
+    <!-- Header: name + status -->
+    <header class="chair__head">
+      <h3 class="chair__name" [id]="'chair-name-' + chair().id" dir="auto">
+        @if (canEdit()) {
+        <!-- The name is the quick way into the edit drawer, like the branch name opens the branch. -->
+        <button
+          type="button"
+          class="chair__link"
+          [title]="'COMMON.EDIT' | translate"
+          (click)="edit.emit(chair())"
+        >
+          {{ chair().name }}
+        </button>
+        } @else {
+        {{ chair().name }}
+        }
+      </h3>
+
+      <app-status-badge [variant]="statusVariant()">
+        {{ (chair().isActive ? 'CHAIRS.STATUS.ACTIVE' : 'CHAIRS.STATUS.INACTIVE') | translate }}
+      </app-status-badge>
+    </header>
+
+    <!-- Branch -->
+    <ul class="chair__info">
+      <li>
+        <i class="pi pi-building" aria-hidden="true"></i>
+        <span class="chair__text" [attr.lang]="branchLang()" [title]="branchName()">
+          {{ branchName() }}
+        </span>
+        <span class="sr-only">{{ 'CHAIRS.FORM.BRANCH' | translate }}</span>
+      </li>
+    </ul>
+
+    <!-- Type + quick "change type" -->
+    <div class="chair__type">
+      <app-status-badge [variant]="isVip() ? 'vip' : 'neutral'" [dot]="false">
+        {{ typeKey() | translate }}
+      </app-status-badge>
+
+      @if (canEdit()) {
+      <app-button
+        variant="ghost"
+        size="sm"
+        iconClass="pi pi-sync"
+        [disabled]="busy()"
+        (clicked)="changeType.emit(chair())"
+      >
+        {{ 'CHAIRS.CHANGE_TYPE.ACTION' | translate }}
+      </app-button>
+      }
+    </div>
+  </div>
+
+  <!-- Footer: availability switch + actions -->
+  @if (hasFooter()) {
+  <footer class="chair__footer">
+    @if (canToggle()) {
+    <!-- The text is the label: clicking it flips the switch, and the tooltip explains the effect. -->
+    <label
+      class="chair__availability"
+      [class.chair__availability--disabled]="busy()"
+      [title]="'CHAIRS.SWITCH.HINT' | translate"
+    >
+      <app-switch
+        [checked]="chair().isActive"
+        [disabled]="busy()"
+        [label]="'CHAIRS.SWITCH.LABEL' | translate"
+        (toggled)="toggleStatus.emit(chair())"
+      />
+      <span class="chair__availability-text">{{ 'CHAIRS.SWITCH.LABEL' | translate }}</span>
+    </label>
+    }
+
+    <div class="chair__actions">
+      @if (canEdit()) {
+      <app-button
+        variant="ghost"
+        size="sm"
+        iconClass="pi pi-pencil"
+        [ariaLabel]="'COMMON.EDIT' | translate"
+        (clicked)="edit.emit(chair())"
+      />
+      } @if (canDelete()) {
+      <app-button
+        variant="ghost"
+        size="sm"
+        iconClass="pi pi-trash"
+        [ariaLabel]="'COMMON.DELETE' | translate"
+        (clicked)="delete.emit(chair())"
+      />
+      }
+    </div>
+  </footer>
+  }
+</article>

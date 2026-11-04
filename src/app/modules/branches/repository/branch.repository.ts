@@ -4,6 +4,7 @@ import { ApiResponse } from "@shared/model/api_response.model";
 import {
   BranchDetails,
   BranchListItem,
+  DeleteBranchesRequest,
   BranchPayload,
   BranchesQuery,
 } from "../model/branch.model";
@@ -29,4 +30,10 @@ export interface IBranchRepository {
     id: number,
     payload: BranchPayload,
   ): Observable<ApiResponse<null>>;
+
+  /** PATCH /branches/{id}/toggle-status — flips `isVisible` (no body). */
+  toggleBranchStatus(id: number): Observable<ApiResponse<null>>;
+
+  /** DELETE /branches — bulk, all-or-nothing, body `{ ids }`. */
+  deleteBranches(payload: DeleteBranchesRequest): Observable<ApiResponse<null>>;
 }

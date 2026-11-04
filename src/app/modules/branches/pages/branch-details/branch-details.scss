@@ -1,0 +1,142 @@
+@use "styles/variables" as v;
+
+:host { display: block; width: 100%; color: v.$text; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  align-self: flex-start;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  text-decoration: none;
+
+  &:hover { color: v.$text; }
+  i { font-size: v.$text-xs; }
+}
+:host-context([dir="rtl"]) .back i { transform: scaleX(-1); }
+
+.skeletons { display: flex; flex-direction: column; gap: v.$space-3; }
+.sk-card { padding: v.$space-5; }
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-4;
+
+  &__switch {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-medium;
+  }
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: v.$space-5;
+  align-items: start;
+}
+
+.stack { display: flex; flex-direction: column; gap: v.$space-5; min-width: 0; }
+
+.panel {
+  min-width: 0;
+
+  &__title { margin: 0; font-size: v.$text-lg; font-weight: v.$fw-semibold; }
+  &__hint { margin: v.$space-1 0 v.$space-4; color: v.$text-secondary; font-size: v.$text-sm; }
+  &__title + .facts { margin-top: v.$space-4; }
+}
+
+.muted { color: v.$text-muted; }
+
+// ── Facts (label / value rows) ──────────────────────────
+.facts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+
+  &--inline { flex-direction: row; flex-wrap: wrap; gap: v.$space-6; margin-top: v.$space-3; }
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  min-width: 0;
+  padding-block: v.$space-3;
+  border-top: 1px solid v.$border;
+
+  &:first-child { border-top: 0; padding-top: 0; }
+  &:last-child { padding-bottom: 0; }
+  .facts--inline & { border-top: 0; padding: 0; }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    i { color: v.$text-muted; }
+  }
+
+  dd { margin: 0; font-size: v.$text-base; font-weight: v.$fw-medium; overflow-wrap: anywhere; }
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  color: v.$primary-text;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+  i { font-size: v.$text-xs; }
+}
+
+.badges { display: flex; flex-wrap: wrap; gap: v.$space-2; }
+
+// ── Working hours ───────────────────────────────────────
+.hours {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(96px, 1fr) auto;
+    align-items: center;
+    gap: v.$space-2 v.$space-3;
+    padding-block: v.$space-3;
+    border-top: 1px solid v.$border;
+
+    &:first-child { border-top: 0; padding-top: 0; }
+    &:last-child { padding-bottom: 0; }
+  }
+
+  &__day { font-weight: v.$fw-semibold; font-size: v.$text-sm; }
+  &__time { font-weight: v.$fw-medium; font-size: v.$text-sm; justify-self: end; }
+  &__row--closed &__day { color: v.$text-muted; }
+
+  &__off {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+    justify-self: end;
+    color: v.$text-muted;
+    font-size: v.$text-sm;
+  }
+
+  // Overnight badge drops under the time instead of squeezing it.
+  app-status-badge { grid-column: 1 / -1; justify-self: end; }
+}
+
+@media (max-width: v.$bp-xl) {
+  .layout { grid-template-columns: 1fr; }
+}

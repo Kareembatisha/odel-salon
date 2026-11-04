@@ -96,3 +96,8 @@ export interface BranchPayload {
   allowsHome: boolean;
   workingHours: BranchWorkingHour[];
 }
+
+/** DELETE /branches body — bulk delete, all-or-nothing. */
+export interface DeleteBranchesRequest {
+  ids: number[];
+}

@@ -1,0 +1,133 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.chair {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-3;
+    padding: v.$space-4;
+    flex: 1;
+    min-width: 0;
+  }
+
+  // Header
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$space-2;
+    min-width: 0;
+  }
+
+  &__name {
+    margin: 0;
+    min-width: 0;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+    line-height: v.$lh-snug;
+    color: v.$text;
+    overflow-wrap: anywhere;
+  }
+
+  // An inactive chair reads as "off" at a glance, before the badge is even read.
+  &--inactive &__name { color: v.$text-secondary; }
+
+  &__link {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+
+    &:hover { text-decoration: underline; }
+    &:focus-visible { @include p.focus-ring; border-radius: v.$radius-xs; }
+  }
+
+  // Branch
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-2;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+
+    li { display: flex; align-items: flex-start; gap: v.$space-2; min-width: 0; }
+    i { margin-top: v.$space-1; color: v.$text-muted; flex-shrink: 0; }
+  }
+
+  &__text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Type badge + quick change-type action
+  &__type {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: v.$space-2;
+    min-width: 0;
+  }
+
+  // Footer
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: v.$space-2;
+    padding: v.$space-2 v.$space-4;
+    border-top: 1px solid v.$border;
+    background: var(--surface-secondary, transparent);
+  }
+
+  &__availability {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+    min-width: 0;
+    cursor: pointer;
+
+    &--disabled { cursor: progress; opacity: 0.6; }
+  }
+
+  &__availability-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-medium;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    flex-shrink: 0;
+    margin-inline-start: auto; // stays at the end even when the switch is hidden
+  }
+}

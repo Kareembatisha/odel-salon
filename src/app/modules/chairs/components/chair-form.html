@@ -1,0 +1,40 @@
+<form class="cf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="cf__body">
+    <app-float-label-select
+      label="CHAIRS.FORM.BRANCH"
+      [options]="branchOptions()"
+      [errorMessage]="error('branchId')"
+      formControlName="branchId"
+    />
+    @if (mode() === 'edit') {
+      <p class="cf__note">
+        <i class="pi pi-lock" aria-hidden="true"></i>
+        {{ 'CHAIRS.FORM.BRANCH_LOCKED' | translate }}
+      </p>
+    }
+
+    <app-float-label-input
+      label="CHAIRS.FORM.NAME"
+      iconLeft="pi pi-tag"
+      hint="CHAIRS.FORM.NAME_HINT"
+      autocomplete="off"
+      [errorMessage]="error('name')"
+      formControlName="name"
+    />
+
+    <app-float-label-select
+      label="CHAIRS.FORM.TYPE"
+      [options]="typeOptions()"
+      formControlName="type"
+    />
+  </div>
+
+  <footer class="cf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">
+      {{ 'COMMON.CANCEL' | translate }}
+    </app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()">
+      {{ (mode() === 'create' ? 'CHAIRS.FORM.CREATE' : 'COMMON.SAVE') | translate }}
+    </app-button>
+  </footer>
+</form>

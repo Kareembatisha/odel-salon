@@ -6,6 +6,7 @@ import {
   BranchListItem,
   BranchWorkingHour,
 } from "@modules/branches/model/branch.model";
+import { ChairDetails, ChairType } from "@modules/chairs/model/chair.model";
 
 // ============================================================
 // Types
@@ -36,6 +37,9 @@ export interface MockUser {
  * endpoints ({@link BranchDetails}, minus the duplicated `id`).
  */
 export type MockBranch = BranchListItem & Omit<BranchDetails, "id">;
+
+/** A chair stored in the mock database (details shape, so the list and detail endpoints share it). */
+export type MockChair = ChairDetails;
 
 // ============================================================
 // Constants
@@ -91,6 +95,7 @@ export class MockDb {
   nextRoleId = 4;
   nextUserId = 13;
   nextBranchId = 15;
+  nextChairId = 1;
 
   // ----------------------------------------------------------
   // Roles
@@ -314,6 +319,16 @@ export class MockDb {
   ];
 
   // ----------------------------------------------------------
+  // Chairs
+  // ----------------------------------------------------------
+
+  /**
+   * Seeded from each branch's `regularChairsCount` / `vipChairsCount`, so the
+   * Branches and Chairs screens agree. Regular chairs are R1…Rn, VIP chairs V1…Vn.
+   */
+  chairs: MockChair[] = this.seedChairs();
+
+  // ----------------------------------------------------------
   // Lookups
   // ----------------------------------------------------------
 
@@ -325,6 +340,43 @@ export class MockDb {
   // ----------------------------------------------------------
   // Factory Helpers
   // ----------------------------------------------------------
+
+  /** `branchId:name` of seeded chairs that start inactive (counts stay totals, as in the real API). */
+  private static readonly INACTIVE_SEED = new Set(["2:R4", "5:V3", "9:R2"]);
+
+  private seedChairs(): MockChair[] {
+    const chairs: MockChair[] = [];
+    let id = 1;
+    const now = new Date().toISOString();
+
+    for (const branch of this.branches) {
+      const groups: Array<[ChairType, string, number]> = [
+        [ChairType.Regular, "R", branch.regularChairsCount],
+        [ChairType.Vip, "V", branch.vipChairsCount],
+      ];
+
+      for (const [type, prefix, count] of groups) {
+        for (let n = 1; n <= count; n++) {
+          const name = `${prefix}${n}`;
+          chairs.push({
+            id: id++,
+            branchId: branch.id,
+            branchNameAr: branch.nameAr,
+            branchNameEn: branch.nameEn,
+            name,
+            type,
+            isActive: !MockDb.INACTIVE_SEED.has(`${branch.id}:${name}`),
+            createdAt: now,
+            updatedAt: null,
+          });
+        }
+      }
+    }
+
+    this.nextChairId = id;
+    return chairs;
+  }
+
 
   /**
    * Build a {@link MockUser} with the shared defaults applied

@@ -1,0 +1,159 @@
+<div class="odl-page">
+  <a class="back" routerLink="/main/branches">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>{{ 'BRANCHES.BACK' | translate }}
+  </a>
+
+  @if (failed()) {
+    <div class="odl-card"><app-failed-state (retry)="load()" /></div>
+  } @else if (loading() || !branch()) {
+    <div class="skeletons" aria-busy="true">
+      <app-skeleton width="40%" height="36px" />
+      <app-skeleton width="25%" height="16px" />
+      <div class="layout">
+        <div class="odl-card sk-card"><app-skeleton height="160px" /></div>
+        <div class="odl-card sk-card"><app-skeleton height="160px" /></div>
+      </div>
+    </div>
+  } @else {
+    <app-page-header [title]="primaryName()" [subtitle]="secondaryName()">
+      @if (canEdit()) {
+        <app-button variant="secondary" iconClass="pi pi-pencil" (clicked)="edit()">
+          {{ 'COMMON.EDIT' | translate }}
+        </app-button>
+      }
+      @if (canDelete()) {
+        <app-button variant="danger" iconClass="pi pi-trash" (clicked)="confirmDeleteOpen.set(true)">
+          {{ 'COMMON.DELETE' | translate }}
+        </app-button>
+      }
+    </app-page-header>
+
+    <div class="summary">
+      <app-status-badge [variant]="visibilityVariant()">
+        {{ (branch()!.isVisible ? 'BRANCHES.STATUS.VISIBLE' : 'BRANCHES.STATUS.HIDDEN') | translate }}
+      </app-status-badge>
+
+      @if (canEdit()) {
+        <span class="summary__switch">
+          <app-switch
+            [checked]="branch()!.isVisible"
+            [disabled]="saving()"
+            [label]="'BRANCHES.SHOWN_IN_APP' | translate"
+            (toggled)="toggleStatus()"
+          />
+          <span>{{ 'BRANCHES.SHOWN_IN_APP' | translate }}</span>
+        </span>
+      }
+    </div>
+
+    <div class="layout">
+      <div class="stack">
+        <!-- Branch information -->
+        <section class="odl-card panel" aria-labelledby="sec-info">
+          <h2 class="panel__title" id="sec-info">{{ 'BRANCHES.DETAILS.INFO' | translate }}</h2>
+
+          <dl class="facts">
+            <div class="fact">
+              <dt><i class="pi pi-map-marker" aria-hidden="true"></i>{{ 'BRANCHES.ADDRESS' | translate }}</dt>
+              <dd dir="auto">{{ branch()!.address }}</dd>
+            </div>
+
+            <div class="fact">
+              <dt><i class="pi pi-phone" aria-hidden="true"></i>{{ 'BRANCHES.PHONE' | translate }}</dt>
+              <dd class="u-num" dir="ltr">{{ branch()!.phone }}</dd>
+            </div>
+
+            <div class="fact">
+              <dt><i class="pi pi-link" aria-hidden="true"></i>{{ 'BRANCHES.FORM.MAP_URL' | translate }}</dt>
+              <dd>
+                @if (branch()!.mapUrl) {
+                  <a class="link" [href]="branch()!.mapUrl" target="_blank" rel="noopener noreferrer">
+                    {{ 'BRANCHES.DETAILS.MAP' | translate }}
+                    <i class="pi pi-external-link" aria-hidden="true"></i>
+                  </a>
+                } @else {
+                  <span class="muted">{{ 'BRANCHES.DETAILS.NO_MAP' | translate }}</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- Booking types -->
+        <section class="odl-card panel" aria-labelledby="sec-booking">
+          <h2 class="panel__title" id="sec-booking">{{ 'BRANCHES.BOOKING_TYPES' | translate }}</h2>
+          <p class="panel__hint">{{ 'BRANCHES.DETAILS.BOOKING_TYPES_HINT' | translate }}</p>
+
+          <div class="badges">
+            @if (branch()!.allowsRegular) {
+              <app-status-badge variant="neutral" [dot]="false">{{ 'BRANCHES.TYPE.REGULAR' | translate }}</app-status-badge>
+            }
+            @if (branch()!.allowsVip) {
+              <app-status-badge variant="vip" [dot]="false">{{ 'BRANCHES.TYPE.VIP' | translate }}</app-status-badge>
+            }
+            @if (branch()!.allowsHome) {
+              <app-status-badge variant="info" [dot]="false">{{ 'BRANCHES.TYPE.HOME' | translate }}</app-status-badge>
+            }
+            @if (!hasBookingTypes()) {
+              <span class="muted">{{ 'BRANCHES.DETAILS.NO_BOOKING_TYPES' | translate }}</span>
+            }
+          </div>
+        </section>
+
+        <!-- Record -->
+        <section class="odl-card panel" aria-labelledby="sec-record">
+          <h2 class="panel__title" id="sec-record">{{ 'BRANCHES.DETAILS.RECORD' | translate }}</h2>
+
+          <dl class="facts facts--inline">
+            <div class="fact">
+              <dt>{{ 'BRANCHES.DETAILS.CREATED_AT' | translate }}</dt>
+              <dd>{{ createdAt() }}</dd>
+            </div>
+            <div class="fact">
+              <dt>{{ 'BRANCHES.DETAILS.UPDATED_AT' | translate }}</dt>
+              <dd>
+                @if (updatedAt()) { {{ updatedAt() }} } @else {
+                  <span class="muted">{{ 'BRANCHES.DETAILS.NOT_UPDATED' | translate }}</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+
+      <!-- Working hours -->
+      <section class="odl-card panel" aria-labelledby="sec-hours">
+        <h2 class="panel__title" id="sec-hours">{{ 'BRANCHES.FORM.WORKING_HOURS' | translate }}</h2>
+        <p class="panel__hint">{{ 'BRANCHES.DETAILS.WORKING_HOURS_HINT' | translate }}</p>
+
+        <ul class="hours">
+          @for (h of hours(); track h.dayOfWeek) {
+            <li class="hours__row" [class.hours__row--closed]="!h.isOpen">
+              <span class="hours__day">{{ dayKey(h.dayOfWeek) | translate }}</span>
+
+              @if (h.isOpen) {
+                <span class="hours__time u-num" dir="ltr">{{ time(h.openTime) }} – {{ time(h.closeTime) }}</span>
+                @if (overnight(h)) {
+                  <app-status-badge variant="info" [dot]="false">{{ 'BRANCHES.DETAILS.OVERNIGHT' | translate }}</app-status-badge>
+                }
+              } @else {
+                <span class="hours__off"><i class="pi pi-moon" aria-hidden="true"></i>{{ 'BRANCHES.FORM.DAY_OFF' | translate }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    </div>
+  }
+</div>
+
+<app-confirm-modal
+  [isOpen]="confirmDeleteOpen()"
+  [title]="'BRANCHES.DELETE.TITLE' | translate"
+  [message]="'BRANCHES.DELETE.MESSAGE' | translate: { name: primaryName() }"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="confirmDeleteOpen.set(false)"
+/>

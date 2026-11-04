@@ -1,0 +1,141 @@
+<div class="odl-page">
+  <app-page-header [title]="'CHAIRS.TITLE' | translate" [subtitle]="'CHAIRS.SUBTITLE' | translate">
+    @if (canCreate()) {
+      <app-button variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
+        {{ 'CHAIRS.NEW' | translate }}
+      </app-button>
+    }
+  </app-page-header>
+
+  <!-- Summary cards: counted by the backend over the selected branch (or all), ignoring type / status / search. -->
+  @if (showStats()) {
+    <section class="stats" [attr.aria-label]="'CHAIRS.STATS.LABEL' | translate">
+      <app-stat-card [label]="'CHAIRS.STATS.REGULAR_ACTIVE' | translate" [value]="summary().regularActive" icon="pi pi-stop" tone="info" [hint]="statsHint()" />
+      <app-stat-card [label]="'CHAIRS.STATS.VIP_ACTIVE' | translate" [value]="summary().vipActive" icon="pi pi-star" tone="gold" [hint]="statsHint()" />
+      <app-stat-card [label]="'CHAIRS.STATS.INACTIVE' | translate" [value]="summary().inactive" icon="pi pi-ban" tone="neutral" [hint]="statsHint()" />
+    </section>
+  } @else if (loading()) {
+    <div class="stats" aria-busy="true">
+      @for (n of skeletonStats; track n) {
+        <div class="odl-card sk-stat">
+          <app-skeleton width="55%" height="14px" />
+          <app-skeleton width="30%" height="28px" />
+          <app-skeleton width="40%" height="12px" />
+        </div>
+      }
+    </div>
+  }
+
+  <div class="toolbar">
+    <app-search-input [placeholder]="'CHAIRS.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+    <app-filter-select [label]="'CHAIRS.FILTER.BRANCH' | translate" [options]="branchFilterOptions()"
+      [value]="query().branchId !== undefined ? '' + query().branchId : ''" (changed)="onBranchFilter($event)" />
+    <app-filter-select [label]="'CHAIRS.FILTER.TYPE' | translate" [options]="typeFilterOptions()"
+      [value]="query().type === undefined ? '' : '' + query().type" (changed)="onTypeFilter($event)" />
+    <app-filter-select [label]="'CHAIRS.FILTER.STATUS' | translate" [options]="statusFilterOptions()"
+      [value]="query().isActive === undefined ? '' : '' + query().isActive" (changed)="onStatusFilter($event)" />
+  </div>
+
+  @if (showSkeleton()) {
+    <div class="grid" aria-busy="true">
+      @for (n of skeletons; track n) {
+        <div class="odl-card sk-card">
+          <div class="sk-card__head">
+            <app-skeleton width="40%" height="22px" />
+            <app-skeleton width="64px" height="22px" />
+          </div>
+          <app-skeleton width="60%" height="14px" />
+          <div class="sk-card__type">
+            <app-skeleton width="56px" height="22px" />
+            <app-skeleton width="96px" height="28px" />
+          </div>
+          <div class="sk-card__footer">
+            <app-skeleton width="45%" height="22px" />
+            <app-skeleton width="64px" height="28px" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (hasError() && !rows().length) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else if (!rows().length) {
+    <div class="odl-card">
+      @if (isFiltered()) {
+        <app-empty-state [title]="'CHAIRS.NO_RESULTS_TITLE' | translate" [description]="'CHAIRS.NO_RESULTS_TEXT' | translate" icon="pi pi-search" />
+      } @else {
+        <app-empty-state [title]="'CHAIRS.EMPTY_TITLE' | translate" [description]="'CHAIRS.EMPTY_TEXT' | translate" icon="pi pi-stop" />
+      }
+    </div>
+  } @else {
+    <div class="grid" [attr.aria-busy]="loading()">
+      @for (chair of rows(); track chair.id) {
+        <app-chair-card
+          [chair]="chair"
+          [canEdit]="canEdit()"
+          [canToggle]="canToggle()"
+          [canDelete]="canDelete()"
+          [busy]="saving()"
+          (edit)="openEdit($event)"
+          (changeType)="askChangeType($event)"
+          (delete)="askDelete($event)"
+          (toggleStatus)="toggle($event)"
+        />
+      }
+    </div>
+    <app-pagination
+      [totalRecords]="meta()?.totalCount ?? 0"
+      [page]="meta()?.currentPage ?? 1"
+      [pageSize]="meta()?.pageSize ?? 12"
+      (pageChange)="onPage($event)"
+    />
+  }
+</div>
+
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="(drawerMode() === 'create' ? 'CHAIRS.FORM.CREATE_TITLE' : 'CHAIRS.FORM.EDIT_TITLE') | translate"
+  [subtitle]="(drawerMode() === 'create' ? 'CHAIRS.FORM.CREATE_SUBTITLE' : 'CHAIRS.FORM.EDIT_SUBTITLE') | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeDrawer()"
+>
+  @if (drawerOpen()) {
+    @if (drawerLoading()) {
+      <div class="drawer-loading">
+        @for (n of [1, 2, 3]; track n) { <app-skeleton height="56px" /> }
+      </div>
+    } @else {
+      <app-chair-form
+        [mode]="drawerMode()"
+        [details]="editDetails()"
+        [branches]="branchList()"
+        [initialBranchId]="query().branchId ?? null"
+        [saving]="saving()"
+        (submitted)="onSubmitted($event)"
+        (cancelled)="closeDrawer()"
+      />
+    }
+  }
+</app-drawer>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete() !== null"
+  [title]="'CHAIRS.DELETE.TITLE_ONE' | translate"
+  [message]="'CHAIRS.DELETE.MESSAGE_ONE' | translate: { name: pendingDelete()?.name }"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set(null)"
+/>
+
+<app-confirm-modal
+  variant="primary"
+  [isOpen]="pendingTypeChange() !== null"
+  [title]="'CHAIRS.CHANGE_TYPE.TITLE' | translate"
+  [message]="changeTypeMessage()"
+  [confirmLabel]="'CHAIRS.CHANGE_TYPE.CONFIRM' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmChangeType()"
+  (cancel)="pendingTypeChange.set(null)"
+/>

@@ -51,7 +51,7 @@
   } @else {
     <div class="grid">
       @for (branch of branches(); track branch.id) {
-        <app-branch-card [branch]="branch" [canEdit]="canEdit()" [canDelete]="canDelete()" (edit)="editBranch($event)" (delete)="deleteBranch($event)" (toggleStatus)="toggleBranchStatus($event)" />
+        <app-branch-card [branch]="branch" [canEdit]="canEdit()" [canDelete]="canDelete()" [busy]="saving()" (view)="viewBranch($event)" (edit)="editBranch($event)" (delete)="deleteBranch($event)" (toggleStatus)="toggleBranchStatus($event)" />
       }
     </div>
     <app-pagination
@@ -62,3 +62,14 @@
     />
   }
 </div>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete() !== null"
+  [title]="'BRANCHES.DELETE.TITLE' | translate"
+  [message]="'BRANCHES.DELETE.MESSAGE' | translate: { name: pendingDeleteName() }"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set(null)"
+/>

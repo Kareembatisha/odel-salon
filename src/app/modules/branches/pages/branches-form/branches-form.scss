@@ -1,5 +1,4 @@
 @use "styles/variables" as v;
-@use "styles/patterns" as p;
 
 :host {
   display: block;
@@ -7,48 +6,36 @@
   color: v.$text;
 }
 
-// ========================================
-// Page Layout - 12 Columns
-// ========================================
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  align-self: flex-start;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  text-decoration: none;
 
+  &:hover { color: v.$text; }
+  i { font-size: v.$text-xs; }
+}
+:host-context([dir="rtl"]) .back i { transform: scaleX(-1); }
+
+// ── Page grid: basic info on top, booking types + hours side by side ──
 .branch-form {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: v.$space-5;
-
-  width: 100%;
-  max-width: v.$content-max-width;
-  margin-inline: auto;
-  padding-block: v.$space-4 v.$space-8;
+  align-items: start;
 }
 
-.form-section {
-  @include p.card(v.$space-6);
+.form-section { min-width: 0; }
+.basic-info { grid-column: 1 / -1; }
+.booking-types { grid-column: span 5; }
+.working-hours { grid-column: span 7; }
+.form-actions { grid-column: 1 / -1; }
 
-  min-width: 0;
-}
-
-// Main sections distribution
-.basic-info {
-  grid-column: 1 / -1;
-}
-
-.booking-types {
-  grid-column: span 4;
-}
-
-.working-hours {
-  grid-column: span 8;
-}
-
-.form-actions {
-  grid-column: 1 / -1;
-}
-
-// ========================================
-// Section Header
-// ========================================
-
+// ── Section header ───────────────────────────────────────
 .section-header {
   display: flex;
   align-items: flex-start;
@@ -62,109 +49,30 @@
   flex: 0 0 42px;
   width: 42px;
   height: 42px;
-
   border-radius: v.$radius-md;
   background: v.$primary-soft;
-  color: v.$primary;
-
+  color: v.$primary-text;
   font-size: v.$text-lg;
 }
 
 .section-heading {
   min-width: 0;
 
-  h2 {
-    margin: 0;
-    color: v.$text;
-    font-size: v.$text-lg;
-    font-weight: v.$fw-semibold;
-    line-height: 1.5;
-  }
-
-  p {
-    margin: v.$space-1 0 0;
-    color: v.$text-secondary;
-    font-size: v.$text-sm;
-    line-height: 1.6;
-  }
+  h2 { margin: 0; font-size: v.$text-lg; font-weight: v.$fw-semibold; line-height: 1.5; }
+  p { margin: v.$space-1 0 0; color: v.$text-secondary; font-size: v.$text-sm; line-height: 1.6; }
 }
 
-// ========================================
-// Basic Information
-// ========================================
-
+// ── Basic information ────────────────────────────────────
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: v.$space-4;
+  align-items: start;
+
+  &__full { grid-column: 1 / -1; }
 }
 
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: v.$space-2;
-  min-width: 0;
-
-  label {
-    color: v.$text;
-    font-size: v.$text-sm;
-    font-weight: v.$fw-medium;
-  }
-
-  input {
-    width: 100%;
-    min-width: 0;
-    height: v.$input-height;
-    padding-inline: v.$space-4;
-
-    border: 1px solid v.$border;
-    border-radius: v.$radius-md;
-    outline: none;
-
-    background: v.$surface-sunken;
-    color: v.$text;
-    font: inherit;
-    font-size: v.$text-base;
-
-    transition:
-      border-color v.$transition-fast,
-      box-shadow v.$transition-fast,
-      background v.$transition-fast;
-
-    &::placeholder {
-      color: v.$text-placeholder;
-    }
-
-    &:hover:not(:disabled) {
-      border-color: v.$border-strong;
-    }
-
-    &:focus {
-      border-color: v.$primary;
-      background: v.$surface;
-      box-shadow: 0 0 0 3px v.tint(v.$primary, 15%);
-    }
-
-    &:disabled {
-      color: v.$text-disabled;
-      cursor: not-allowed;
-    }
-  }
-}
-
-.form-field--full {
-  grid-column: 1 / -1;
-}
-
-.error-message {
-  color: v.$danger-text;
-  font-size: v.$text-xs;
-}
-
-// ========================================
-// Booking Types
-// ========================================
-
+// ── Booking types ────────────────────────────────────────
 .booking-grid {
   display: flex;
   flex-direction: column;
@@ -172,37 +80,19 @@
 }
 
 .booking-option {
-  position: relative;
-  display: block;
-  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  min-height: 72px;
+  padding: v.$space-3 v.$space-4;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-md;
+  background: v.$surface;
   cursor: pointer;
+  transition: border-color v.$transition-fast, background v.$transition-fast;
 
-  input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  &__content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: v.$space-3;
-
-    min-height: 76px;
-    padding: v.$space-3;
-
-    border: 1px solid v.$border;
-    border-radius: v.$radius-md;
-    background: v.$surface;
-
-    transition:
-      border-color v.$transition-fast,
-      background v.$transition-fast,
-      box-shadow v.$transition-fast;
-  }
+  &:hover { border-color: v.$primary; }
+  &:has(input:checked) { border-color: v.$primary; background: v.$primary-soft; }
 
   &__text {
     display: flex;
@@ -210,358 +100,122 @@
     gap: v.$space-1;
     min-width: 0;
 
-    strong {
-      color: v.$text;
-      font-size: v.$text-sm;
-      font-weight: v.$fw-semibold;
-    }
-
-    small {
-      color: v.$text-secondary;
-      font-size: v.$text-xs;
-      line-height: 1.6;
-    }
-  }
-
-  &__check {
-    display: grid;
-    place-items: center;
-    flex: 0 0 20px;
-
-    width: 20px;
-    height: 20px;
-
-    border: 1px solid v.$border-strong;
-    border-radius: v.$radius-xs;
-
-    color: transparent;
-    font-size: 11px;
-
-    transition:
-      background v.$transition-fast,
-      border-color v.$transition-fast;
-  }
-
-  input:checked + &__content {
-    border-color: v.$primary;
-    background: v.$primary-soft;
-  }
-
-  input:checked + &__content &__check {
-    border-color: v.$primary;
-    background: v.$primary;
-    color: v.$on-primary;
-  }
-
-  input:focus-visible + &__content {
-    @include p.focus-ring;
-  }
-
-  &:hover &__content {
-    border-color: v.$primary;
+    strong { font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+    small { color: v.$text-secondary; font-size: v.$text-xs; line-height: 1.6; }
   }
 }
 
-// ========================================
-// Working Hours
-// ========================================
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: v.$space-1;
+  margin: v.$space-3 0 0;
+  color: v.$danger-text;
+  font-size: v.$text-sm;
+}
 
-.working-hours-grid {
+// ── Working hours ────────────────────────────────────────
+.days {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: v.$space-3;
-}
+  grid-template-columns: minmax(150px, 0.8fr) minmax(0, 2fr);
+  align-items: start;
+  gap: v.$space-4;
+  padding-block: v.$space-3;
+  border-top: 1px solid v.$border;
 
-.working-day {
-  min-width: 0;
-  padding: v.$space-3;
+  &:first-child { border-top: 0; padding-top: 0; }
+  &:last-child { padding-bottom: 0; }
 
-  border: 1px solid v.$border;
-  border-radius: v.$radius-md;
-  background: v.$surface;
-
-  &__header {
+  &__head {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: v.$space-2;
-    min-width: 0;
-    margin-bottom: v.$space-3;
+    // Centre against the 56px time fields.
+    min-height: 56px;
+    justify-content: center;
   }
 
-  &__name {
-    display: flex;
+  &__name { font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+
+  &__switch {
+    display: inline-flex;
     align-items: center;
     gap: v.$space-2;
-    min-width: 0;
-
-    strong {
-      color: v.$text;
-      font-size: v.$text-sm;
-      font-weight: v.$fw-semibold;
-    }
   }
 
-  &__dot {
-    flex: 0 0 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: v.$radius-full;
-    background: v.$text-muted;
-
-    &--open {
-      background: v.$success;
-    }
-  }
+  &__state { color: v.$text-secondary; font-size: v.$text-xs; font-weight: v.$fw-medium; }
+  &--open &__state { color: v.$success-text; }
 
   &__times {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: v.$space-2;
-
-    .form-field {
-      gap: v.$space-1;
-
-      label {
-        font-size: v.$text-xs;
-        color: v.$text-secondary;
-      }
-
-      input {
-        height: 38px;
-        padding-inline: v.$space-2;
-        font-size: v.$text-sm;
-      }
-    }
+    gap: v.$space-3;
+    align-items: start;
   }
 
-  &__closed {
+  &__off {
     display: flex;
     align-items: center;
     gap: v.$space-2;
-
-    min-height: 38px;
+    min-height: 56px;
+    margin: 0;
     color: v.$text-muted;
-    font-size: v.$text-xs;
-
-    i {
-      font-size: v.$text-sm;
-    }
+    font-size: v.$text-sm;
   }
 }
 
-// ========================================
-// Day Toggle
-// ========================================
-
-.day-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: v.$space-2;
-  cursor: pointer;
-
-  input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  &__track {
-    position: relative;
-    display: block;
-
-    width: 34px;
-    height: 19px;
-
-    border-radius: v.$radius-full;
-    background: v.$surface-sunken;
-    border: 1px solid v.$border-strong;
-
-    transition: background v.$transition-fast;
-
-    &::after {
-      content: "";
-      position: absolute;
-      inset-block-start: 2px;
-      inset-inline-start: 2px;
-
-      width: 13px;
-      height: 13px;
-
-      border-radius: v.$radius-full;
-      background: v.$surface;
-      box-shadow: v.$shadow-sm;
-
-      transition: transform v.$transition-fast;
-    }
-  }
-
-  input:checked + &__track {
-    background: v.$primary;
-    border-color: v.$primary;
-
-    &::after {
-      transform: translateX(15px);
-    }
-  }
-
-  input:focus-visible + &__track {
-    @include p.focus-ring;
-  }
-
-  &__label {
-    color: v.$text-secondary;
-    font-size: v.$text-xs;
-    font-weight: v.$fw-medium;
-  }
-}
-
-// RTL toggle adjustment
-:host-context([dir="rtl"]) {
-  .day-toggle input:checked + .day-toggle__track::after {
-    transform: translateX(-15px);
-  }
-}
-
-// ========================================
-// Form Actions
-// ========================================
-
+// ── Actions ──────────────────────────────────────────────
 .form-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: v.$space-3;
-
-  padding-top: v.$space-2;
 }
 
-.btn-cancel,
-.btn-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: v.$space-2;
-
-  min-height: v.$btn-height-md;
-  padding-inline: v.$space-5;
-
-  border-radius: v.$radius-md;
-  font: inherit;
-  font-size: v.$text-sm;
-  font-weight: v.$fw-semibold;
-  text-decoration: none;
-  cursor: pointer;
-
-  transition:
-    background v.$transition-fast,
-    border-color v.$transition-fast,
-    color v.$transition-fast,
-    box-shadow v.$transition-fast;
-
-  &:focus-visible {
-    @include p.focus-ring;
-  }
+// ── Loading skeleton ─────────────────────────────────────
+.skeletons { display: flex; flex-direction: column; gap: v.$space-5; }
+.sk-card { display: flex; flex-direction: column; gap: v.$space-4; }
+.sk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: v.$space-4; }
+.sk-split { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: v.$space-5;
+  > :first-child { grid-column: span 5; }
+  > :last-child { grid-column: span 7; }
 }
 
-.btn-cancel {
-  border: 1px solid v.$border;
-  background: v.$surface;
-  color: v.$text-secondary;
-
-  &:hover {
-    border-color: v.$border-strong;
-    background: v.$surface-hover;
-    color: v.$text;
-  }
-}
-
-.btn-submit {
-  border: 1px solid v.$primary;
-  background: v.$primary;
-  color: v.$on-primary;
-
-  &:hover:not(:disabled) {
-    background: v.$primary-hover;
-    border-color: v.$primary-hover;
-  }
-
-  &:active:not(:disabled) {
-    background: v.$primary-active;
-    border-color: v.$primary-active;
-  }
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-  }
-}
-
-// ========================================
-// Responsive Layout
-// ========================================
-
+// ── Responsive ───────────────────────────────────────────
 @media (max-width: v.$bp-xl) {
-  .booking-types {
-    grid-column: 1 / -1;
-  }
-
-  .working-hours {
-    grid-column: 1 / -1;
-  }
+  .booking-types,
+  .working-hours { grid-column: 1 / -1; }
 
   .booking-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .working-hours-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  .sk-split > * { grid-column: 1 / -1 !important; }
 }
 
 @media (max-width: v.$bp-md) {
-  .branch-form {
-    gap: v.$space-4;
-  }
-
-  .form-section {
-    padding: v.$space-4;
-  }
-
-  .booking-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .working-hours-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .branch-form { gap: v.$space-4; }
+  .booking-grid { grid-template-columns: 1fr; }
+  .day { grid-template-columns: 1fr; gap: v.$space-3; }
+  .day__head { min-height: 0; flex-direction: row; align-items: center; justify-content: space-between; }
 }
 
 @media (max-width: v.$bp-sm) {
   .form-grid,
-  .working-hours-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-field--full {
-    grid-column: auto;
-  }
-
-  .working-day__times {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .sk-grid { grid-template-columns: 1fr; }
+  .form-grid__full { grid-column: auto; }
 
   .form-actions {
     flex-direction: column-reverse;
     align-items: stretch;
-
-    .btn-cancel,
-    .btn-submit {
-      width: 100%;
-    }
   }
 }

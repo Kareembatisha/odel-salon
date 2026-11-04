@@ -88,6 +88,32 @@ export const MAIN_ROUTES: Routes = [
       ),
   },
 
+  {
+    path: "branches/:id",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Branch.View,
+      breadcrumb: ["LAYOUT.NAV.BRANCHES", "BRANCHES.DETAILS.BREADCRUMB"],
+    },
+    loadComponent: () =>
+      import("./branches/pages/branch-details/branch-details").then(
+        (m) => m.BranchDetails,
+      ),
+  },
+
+  {
+    path: "chairs",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Chair.View,
+      breadcrumb: "LAYOUT.NAV.CHAIRS",
+    },
+    loadComponent: () =>
+      import("./chairs/pages/chairs-list/chairs-list").then(
+        (m) => m.ChairsList,
+      ),
+  },
+
   // ── Account ──────────────────────────────────────────
   {
     path: "profile",

@@ -1,318 +1,151 @@
+<div class="odl-page">
+  <a class="back" routerLink="/main/branches">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>{{ 'BRANCHES.BACK' | translate }}
+  </a>
 
-<form
-  class="branch-form"
-  [formGroup]="form"
-  (ngSubmit)="submit()"
->
-  <!-- Basic Information -->
-  <section class="form-section basic-info" formGroupName="basicInfo">
-    <header class="section-header">
-      <div class="section-icon">
-        <i class="pi pi-building"></i>
+  <app-page-header [title]="titleKey() | translate" [subtitle]="subtitleKey() | translate" />
+
+  @if (failed()) {
+    <div class="odl-card"><app-failed-state (retry)="loadBranch()" /></div>
+  } @else if (loading()) {
+    <div class="skeletons" aria-busy="true">
+      <div class="odl-card sk-card">
+        <app-skeleton width="30%" height="22px" />
+        <div class="sk-grid">
+          @for (n of [1, 2, 3, 4]; track n) { <app-skeleton height="56px" /> }
+        </div>
       </div>
-
-      <div class="section-heading">
-        <h2>{{ "BRANCHES.FORM.BASIC_INFO" | translate }}</h2>
-        <p>{{ "BRANCHES.FORM.BASIC_INFO_HINT" | translate }}</p>
-      </div>
-    </header>
-
-    <div class="form-grid">
-      <!-- Arabic Name -->
-      <div class="form-field">
-        <label for="nameAr">
-          {{ "BRANCHES.FORM.NAME_AR" | translate }}
-        </label>
-
-        <input
-          id="nameAr"
-          type="text"
-          formControlName="nameAr"
-          [placeholder]="'BRANCHES.FORM.NAME_AR_PLACEHOLDER' | translate"
-        />
-
-        @if (form.get("basicInfo.nameAr")?.touched &&
-             form.get("basicInfo.nameAr")?.invalid) {
-          <span class="error-message">
-            {{ "BRANCHES.VALIDATION.NAME_AR_REQUIRED" | translate }}
-          </span>
-        }
-      </div>
-
-      <!-- English Name -->
-      <div class="form-field">
-        <label for="nameEn">
-          {{ "BRANCHES.FORM.NAME_EN" | translate }}
-        </label>
-
-        <input
-          id="nameEn"
-          type="text"
-          formControlName="nameEn"
-          [placeholder]="'BRANCHES.FORM.NAME_EN_PLACEHOLDER' | translate"
-        />
-
-        @if (form.get("basicInfo.nameEn")?.touched &&
-             form.get("basicInfo.nameEn")?.invalid) {
-          <span class="error-message">
-            {{ "BRANCHES.VALIDATION.NAME_EN_REQUIRED" | translate }}
-          </span>
-        }
-      </div>
-
-      <!-- Address -->
-      <div class="form-field form-field--full">
-        <label for="address">
-          {{ "BRANCHES.FORM.ADDRESS" | translate }}
-        </label>
-
-        <input
-          id="address"
-          type="text"
-          formControlName="address"
-          [placeholder]="'BRANCHES.FORM.ADDRESS_PLACEHOLDER' | translate"
-        />
-
-        @if (form.get("basicInfo.address")?.touched &&
-             form.get("basicInfo.address")?.invalid) {
-          <span class="error-message">
-            {{ "BRANCHES.VALIDATION.ADDRESS_REQUIRED" | translate }}
-          </span>
-        }
-      </div>
-
-      <!-- Phone -->
-      <div class="form-field">
-        <label for="phone">
-          {{ "BRANCHES.FORM.PHONE" | translate }}
-        </label>
-
-        <input
-          id="phone"
-          type="tel"
-          formControlName="phone"
-          placeholder="+201xxxxxxxxx"
-          dir="ltr"
-        />
-
-        @if (form.get("basicInfo.phone")?.touched &&
-             form.get("basicInfo.phone")?.invalid) {
-          <span class="error-message">
-            {{ "BRANCHES.VALIDATION.PHONE_INVALID" | translate }}
-          </span>
-        }
-      </div>
-
-      <!-- Google Maps URL -->
-      <div class="form-field">
-        <label for="mapUrl">
-          {{ "BRANCHES.FORM.MAP_URL" | translate }}
-        </label>
-
-        <input
-          id="mapUrl"
-          type="url"
-          formControlName="mapUrl"
-          [placeholder]="'BRANCHES.FORM.MAP_URL_PLACEHOLDER' | translate"
-          dir="ltr"
-        />
-
-        @if (form.get("basicInfo.mapUrl")?.touched &&
-             form.get("basicInfo.mapUrl")?.invalid) {
-          <span class="error-message">
-            {{ "BRANCHES.VALIDATION.URL_INVALID" | translate }}
-          </span>
-        }
+      <div class="sk-split">
+        <div class="odl-card sk-card"><app-skeleton height="200px" /></div>
+        <div class="odl-card sk-card"><app-skeleton height="200px" /></div>
       </div>
     </div>
-  </section>
+  } @else {
+    <form class="branch-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Basic information -->
+      <section class="odl-card form-section basic-info" formGroupName="basicInfo" aria-labelledby="sec-basic">
+        <header class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="pi pi-building"></i></span>
+          <div class="section-heading">
+            <h2 id="sec-basic">{{ 'BRANCHES.FORM.BASIC_INFO' | translate }}</h2>
+            <p>{{ 'BRANCHES.FORM.BASIC_INFO_HINT' | translate }}</p>
+          </div>
+        </header>
 
-  <!-- Booking Types -->
-  <section
-    class="form-section booking-types"
-    formGroupName="bookingTypes"
-  >
-    <header class="section-header">
-      <div class="section-icon">
-        <i class="pi pi-calendar-check"></i>
-      </div>
+        <div class="form-grid">
+          <app-float-label-input label="BRANCHES.FORM.NAME_AR" iconLeft="pi pi-building"
+            [errorMessage]="error('basicInfo.nameAr')" formControlName="nameAr" />
+          <app-float-label-input label="BRANCHES.FORM.NAME_EN" iconLeft="pi pi-building"
+            [errorMessage]="error('basicInfo.nameEn')" formControlName="nameEn" />
 
-      <div class="section-heading">
-        <h2>{{ "BRANCHES.FORM.BOOKING_TYPES" | translate }}</h2>
-        <p>{{ "BRANCHES.FORM.BOOKING_TYPES_HINT" | translate }}</p>
-      </div>
-    </header>
-
-    <div class="booking-grid">
-      <!-- Regular -->
-      <label class="booking-option">
-        <input type="checkbox" formControlName="allowsRegular" />
-
-        <span class="booking-option__content">
-          <span class="booking-option__text">
-            <strong>
-              {{ "BRANCHES.FORM.REGULAR_BOOKING" | translate }}
-            </strong>
-            <small>
-              {{ "BRANCHES.FORM.REGULAR_HINT" | translate }}
-            </small>
-          </span>
-
-          <span class="booking-option__check">
-            <i class="pi pi-check"></i>
-          </span>
-        </span>
-      </label>
-
-      <!-- VIP -->
-      <label class="booking-option">
-        <input type="checkbox" formControlName="allowsVip" />
-
-        <span class="booking-option__content">
-          <span class="booking-option__text">
-            <strong>
-              {{ "BRANCHES.FORM.VIP_BOOKING" | translate }}
-            </strong>
-            <small>
-              {{ "BRANCHES.FORM.VIP_HINT" | translate }}
-            </small>
-          </span>
-
-          <span class="booking-option__check">
-            <i class="pi pi-check"></i>
-          </span>
-        </span>
-      </label>
-
-      <!-- Home -->
-      <label class="booking-option">
-        <input type="checkbox" formControlName="allowsHome" />
-
-        <span class="booking-option__content">
-          <span class="booking-option__text">
-            <strong>
-              {{ "BRANCHES.FORM.HOME_BOOKING" | translate }}
-            </strong>
-            <small>
-              {{ "BRANCHES.FORM.HOME_HINT" | translate }}
-            </small>
-          </span>
-
-          <span class="booking-option__check">
-            <i class="pi pi-check"></i>
-          </span>
-        </span>
-      </label>
-    </div>
-
-    @if (form.get("bookingTypes")?.touched &&
-         form.get("bookingTypes")?.hasError("atLeastOneBookingType")) {
-      <span class="error-message">
-        {{ "BRANCHES.VALIDATION.BOOKING_TYPE_REQUIRED" | translate }}
-      </span>
-    }
-  </section>
-
-  <!-- Working Hours -->
-  <section class="form-section working-hours">
-    <header class="section-header">
-      <div class="section-icon">
-        <i class="pi pi-clock"></i>
-      </div>
-
-      <div class="section-heading">
-        <h2>{{ "BRANCHES.FORM.WORKING_HOURS" | translate }}</h2>
-        <p>{{ "BRANCHES.FORM.WORKING_HOURS_HINT" | translate }}</p>
-      </div>
-    </header>
-
-    <div class="working-hours-grid" formArrayName="workingHours">
-      @for (day of workingHours.controls; track $index; let i = $index) {
-        <div class="working-day" [formGroupName]="i">
-          <div class="working-day__header">
-            <div class="working-day__name">
-              <span
-                class="working-day__dot"
-                [class.working-day__dot--open]="day.get('isOpen')?.value"
-              ></span>
-
-              <strong>
-                {{ "BRANCHES.DAYS." + dayNames[day.get("dayOfWeek")?.value] | translate }}
-              </strong>
-            </div>
-
-            <label class="day-toggle">
-              <input type="checkbox" formControlName="isOpen" />
-
-              <span class="day-toggle__track">
-                <span class="day-toggle__thumb"></span>
-              </span>
-
-              <span class="day-toggle__label">
-                {{
-                  (day.get("isOpen")?.value
-                    ? "BRANCHES.FORM.OPEN"
-                    : "BRANCHES.FORM.CLOSED") | translate
-                }}
-              </span>
-            </label>
+          <div class="form-grid__full">
+            <app-float-label-input label="BRANCHES.FORM.ADDRESS" iconLeft="pi pi-map-marker"
+              [errorMessage]="error('basicInfo.address')" formControlName="address" />
           </div>
 
-          @if (day.get("isOpen")?.value) {
-            <div class="working-day__times">
-              <div class="form-field">
-                <label>
-                  {{ "BRANCHES.FORM.OPENING_TIME" | translate }}
-                </label>
-
-                <input type="time" formControlName="openTime" dir="ltr" />
-              </div>
-
-              <div class="form-field">
-                <label>
-                  {{ "BRANCHES.FORM.CLOSING_TIME" | translate }}
-                </label>
-
-                <input type="time" formControlName="closeTime" dir="ltr" />
-              </div>
-            </div>
-
-            @if (day.touched && day.invalid) {
-              <span class="error-message">
-                {{ "BRANCHES.FORM.WORKING_HOURS" | translate }}
-              </span>
-            }
-          } @else {
-            <div class="working-day__closed">
-              <i class="pi pi-moon"></i>
-              <span>{{ "BRANCHES.FORM.DAY_OFF" | translate }}</span>
-            </div>
-          }
+          <app-float-label-input label="BRANCHES.FORM.PHONE" type="tel" iconLeft="pi pi-phone" [ltr]="true"
+            hint="BRANCHES.FORM.PHONE_HINT" [errorMessage]="error('basicInfo.phone')" formControlName="phone" />
+          <app-float-label-input label="BRANCHES.FORM.MAP_URL" type="url" iconLeft="pi pi-link" [ltr]="true"
+            hint="BRANCHES.FORM.MAP_URL_HINT" [errorMessage]="error('basicInfo.mapUrl')" formControlName="mapUrl" />
         </div>
-      }
-    </div>
-  </section>
+      </section>
 
-  <!-- Actions -->
-  <footer class="form-actions">
-    <a class="btn-cancel" routerLink="/branches">
-      {{ "COMMON.CANCEL" | translate }}
-    </a>
+      <!-- Booking types -->
+      <section class="odl-card form-section booking-types" formGroupName="bookingTypes" aria-labelledby="sec-booking">
+        <header class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="pi pi-calendar-check"></i></span>
+          <div class="section-heading">
+            <h2 id="sec-booking">{{ 'BRANCHES.FORM.BOOKING_TYPES' | translate }}</h2>
+            <p>{{ 'BRANCHES.FORM.BOOKING_TYPES_HINT' | translate }}</p>
+          </div>
+        </header>
 
-    <button
-      class="btn-submit"
-      type="submit"
-      [disabled]="form.invalid || saving()"
-    >
-      @if (saving()) {
-        <i class="pi pi-spin pi-spinner"></i>
-        {{ "COMMON.SAVING" | translate }}
-      } @else {
-        <i class="pi pi-check"></i>
-        {{
-          (isEditMode() ? "COMMON.UPDATE" : "COMMON.CREATE") | translate
-        }}
-      }
-    </button>
-  </footer>
-</form>
+        <div class="booking-grid">
+          <label class="booking-option">
+            <input type="checkbox" class="odl-check" formControlName="allowsRegular" />
+            <span class="booking-option__text">
+              <strong>{{ 'BRANCHES.FORM.REGULAR_BOOKING' | translate }}</strong>
+              <small>{{ 'BRANCHES.FORM.REGULAR_HINT' | translate }}</small>
+            </span>
+          </label>
+
+          <label class="booking-option">
+            <input type="checkbox" class="odl-check" formControlName="allowsVip" />
+            <span class="booking-option__text">
+              <strong>{{ 'BRANCHES.FORM.VIP_BOOKING' | translate }}</strong>
+              <small>{{ 'BRANCHES.FORM.VIP_HINT' | translate }}</small>
+            </span>
+          </label>
+
+          <label class="booking-option">
+            <input type="checkbox" class="odl-check" formControlName="allowsHome" />
+            <span class="booking-option__text">
+              <strong>{{ 'BRANCHES.FORM.HOME_BOOKING' | translate }}</strong>
+              <small>{{ 'BRANCHES.FORM.HOME_HINT' | translate }}</small>
+            </span>
+          </label>
+        </div>
+
+        @if (bookingTypesError()) {
+          <p class="field-error" role="alert">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            {{ 'BRANCHES.VALIDATION.BOOKING_TYPE_REQUIRED' | translate }}
+          </p>
+        }
+      </section>
+
+      <!-- Working hours -->
+      <section class="odl-card form-section working-hours" aria-labelledby="sec-hours">
+        <header class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="pi pi-clock"></i></span>
+          <div class="section-heading">
+            <h2 id="sec-hours">{{ 'BRANCHES.FORM.WORKING_HOURS' | translate }}</h2>
+            <p>
+              {{ 'BRANCHES.FORM.WORKING_HOURS_HINT' | translate }}
+              {{ 'BRANCHES.FORM.HOURS_CLOSE_NEXT_DAY' | translate }}
+            </p>
+          </div>
+        </header>
+
+        <ul class="days" formArrayName="workingHours">
+          @for (day of workingHours.controls; track day.value.dayOfWeek; let i = $index) {
+            <li class="day" [class.day--open]="isOpen(i)" [formGroupName]="i">
+              <div class="day__head">
+                <span class="day__name">{{ dayKey(day.value.dayOfWeek) | translate }}</span>
+                <span class="day__switch">
+                  <app-switch
+                    [checked]="isOpen(i)"
+                    [label]="('BRANCHES.FORM.OPEN' | translate) + ' — ' + (dayKey(day.value.dayOfWeek) | translate)"
+                    (toggled)="setOpen(i, $event)"
+                  />
+                  <span class="day__state">{{ (isOpen(i) ? 'BRANCHES.FORM.OPEN' : 'BRANCHES.FORM.CLOSED') | translate }}</span>
+                </span>
+              </div>
+
+              @if (isOpen(i)) {
+                <div class="day__times">
+                  <app-float-label-input label="BRANCHES.FORM.OPENING_TIME" type="time" [ltr]="true"
+                    [errorMessage]="dayError(i)" formControlName="openTime" />
+                  <app-float-label-input label="BRANCHES.FORM.CLOSING_TIME" type="time" [ltr]="true"
+                    formControlName="closeTime" />
+                </div>
+              } @else {
+                <p class="day__off"><i class="pi pi-moon" aria-hidden="true"></i>{{ 'BRANCHES.FORM.DAY_OFF' | translate }}</p>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- Actions -->
+      <footer class="form-actions">
+        <app-button variant="secondary" [disabled]="saving()" (clicked)="cancel()">
+          {{ 'COMMON.CANCEL' | translate }}
+        </app-button>
+        <app-button type="submit" variant="primary" [loading]="saving()">
+          {{ (isEditMode() ? 'COMMON.SAVE' : 'BRANCHES.FORM.CREATE') | translate }}
+        </app-button>
+      </footer>
+    </form>
+  }
+</div>

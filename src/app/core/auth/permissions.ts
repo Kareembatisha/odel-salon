@@ -14,7 +14,7 @@ const SPEC = {
   Branch: ['View', 'Create', 'Edit', 'Delete'],
   Service: ['View', 'Create', 'Edit', 'Delete'],
   Barber: ['View', 'Create', 'Edit', 'Delete'],
-  Chair: ['View', 'Create', 'Edit', 'Delete'],
+  Chair: ['View', 'Create', 'Edit', 'ToggleStatus', 'Delete'],
   Offer: ['View', 'Create', 'Edit', 'Delete'],
   Points: ['View', 'Manage'],
   Review: ['View', 'Moderate'],

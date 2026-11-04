@@ -1,11 +1,15 @@
 import { Injectable, inject } from "@angular/core";
-import { Observable, delay, of } from "rxjs";
+import { Observable, delay, of, throwError } from "rxjs";
 
 import { MockDb } from "@core/mock/mock-db";
+import { NotificationService } from "@core/services/notification.service";
+import { LanguageService } from "@core/services/language.service";
+import { TranslateService } from "@ngx-translate/core";
 import { ApiResponse } from "@shared/model/api_response.model";
 import {
   BranchDetails,
   BranchListItem,
+  DeleteBranchesRequest,
   BranchPayload,
   BranchesQuery,
 } from "../model/branch.model";
@@ -32,6 +36,9 @@ const MOCK_DELAY_MS = 450;
 @Injectable({ providedIn: "root" })
 export class BranchMockRepository implements IBranchRepository {
   private readonly db = inject(MockDb);
+  private readonly notify = inject(NotificationService);
+  private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
 
   // ----------------------------------------------------------
   // Read Operations
@@ -221,5 +228,93 @@ export class BranchMockRepository implements IBranchRepository {
       meta: null,
       data: null,
     }).pipe(delay(MOCK_DELAY_MS));
+  }
+
+  /**
+   * Flip `isVisible`. Hiding is always allowed; showing needs an active
+   * barber and a chair for every enabled chair type (the mock only has
+   * totals, so it uses those). Failures mirror the real `400`/`404`.
+   */
+  toggleBranchStatus(id: number): Observable<ApiResponse<null>> {
+    const branch = this.db.branches.find((b) => b.id === id);
+
+    if (!branch) return this.fail(this.translate.instant("BRANCHES.ERRORS.NOT_FOUND"), 404);
+
+    if (!branch.isVisible) {
+      const errors: Record<string, string> = {};
+
+      if (branch.allowsRegular && branch.regularChairsCount === 0) {
+        errors["AllowsRegular"] = "BRANCHES.ERRORS.SHOW_NEEDS_CHAIR";
+      }
+      if (branch.allowsVip && branch.vipChairsCount === 0) {
+        errors["AllowsVip"] = "BRANCHES.ERRORS.SHOW_NEEDS_CHAIR";
+      }
+      if (branch.barbersCount === 0) {
+        errors["Barbers"] = "BRANCHES.ERRORS.SHOW_NEEDS_BARBER";
+      }
+
+      if (Object.keys(errors).length) {
+        // Same shape as the interceptor's validation toast: field label + message.
+        Object.entries(errors).forEach(([field, messageKey]) =>
+          this.notify.warning(`VALIDATION_FIELDS.${field}`, messageKey),
+        );
+        return throwError(() => new Error("Validation failed")).pipe(
+          delay(MOCK_DELAY_MS),
+        ) as Observable<never>;
+      }
+    }
+
+    branch.isVisible = !branch.isVisible;
+    branch.updatedAt = new Date().toISOString();
+
+    return this.reply(null, "Branch Updated Successfully");
+  }
+
+  /**
+   * Bulk delete, all-or-nothing: any unknown id (404) or any branch that
+   * still has chairs or barbers (409) aborts the whole request.
+   */
+  deleteBranches(payload: DeleteBranchesRequest): Observable<ApiResponse<null>> {
+    if (!payload.ids.length) {
+      return this.fail(this.translate.instant("BRANCHES.ERRORS.IDS_REQUIRED"), 400);
+    }
+
+    for (const id of payload.ids) {
+      const branch = this.db.branches.find((b) => b.id === id);
+      if (!branch) return this.fail(this.translate.instant("BRANCHES.ERRORS.NOT_FOUND"), 404);
+
+      const chairs = branch.regularChairsCount + branch.vipChairsCount;
+      if (chairs > 0 || branch.barbersCount > 0) {
+        const name = this.language.currentLang() === "ar" ? branch.nameAr : branch.nameEn;
+        const message = chairs > 0
+          ? this.translate.instant("BRANCHES.ERRORS.DELETE_BLOCKED_CHAIRS", { name, count: chairs })
+          : this.translate.instant("BRANCHES.ERRORS.DELETE_BLOCKED_BARBERS", { name, count: branch.barbersCount });
+
+        return this.fail(message, 409);
+      }
+    }
+
+    this.db.branches = this.db.branches.filter((b) => !payload.ids.includes(b.id));
+
+    return this.reply(null, "Branch Deleted Successfully");
+  }
+
+  private reply<T>(data: T, message: string): Observable<ApiResponse<T>> {
+    return of<ApiResponse<T>>({
+      status: true,
+      statusCode: 200,
+      message,
+      errors: null,
+      meta: null,
+      data,
+    }).pipe(delay(MOCK_DELAY_MS));
+  }
+
+  /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
+  private fail(message: string, statusCode: number): Observable<never> {
+    this.notify.warning(message);
+    return throwError(
+      () => Object.assign(new Error(message), { status: statusCode }),
+    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
   }
 }

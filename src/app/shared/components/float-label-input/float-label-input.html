@@ -20,6 +20,7 @@
       [value]="value()"
       [disabled]="isDisabled()"
       [autocomplete]="autocomplete()"
+      [attr.dir]="ltr() ? 'ltr' : null"
       [attr.aria-label]="label() | translate"
       [attr.aria-invalid]="errorMessage() ? true : null"
       (input)="onInput($event)"

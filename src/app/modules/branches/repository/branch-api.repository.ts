@@ -7,6 +7,7 @@ import { ApiResponse } from "@shared/model/api_response.model";
 import {
   BranchDetails,
   BranchListItem,
+  DeleteBranchesRequest,
   BranchPayload,
   BranchesQuery,
 } from "../model/branch.model";
@@ -87,5 +88,26 @@ export class BranchApiRepository implements IBranchRepository {
     payload: BranchPayload,
   ): Observable<ApiResponse<null>> {
     return this.http.put<ApiResponse<null>>(`${this.url}/${id}`, payload);
+  }
+
+  /**
+   * Flip a branch between shown and hidden in the app.
+   *
+   * No body — each call toggles. Showing a branch can be rejected with a
+   * `400` listing what is missing (an active chair per enabled type, an
+   * active barber); the error interceptor surfaces those messages.
+   */
+  toggleBranchStatus(id: number): Observable<ApiResponse<null>> {
+    return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/toggle-status`, null);
+  }
+
+  /**
+   * Permanently delete one or more branches (all-or-nothing).
+   *
+   * `HttpClient.delete` has no body argument — the JSON body goes through
+   * `options.body`. A branch with chairs or barbers answers `409`.
+   */
+  deleteBranches(payload: DeleteBranchesRequest): Observable<ApiResponse<null>> {
+    return this.http.delete<ApiResponse<null>>(this.url, { body: payload });
   }
 }

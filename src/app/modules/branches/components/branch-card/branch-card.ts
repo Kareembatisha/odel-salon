@@ -29,7 +29,11 @@ export class BranchCard {
   /** Which actions this user may see — decided by the page from permissions. */
   readonly canEdit = input<boolean>(false);
   readonly canDelete = input<boolean>(false);
+  /** A mutation is running — the visibility switch is disabled so a second click can't race the first. */
+  readonly busy = input<boolean>(false);
 
+  /** Open the branch details page — the name is the link, so it needs no permission. */
+  readonly view = output<BranchListItem>();
   readonly edit = output<BranchListItem>();
   readonly delete = output<BranchListItem>();
   /** Show/hide in the app — asks the parent to flip `isVisible`; the card never changes it itself. */

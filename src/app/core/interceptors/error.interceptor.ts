@@ -8,6 +8,7 @@ import {
 } from "@angular/common/http";
 import { inject, Injector, runInInjectionContext } from "@angular/core";
 import { Router } from "@angular/router";
+import { TranslateService } from "@ngx-translate/core";
 import {
   BehaviorSubject,
   Observable,
@@ -165,7 +166,10 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         );
       }
 
-      handleError(err, notify, router);
+      const translate = runInInjectionContext(injector, () =>
+        inject(TranslateService),
+      );
+      handleError(err, notify, router, translate);
       return throwError(() => err);
     }),
   );
@@ -286,6 +290,7 @@ function handleError(
   err: HttpErrorResponse,
   notify: NotificationService,
   router: Router,
+  translate: TranslateService,
 ): void {
   if (err.status === 0) {
     // `navigator.onLine` isn't a perfect signal (it can be true on a
@@ -313,7 +318,7 @@ function handleError(
     // Handle validation errors returned as 400 or 422
     case HttpStatusCode.BadRequest:
     case HttpStatusCode.UnprocessableEntity:
-      handleValidationErrors(err, notify);
+      handleValidationErrors(err, notify, translate);
       break;
 
     case HttpStatusCode.RequestTimeout:
@@ -363,7 +368,9 @@ function handleError(
         const retryAfterMs = parseRetryAfterMs(retryAfter ?? null);
         const detail =
           retryAfterMs != null
-            ? `Retry after ${Math.ceil(retryAfterMs / 1000)}s`
+            ? translate.instant("ERRORS.RETRY_AFTER", {
+                seconds: Math.ceil(retryAfterMs / 1000),
+              })
             : undefined;
         notify.warning("ERRORS.RATE_LIMITED", detail);
       }
@@ -452,9 +459,22 @@ function humanizeFieldName(field: string): string {
     .trim();
 }
 
+/**
+ * Field name for a validation toast: the translated `VALIDATION_FIELDS.<Field>`
+ * label when we have one (the API only localizes messages, not field names),
+ * otherwise the humanized field name.
+ */
+function fieldLabel(field: string, translate: TranslateService): string {
+  const key = `VALIDATION_FIELDS.${field}`;
+  const label = translate.instant(key);
+
+  return label === key ? humanizeFieldName(field) : label;
+}
+
 function handleValidationErrors(
   err: HttpErrorResponse,
   notify: NotificationService,
+  translate: TranslateService,
 ): void {
   const errors: ApiErrors | null = err.error?.errors ?? null;
 
@@ -474,7 +494,7 @@ function handleValidationErrors(
         // confusing on a multi-step form. Now the field name is the toast
         // summary and the backend message is the detail line, so it reads
         // like "Additional Expenses — The value '' is invalid."
-        notify.warning(humanizeFieldName(field), text);
+        notify.warning(fieldLabel(field, translate), text);
       }
     });
     return;

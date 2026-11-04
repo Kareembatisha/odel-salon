@@ -1,4 +1,5 @@
 @use "styles/variables" as v;
+@use "styles/patterns" as p;
 
 :host {
   display: block;
@@ -44,6 +45,23 @@
     line-height: v.$lh-snug;
     color: v.$text;
     overflow-wrap: anywhere;
+  }
+
+  &__link {
+    display: block;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+
+    &:hover { text-decoration: underline; }
+    &:focus-visible { @include p.focus-ring; border-radius: v.$radius-xs; }
   }
 
   &__alt {
@@ -142,7 +160,22 @@
   }
 
   &__visibility {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
     min-width: 0;
+    cursor: pointer;
+
+    &--disabled { cursor: progress; opacity: 0.6; }
+  }
+
+  &__visibility-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-medium;
   }
 
   &__actions {
