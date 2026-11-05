@@ -153,7 +153,8 @@
       "BRANCHES": "Branches",
       "CHAIRS": "Chairs",
       "BARBERS": "Barbers",
-      "DESIGN_SYSTEM": "Design system"
+      "DESIGN_SYSTEM": "Design system",
+      "SERVICES": "Menu & services"
     }
   },
   "DASHBOARD": {
@@ -642,6 +643,165 @@
       "LAST_ACTIVE_REGULAR": "{{name}} is the last active Regular chair in a visible branch that offers Regular booking. Hide the branch or disable Regular booking first."
     }
   },
+  "SERVICES": {
+    "TITLE": "Menu & services",
+    "CURRENCY": "EGP",
+    "CREATED": "Service created.",
+    "UPDATED": "Service updated.",
+    "STATUS_UPDATED": "Service status updated.",
+    "DELETED": "Service deleted.",
+    "PRICES_COPIED": "Prices copied.",
+    "PRICES_ADJUSTED": "Prices updated.",
+    "ERRORS": {
+      "NOT_FOUND": "This service no longer exists.",
+      "BRANCH_NOT_FOUND": "This branch no longer exists.",
+      "NAME_REQUIRED": "The name is required",
+      "NAME_TOO_LONG": "The name can’t be longer than 100 characters",
+      "NAME_TAKEN": "A service with this name already exists.",
+      "BRANCHES_INVALID": "Every branch must be included exactly once.",
+      "DURATION_INVALID": "Duration must be between 5 and 480 minutes, in steps of 5.",
+      "PRICE_INVALID": "Enter a price above 0, up to 100,000, with at most 2 decimals.",
+      "HOME_PRICE_REQUIRED": "Enter a home price, or turn off home availability.",
+      "IDS_REQUIRED": "Select at least one service.",
+      "BRANCH_IDS_REQUIRED": "Select at least one branch.",
+      "BRANCH_IDS_DUPLICATE": "A branch can only be listed once.",
+      "NOT_PRICED_IN_BRANCH": "This service has no price in one of the selected branches.",
+      "LAST_ACTIVE": "{{name}} is the last active service in {{branch}}, a visible branch. Hide the branch or keep another service active first.",
+      "SAME_BRANCH": "Choose two different branches.",
+      "SOURCE_EMPTY": "The source branch has no prices to copy.",
+      "COPY_EMPTIES_BRANCH": "Copying would leave {{branch}} with no active service.",
+      "PERCENTAGE_INVALID": "Enter a percentage from -90 to 500, other than 0.",
+      "PRICE_TOO_HIGH": "A new price would be above 100,000 EGP.",
+      "BRANCH_EMPTY": "This branch has no priced services."
+    },
+    "SUBTITLE": "The salon’s menu: each service’s duration and prices — Regular, VIP and at home — set separately for every branch.",
+    "NEW": "Add service",
+    "SEARCH": "Search by service name…",
+    "EMPTY_TITLE": "No services yet",
+    "EMPTY_TEXT": "Add a service to start building the menu.",
+    "NO_RESULTS_TITLE": "No services found",
+    "NO_RESULTS_TEXT": "Try a different search or filter.",
+    "NO_BRANCHES_TITLE": "No branches yet",
+    "NO_BRANCHES_TEXT": "Services are priced per branch. Add a branch first.",
+    "SET_PRICES": "Set prices",
+    "IN_BRANCH_ONLY": "In branch only",
+    "FILTER": {
+      "BRANCH": "Branch",
+      "STATUS": "Filter by status",
+      "HOME": "Filter by home visits",
+      "ALL_STATUSES": "All statuses",
+      "ALL_HOME": "Home & in-branch",
+      "HOME_YES": "Home available",
+      "HOME_NO": "In branch only"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "NOT_PRICED": "Not priced"
+    },
+    "SWITCH": {
+      "ACTIVATE": "Activate in this branch",
+      "DEACTIVATE": "Deactivate in this branch"
+    },
+    "STATS": {
+      "LABEL": "Services summary",
+      "TOTAL": "Services",
+      "ACTIVE": "Active services",
+      "HOME": "Available for home visits",
+      "UNPRICED": "Not priced yet"
+    },
+    "COL": {
+      "SERVICE": "Service",
+      "DURATION": "Duration",
+      "REGULAR": "Regular price",
+      "VIP": "VIP price",
+      "HOME": "Home price",
+      "STATUS": "Status"
+    },
+    "UNITS": {
+      "H": "h",
+      "MIN": "min"
+    },
+    "DELETE": {
+      "TITLE_ONE": "Delete service?",
+      "TITLE_MANY": "Delete services?",
+      "MESSAGE_ONE": "“{{name}}” will be deleted together with its prices in every branch. This can’t be undone.",
+      "MESSAGE_MANY": "{{count}} services will be deleted together with their prices in every branch. This can’t be undone."
+    },
+    "BACK": "Back to services",
+    "FORM": {
+      "CREATE_TITLE": "New service",
+      "CREATE_SUBTITLE": "Name the service and set its duration and prices for every branch.",
+      "EDIT_TITLE": "Edit service",
+      "EDIT_SUBTITLE": "Update the names, or any branch’s duration, prices and status.",
+      "NAMES": "Service name",
+      "NAMES_HINT": "Shown to customers in the language they use.",
+      "NAME_AR": "Service name (Arabic)",
+      "NAME_EN": "Service name (English)",
+      "PRICES": "Prices by branch",
+      "PRICES_HINT": "Every branch needs a duration and Regular and VIP prices. Prices a branch doesn’t offer yet are still required, so they’re ready when it does.",
+      "DURATION": "Duration (minutes)",
+      "DURATION_HINT": "5 to 480, in steps of 5",
+      "REGULAR_PRICE": "Regular price (EGP)",
+      "VIP_PRICE": "VIP price (EGP)",
+      "HOME_PRICE": "Home price (EGP)",
+      "HOME_AVAILABLE": "Available for home visits",
+      "HOME_NOT_OFFERED": "This branch doesn’t offer home booking yet",
+      "NOT_OFFERED": "This branch doesn’t offer this booking type yet",
+      "ACTIVE_IN": "Active in this branch",
+      "SET_PRICES_STATE": "Set prices",
+      "UNPRICED_NOTE": "This service has no prices in this branch yet. Fill in the numbers below to add it.",
+      "COPY_TO_ALL": "Copy to all branches",
+      "FIX_ERRORS": "Fix the highlighted fields in {{count}} branch(es) to continue.",
+      "CREATE": "Create service"
+    },
+    "VALIDATION": {
+      "NAME_AR_REQUIRED": "Enter the Arabic name",
+      "NAME_EN_REQUIRED": "Enter the English name",
+      "NAME_MAX": "The name can’t be longer than 100 characters",
+      "DURATION_REQUIRED": "Enter the duration",
+      "DURATION_INVALID": "Between 5 and 480 minutes, in steps of 5",
+      "PRICE_REQUIRED": "Enter the price",
+      "PRICE_INVALID": "Above 0, up to 100,000, at most 2 decimals",
+      "HOME_PRICE_REQUIRED": "Enter a home price, or turn home visits off"
+    },
+    "BULK": {
+      "ADJUST": "Change prices by %",
+      "ADJUST_SUBTITLE": "Raise or lower the prices of a branch in one go.",
+      "COPY_FROM": "Copy prices from another branch",
+      "COPY_SUBTITLE": "Reuse one branch’s menu in another.",
+      "SET_STATUS": "Set status in branches",
+      "STATUS_SUBTITLE": "Activate or deactivate the selected services in several branches.",
+      "BRANCH": "Branch",
+      "PERCENTAGE": "Change by (%)",
+      "PERCENTAGE_HINT": "From -90 to 500. Use 10 for +10%, -15 for 15% off.",
+      "PERCENTAGE_REQUIRED": "Enter a percentage",
+      "PERCENTAGE_INVALID": "From -90 to 500, other than 0",
+      "SCOPE": "Apply to",
+      "SCOPE_ALL": "All services priced in this branch",
+      "SCOPE_SELECTED": "Only the {{count}} selected service(s)",
+      "PREVIEW": "Preview",
+      "PREVIEW_HINT": "Enter a percentage to preview the new prices of {{count}} service(s).",
+      "WILL_CHANGE": "{{count}} service(s) will change. Prices are rounded to the nearest pound; durations don’t change.",
+      "AND_MORE": "…and {{count}} more",
+      "NO_PRICED": "No priced services here to change.",
+      "OVER_LIMIT": "{{count}} service(s) would go above 100,000 EGP. Use a smaller percentage or select fewer services.",
+      "APPLY": "Apply",
+      "SOURCE_BRANCH": "Copy from",
+      "TARGET_BRANCH": "Copy to",
+      "COPY": "Copy prices",
+      "COPY_COUNT": "{{count}} service(s) will be copied to {{branch}}.",
+      "COPY_WARNING": "Duration, prices, home availability and status of those services will overwrite what the target branch has. Its other services stay as they are.",
+      "STATUS_FOR": "Applies to {{count}} selected service(s).",
+      "NEW_STATE": "New status",
+      "ACTIVATE": "Activate",
+      "DEACTIVATE": "Deactivate",
+      "IN_BRANCHES": "In these branches",
+      "ALL_BRANCHES": "All branches",
+      "STATUS_WARNING": "A service must already have a price in every branch you choose. A visible branch always needs at least one active service.",
+      "BECOMES": "becomes"
+    }
+  },
   "VALIDATION_FIELDS": {
     "NameAr": "Arabic name",
     "NameEn": "English name",
@@ -659,6 +819,16 @@
     "Ids": "Chairs",
     "FullName": "Full name",
     "Image": "Photo",
-    "BarberIds": "Barbers"
+    "BarberIds": "Barbers",
+    "Branches": "Branches",
+    "BranchIds": "Branches",
+    "DurationMinutes": "Duration",
+    "RegularPrice": "Regular price",
+    "VipPrice": "VIP price",
+    "HomePrice": "Home price",
+    "Percentage": "Percentage",
+    "SourceBranchId": "Source branch",
+    "TargetBranchId": "Target branch",
+    "ServiceIds": "Services"
   }
 }

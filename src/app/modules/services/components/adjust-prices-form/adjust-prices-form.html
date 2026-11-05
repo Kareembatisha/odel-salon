@@ -1,0 +1,57 @@
+<form class="bf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="bf__body">
+    <app-float-label-select label="SERVICES.BULK.BRANCH" [options]="branchOptions()" formControlName="branchId" />
+
+    <app-float-label-input label="SERVICES.BULK.PERCENTAGE" type="number" iconLeft="pi pi-percentage" [ltr]="true"
+      hint="SERVICES.BULK.PERCENTAGE_HINT" [errorMessage]="percentageError()" formControlName="percentage" />
+
+    @if (canScopeToSelection()) {
+      <app-float-label-select label="SERVICES.BULK.SCOPE" [options]="scopeOptions()" formControlName="scope" />
+    }
+
+    <section class="preview" aria-live="polite">
+      <h3 class="preview__title">{{ 'SERVICES.BULK.PREVIEW' | translate }}</h3>
+
+      @if (rowsLoading()) {
+        <div class="preview__loading" aria-busy="true">
+          @for (n of [1, 2, 3]; track n) { <app-skeleton height="44px" /> }
+        </div>
+      } @else if (targetCount() === 0) {
+        <p class="bf__note"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'SERVICES.BULK.NO_PRICED' | translate }}</p>
+      } @else if (preview().length === 0) {
+        <p class="preview__hint">{{ 'SERVICES.BULK.PREVIEW_HINT' | translate: { count: targetCount() } }}</p>
+      } @else {
+        <p class="preview__hint">{{ 'SERVICES.BULK.WILL_CHANGE' | translate: { count: targetCount() } }}</p>
+        <ul class="preview__list">
+          @for (row of preview(); track row.id) {
+            <li class="preview__row">
+              <span class="preview__name">{{ row.name }}</span>
+              <dl class="preview__prices">
+                <div><dt>{{ 'SERVICES.COL.REGULAR' | translate }}</dt><dd>{{ row.regular.from }} <i class="pi pi-arrow-right preview__arrow" aria-hidden="true"></i><span class="sr-only"> {{ 'SERVICES.BULK.BECOMES' | translate }} </span><strong>{{ row.regular.to }}</strong></dd></div>
+                <div><dt>{{ 'SERVICES.COL.VIP' | translate }}</dt><dd>{{ row.vip.from }} <i class="pi pi-arrow-right preview__arrow" aria-hidden="true"></i><span class="sr-only"> {{ 'SERVICES.BULK.BECOMES' | translate }} </span><strong>{{ row.vip.to }}</strong></dd></div>
+                @if (row.home) {
+                  <div><dt>{{ 'SERVICES.COL.HOME' | translate }}</dt><dd>{{ row.home.from }} <i class="pi pi-arrow-right preview__arrow" aria-hidden="true"></i><span class="sr-only"> {{ 'SERVICES.BULK.BECOMES' | translate }} </span><strong>{{ row.home.to }}</strong></dd></div>
+                }
+              </dl>
+            </li>
+          }
+        </ul>
+        @if (moreCount() > 0) {
+          <p class="preview__more">{{ 'SERVICES.BULK.AND_MORE' | translate: { count: moreCount() } }}</p>
+        }
+      }
+
+      @if (overLimit() > 0) {
+        <p class="bf__note bf__note--warn" role="alert">
+          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+          {{ 'SERVICES.BULK.OVER_LIMIT' | translate: { count: overLimit() } }}
+        </p>
+      }
+    </section>
+  </div>
+
+  <footer class="bf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()" [disabled]="!canSubmit()">{{ 'SERVICES.BULK.APPLY' | translate }}</app-button>
+  </footer>
+</form>

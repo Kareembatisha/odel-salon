@@ -54,6 +54,7 @@ src/
       branches/           cards · create/edit pages · details · visibility switch
       chairs/             cards + summary · create/edit drawer · status switch
       barbers/            table + filters + bulk delete · create/edit drawer with photo · status switch
+      services/           price table per branch + summary · create/edit page (price card per branch) · bulk tools
       dashboard/          model · repository (api + mock) · service · page
       profile-management/ profile + change password
       design-system/      living reference page (dev only)
@@ -123,6 +124,9 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 | Branches | `/main/branches` | `Branch.View` (+ `Create` / `Edit` / `Delete` for the actions) |
 | Chairs | `/main/chairs` | `Chair.View` (+ `Create` / `Edit` / `ToggleStatus` / `Delete` for the actions) |
 | Barbers | `/main/barbers` | `Barber.View` (+ `Create` / `Edit` / `Delete` for the actions) |
+| Services (Menu & services) | `/main/services` | `Service.View` (+ `Edit` for the status switch and bulk tools, `Delete` for delete) |
+| New service | `/main/services/new` | `Service.Create` |
+| Edit service | `/main/services/:id/edit` | `Service.Edit` |
 | My profile | `/main/profile` | sign-in only |
 | Design system (dev builds only) | `/main/design-system` | — |
 
@@ -165,6 +169,23 @@ Implements `API Contract — Barbers` (all 6 endpoints) in `modules/barbers/`, b
 - **Last active barber rule** — in a *visible* branch the last active barber can't be suspended, deleted or moved (409 "…is the last active barber in a visible branch. Hide the branch first"); the check covers the whole bulk request. Hidden branches have no such restriction. The backend's message is shown as-is.
 - **Mock backend** — `core/mock/mock-db.ts` seeds each branch with as many barbers as its `barbersCount` (a few suspended), and the mock repository enforces the same rules (valid + unique phone, photo type/size, the 409 lock, all-or-nothing delete) and keeps `barbersCount` on the Branches screen in sync. In mock mode, "showing" a hidden branch also needs an *active* barber.
 - **Permissions** — `Barber.View` opens the page; `Create`, `Edit` (also the status switch) and `Delete` show or hide their actions. The mock `BranchManager` role has `Barber.View` only; `SuperAdmin` has everything.
+
+## Services (Menu & services)
+
+Implements `API Contract — Services` (all 8 endpoints) in `modules/services/`, built as `model → repository (interface + api + mock) → service (signals) → pages`.
+
+A service is **one record with a price row per branch** (duration, Regular, VIP, optional Home price, active). The API prices one branch at a time, so the list always shows ONE branch — there is no "all branches" view.
+
+- **List** (`/main/services`) — branch selector (first branch by default; oldest first, because the API lists newest first), four summary cards (Services, Active, Home, Not priced yet — counted by the backend over the whole branch and unaffected by search/filters), search (Arabic or English name), status and home filters, 20 per page. A service with no price in the branch shows a **Not priced** badge and a *Set prices* button instead of the switch. Below 768px the table becomes cards.
+- **Row switch** — `PATCH /services/{id}/branches/status` with only the selected branch (`isActive` is the *target* state, not a toggle). A refused change (409) leaves the switch where it was.
+- **Create / edit** (`/main/services/new`, `/main/services/:id/edit`) — Arabic + English names and **one price card per branch** (the API wants every branch exactly once). Each card: duration (5–480, steps of 5), Regular and VIP price (always required), home toggle + home price (required only while it's on, sent as `null` otherwise), active switch. Prices the branch doesn't offer yet (`branchAllows*`) stay required but are shown quieter with a note; a branch with no price yet gets a "Set prices" state. *Copy to all branches* fills every card from one. Validation mirrors the contract inline (`utils/service-form.validators.ts`); on a failed submit focus moves to the first error. The backend's 400/409 messages (duplicate name, last-active lock) arrive as interceptor toasts.
+- **Delete** — one service from the row or several with row checkboxes → one `DELETE /services` with `{ ids }`, all-or-nothing, removed from every branch, always behind a confirmation.
+- **Bulk tools** (drawers, `Service.Edit`):
+  - **Change prices by %** (`POST /services/adjust-prices`) — branch + percentage (-90…500, not 0), for every priced service of the branch or just the ticked ones. A preview lists old → new prices using the same rounding as the backend (nearest pound, never below 1; durations don't change). A result above 100,000 EGP blocks the request.
+  - **Copy prices from another branch** (`POST /services/copy-prices`) — overwrites duration, prices, home availability and status of the services priced in the source; the target's other services stay. Shows how many services will be copied; identical branches are refused.
+  - **Set status in branches** — for the ticked services, activate/deactivate in the chosen branches (one status request per service; one success toast).
+- **Mock backend** — `core/mock/mock-db.ts` + `service-mock.repository.ts` enforce unique names, every-branch-once, price/duration limits, the "last active service of a *visible* branch" 409 (deactivate / delete / copy) and all-or-nothing delete. Not simulated: the 409s for services used by packages or running offers (those modules don't exist yet).
+- **Permissions** — `Service.View` opens the page; `Create`, `Edit` (switch, edit, bulk tools) and `Delete` show or hide their actions.
 
 ## Notes and assumptions
 

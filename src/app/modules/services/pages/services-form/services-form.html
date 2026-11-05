@@ -1,0 +1,140 @@
+<div class="odl-page">
+  <a class="back" routerLink="/main/services">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>{{ 'SERVICES.BACK' | translate }}
+  </a>
+
+  <app-page-header [title]="titleKey() | translate" [subtitle]="subtitleKey() | translate" />
+
+  @if (failed()) {
+    <div class="odl-card"><app-failed-state (retry)="load()" /></div>
+  } @else if (loading()) {
+    <div class="skeletons" aria-busy="true">
+      <div class="odl-card sk-card">
+        <app-skeleton width="30%" height="22px" />
+        <div class="sk-grid">
+          @for (n of [1, 2]; track n) { <app-skeleton height="56px" /> }
+        </div>
+      </div>
+      <div class="sk-cards">
+        @for (n of [1, 2]; track n) { <div class="odl-card sk-card"><app-skeleton height="220px" /></div> }
+      </div>
+    </div>
+  } @else if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state [title]="'SERVICES.NO_BRANCHES_TITLE' | translate" [description]="'SERVICES.NO_BRANCHES_TEXT' | translate" icon="pi pi-building" />
+    </div>
+  } @else {
+    <form class="service-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <!-- Names -->
+      <section class="odl-card form-section" aria-labelledby="sec-names">
+        <header class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="pi pi-list"></i></span>
+          <div class="section-heading">
+            <h2 id="sec-names">{{ 'SERVICES.FORM.NAMES' | translate }}</h2>
+            <p>{{ 'SERVICES.FORM.NAMES_HINT' | translate }}</p>
+          </div>
+        </header>
+        <div class="form-grid">
+          <app-float-label-input label="SERVICES.FORM.NAME_AR" iconLeft="pi pi-tag"
+            [errorMessage]="nameError('nameAr')" formControlName="nameAr" />
+          <app-float-label-input label="SERVICES.FORM.NAME_EN" iconLeft="pi pi-tag"
+            [errorMessage]="nameError('nameEn')" formControlName="nameEn" />
+        </div>
+      </section>
+
+      <!-- Price grid: one card per branch -->
+      <section class="grid-section" aria-labelledby="sec-prices">
+        <header class="section-header section-header--flat">
+          <span class="section-icon" aria-hidden="true"><i class="pi pi-building"></i></span>
+          <div class="section-heading">
+            <h2 id="sec-prices">{{ 'SERVICES.FORM.PRICES' | translate }}</h2>
+            <p>{{ 'SERVICES.FORM.PRICES_HINT' | translate }}</p>
+          </div>
+        </header>
+
+        @if (submitted() && invalidCount() > 0) {
+          <p class="banner" role="alert">
+            <i class="pi pi-exclamation-circle" aria-hidden="true"></i>
+            {{ 'SERVICES.FORM.FIX_ERRORS' | translate: { count: invalidCount() } }}
+          </p>
+        }
+
+        <div class="branch-grid" formArrayName="branches">
+          @for (group of branchGroups.controls; track group.value.branchId; let i = $index) {
+            <article class="odl-card branch-card" [class.branch-card--off]="!isActive(i)"
+              [class.branch-card--invalid]="submitted() && cardInvalid(i)" [formGroupName]="i">
+              <header class="branch-card__head">
+                <div class="branch-card__title">
+                  <h3>{{ branchName(i) }}</h3>
+                  @if (isUnpriced(i)) {
+                    <app-status-badge variant="warning">{{ 'SERVICES.FORM.SET_PRICES_STATE' | translate }}</app-status-badge>
+                  }
+                </div>
+                <span class="branch-card__active">
+                  <app-switch [checked]="isActive(i)"
+                    [label]="('SERVICES.FORM.ACTIVE_IN' | translate) + ' — ' + branchName(i)"
+                    (toggled)="setActive(i, $event)" />
+                  <span class="branch-card__state">{{ (isActive(i) ? 'SERVICES.STATUS.ACTIVE' : 'SERVICES.STATUS.INACTIVE') | translate }}</span>
+                </span>
+              </header>
+
+              @if (isUnpriced(i)) {
+                <p class="branch-card__note"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'SERVICES.FORM.UNPRICED_NOTE' | translate }}</p>
+              }
+
+              <div class="fields">
+                <div class="fields__duration">
+                  <app-float-label-input label="SERVICES.FORM.DURATION" type="number" iconLeft="pi pi-clock" [ltr]="true"
+                    hint="SERVICES.FORM.DURATION_HINT" [errorMessage]="priceError(i, 'durationMinutes')" formControlName="durationMinutes" />
+                </div>
+
+                <div class="field" [class.field--idle]="!uses(i, 'Regular')">
+                  <app-float-label-input label="SERVICES.FORM.REGULAR_PRICE" type="number" iconLeft="pi pi-wallet" [ltr]="true"
+                    [errorMessage]="priceError(i, 'regularPrice')" formControlName="regularPrice" />
+                  @if (!uses(i, 'Regular')) { <span class="field__tag">{{ 'SERVICES.FORM.NOT_OFFERED' | translate }}</span> }
+                </div>
+
+                <div class="field" [class.field--idle]="!uses(i, 'Vip')">
+                  <app-float-label-input label="SERVICES.FORM.VIP_PRICE" type="number" iconLeft="pi pi-star" [ltr]="true"
+                    [errorMessage]="priceError(i, 'vipPrice')" formControlName="vipPrice" />
+                  @if (!uses(i, 'Vip')) { <span class="field__tag">{{ 'SERVICES.FORM.NOT_OFFERED' | translate }}</span> }
+                </div>
+
+                <div class="home" [class.field--idle]="!uses(i, 'Home')">
+                  <span class="home__toggle">
+                    <app-switch [checked]="isHome(i)"
+                      [label]="('SERVICES.FORM.HOME_AVAILABLE' | translate) + ' — ' + branchName(i)"
+                      (toggled)="setHome(i, $event)" />
+                    <span class="home__label">
+                      <strong>{{ 'SERVICES.FORM.HOME_AVAILABLE' | translate }}</strong>
+                      @if (!uses(i, 'Home')) { <small>{{ 'SERVICES.FORM.HOME_NOT_OFFERED' | translate }}</small> }
+                    </span>
+                  </span>
+                  @if (isHome(i)) {
+                    <app-float-label-input label="SERVICES.FORM.HOME_PRICE" type="number" iconLeft="pi pi-home" [ltr]="true"
+                      [errorMessage]="priceError(i, 'homePrice')" formControlName="homePrice" />
+                  }
+                </div>
+              </div>
+
+              @if (branchGroups.length > 1) {
+                <footer class="branch-card__foot">
+                  <app-button variant="ghost" size="sm" iconClass="pi pi-copy" [ariaLabel]="('SERVICES.FORM.COPY_TO_ALL' | translate) + ' — ' + branchName(i)" (clicked)="copyToAll(i)">
+                    {{ 'SERVICES.FORM.COPY_TO_ALL' | translate }}
+                  </app-button>
+                </footer>
+              }
+            </article>
+          }
+        </div>
+      </section>
+
+      <footer class="form-actions">
+        <app-button variant="secondary" [disabled]="saving()" (clicked)="cancel()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+        <app-button type="submit" variant="primary" [loading]="saving()">
+          {{ (isEditMode() ? 'COMMON.SAVE' : 'SERVICES.FORM.CREATE') | translate }}
+        </app-button>
+      </footer>
+    </form>
+  }
+</div>

@@ -1,0 +1,42 @@
+@use "styles/variables" as v;
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+
+  &__title { margin: 0; font-size: v.$text-md; font-weight: v.$fw-semibold; }
+  &__hint,
+  &__more { margin: 0; color: v.$text-secondary; font-size: v.$text-sm; }
+  &__loading { display: flex; flex-direction: column; gap: v.$space-2; }
+
+  &__list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; border: 1px solid v.$border; border-radius: v.$radius-md; }
+
+  &__row {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-2;
+    padding: v.$space-3;
+    border-top: 1px solid v.$border;
+    &:first-child { border-top: 0; }
+  }
+
+  &__name { font-size: v.$text-sm; font-weight: v.$fw-semibold; overflow-wrap: anywhere; }
+
+  &__prices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: v.$space-2 v.$space-4;
+    margin: 0;
+    font-size: v.$text-xs;
+
+    div { display: flex; flex-direction: column; gap: 2px; }
+    dt { color: v.$text-muted; }
+    dd { margin: 0; color: v.$text-secondary; font-variant-numeric: tabular-nums; unicode-bidi: plaintext; }
+    strong { color: v.$text; font-weight: v.$fw-semibold; }
+  }
+
+  // "from → to" must point the way the text reads: flip it in RTL.
+  &__arrow { margin-inline: v.$space-1; font-size: v.$text-xs; }
+}
+:host-context([dir="rtl"]) .preview__arrow { transform: scaleX(-1); }

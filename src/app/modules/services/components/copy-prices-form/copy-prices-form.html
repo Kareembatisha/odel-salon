@@ -1,0 +1,27 @@
+<form class="bf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="bf__body">
+    <app-float-label-select label="SERVICES.BULK.SOURCE_BRANCH" [options]="sourceOptions()" formControlName="sourceBranchId" />
+    <app-float-label-select label="SERVICES.BULK.TARGET_BRANCH" [options]="targetOptions()" formControlName="targetBranchId" />
+
+    @if (sameBranch()) {
+      <p class="bf__error" role="alert"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ 'SERVICES.ERRORS.SAME_BRANCH' | translate }}</p>
+    } @else if (sourceCount() === 0) {
+      <p class="bf__error" role="alert"><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ 'SERVICES.ERRORS.SOURCE_EMPTY' | translate }}</p>
+    } @else if (sourceCount() !== null) {
+      <p class="bf__note">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        {{ 'SERVICES.BULK.COPY_COUNT' | translate: { count: sourceCount(), branch: targetName() } }}
+      </p>
+    }
+
+    <p class="bf__note bf__note--warn">
+      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+      {{ 'SERVICES.BULK.COPY_WARNING' | translate }}
+    </p>
+  </div>
+
+  <footer class="bf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()" [disabled]="!canSubmit()">{{ 'SERVICES.BULK.COPY' | translate }}</app-button>
+  </footer>
+</form>

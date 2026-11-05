@@ -1,0 +1,44 @@
+<form class="bf" (submit)="$event.preventDefault(); submit()" novalidate>
+  <div class="bf__body">
+    <p class="bf__note">
+      <i class="pi pi-info-circle" aria-hidden="true"></i>
+      {{ 'SERVICES.BULK.STATUS_FOR' | translate: { count: serviceIds().length } }}
+    </p>
+
+    <fieldset class="choice">
+      <legend>{{ 'SERVICES.BULK.NEW_STATE' | translate }}</legend>
+      <label class="choice__option" [class.choice__option--on]="target() === 'activate'">
+        <input type="radio" name="target" [checked]="target() === 'activate'" (change)="target.set('activate')" />
+        <span>{{ 'SERVICES.BULK.ACTIVATE' | translate }}</span>
+      </label>
+      <label class="choice__option" [class.choice__option--on]="target() === 'deactivate'">
+        <input type="radio" name="target" [checked]="target() === 'deactivate'" (change)="target.set('deactivate')" />
+        <span>{{ 'SERVICES.BULK.DEACTIVATE' | translate }}</span>
+      </label>
+    </fieldset>
+
+    <fieldset class="choice choice--branches">
+      <legend>{{ 'SERVICES.BULK.IN_BRANCHES' | translate }}</legend>
+      <label class="choice__option choice__option--all">
+        <input type="checkbox" class="odl-check" [checked]="allChosen()" (change)="toggleAll()" />
+        <span>{{ 'SERVICES.BULK.ALL_BRANCHES' | translate }}</span>
+      </label>
+      @for (b of options(); track b.id) {
+        <label class="choice__option" [class.choice__option--on]="chosen().includes(b.id)">
+          <input type="checkbox" class="odl-check" [checked]="chosen().includes(b.id)" (change)="toggle(b.id)" />
+          <span>{{ b.label }}</span>
+        </label>
+      }
+    </fieldset>
+
+    <p class="bf__note bf__note--warn">
+      <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+      {{ 'SERVICES.BULK.STATUS_WARNING' | translate }}
+    </p>
+  </div>
+
+  <footer class="bf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()" [disabled]="!canSubmit()">{{ 'SERVICES.BULK.APPLY' | translate }}</app-button>
+  </footer>
+</form>

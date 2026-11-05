@@ -8,6 +8,7 @@ import {
 } from "@modules/branches/model/branch.model";
 import { ChairDetails, ChairType } from "@modules/chairs/model/chair.model";
 import { BarberDetails } from "@modules/barbers/model/barber.model";
+import { ServiceBranchPayload } from "@modules/services/model/service.model";
 
 // ============================================================
 // Types
@@ -44,6 +45,19 @@ export type MockChair = ChairDetails;
 
 /** A barber stored in the mock database (details shape, so the list and detail endpoints share it). */
 export type MockBarber = BarberDetails;
+
+/**
+ * A service stored in the mock database: one record with a price row per branch.
+ * A branch with no row in `prices` is "unpriced" for that service.
+ */
+export interface MockService {
+  id: number;
+  nameAr: string;
+  nameEn: string;
+  createdAt: string;
+  updatedAt: string | null;
+  prices: ServiceBranchPayload[];
+}
 
 // ============================================================
 // Constants
@@ -101,6 +115,7 @@ export class MockDb {
   nextBranchId = 15;
   nextChairId = 1;
   nextBarberId = 1;
+  nextServiceId = 1;
 
   // ----------------------------------------------------------
   // Roles
@@ -345,6 +360,17 @@ export class MockDb {
   barbers: MockBarber[] = this.seedBarbers();
 
   // ----------------------------------------------------------
+  // Services (menu & pricing)
+  // ----------------------------------------------------------
+
+  /**
+   * Seeded from the branch list: every service is priced in every branch except a few
+   * deliberately "unpriced" ones (e.g. a branch added after the service), and prices
+   * scale with a per-branch factor. Home is only seeded in branches that allow home visits.
+   */
+  services: MockService[] = this.seedServices();
+
+  // ----------------------------------------------------------
   // Lookups
   // ----------------------------------------------------------
 
@@ -382,6 +408,70 @@ export class MockDb {
     "Karim Mostafa": "+201001234567",
     "Omar Adel": "+201112223344",
   };
+
+  /** `[nameAr, nameEn, minutes, regular, vip, home price | null]` — base prices before the branch factor. */
+  private static readonly SERVICE_SEED: Array<
+    [string, string, number, number, number, number | null]
+  > = [
+    ["قص شعر", "Haircut", 30, 120, 200, 300],
+    ["تشذيب اللحية", "Beard trim", 15, 60, 100, null],
+    ["غسيل الشعر", "Hair wash", 10, 30, 50, null],
+    ["صبغة شعر", "Hair colour", 90, 350, 500, 700],
+    ["تنظيف البشرة", "Facial cleansing", 40, 180, 260, 300],
+    ["علاج الشعر بالكيراتين", "Keratin treatment", 120, 600, 900, null],
+    ["مانيكير", "Manicure", 30, 100, 150, 200],
+    ["باديكير", "Pedicure", 45, 130, 190, null],
+    ["حلاقة بالموس", "Classic shave", 20, 70, 110, 150],
+    ["قص شعر أطفال", "Kids haircut", 20, 80, 120, 180],
+  ];
+
+  /** Price multiplier per branch id (missing = 1). */
+  private static readonly BRANCH_PRICE_FACTOR: Record<number, number> = {
+    1: 1.2, 2: 1.1, 4: 1.05, 5: 1.25, 6: 1.15, 7: 1.1, 8: 0.9,
+    9: 1.1, 12: 0.8, 13: 0.85, 14: 1.3,
+  };
+
+  /** `serviceId:branchId` pairs with NO price row ("unpriced"). */
+  private static readonly UNPRICED_SERVICES = new Set([
+    "4:8", "4:12", "4:13", "4:14", "10:14", "6:12", "6:13",
+  ]);
+
+  /** `serviceId:branchId` pairs that are priced but inactive. */
+  private static readonly INACTIVE_SERVICES = new Set([
+    "6:2", "8:5", "3:9", "5:11", "9:3", "7:6",
+  ]);
+
+  private seedServices(): MockService[] {
+    const now = new Date().toISOString();
+    const services = MockDb.SERVICE_SEED.map(
+      ([nameAr, nameEn, minutes, regular, vip, home], index): MockService => {
+        const id = index + 1;
+        const prices: ServiceBranchPayload[] = [];
+
+        for (const branch of this.branches) {
+          const key = `${id}:${branch.id}`;
+          if (MockDb.UNPRICED_SERVICES.has(key)) continue;
+
+          const factor = MockDb.BRANCH_PRICE_FACTOR[branch.id] ?? 1;
+          const offersHome = home !== null && branch.allowsHome;
+          prices.push({
+            branchId: branch.id,
+            durationMinutes: minutes,
+            regularPrice: Math.round(regular * factor),
+            vipPrice: Math.round(vip * factor),
+            isHomeAvailable: offersHome,
+            homePrice: offersHome ? Math.round(home * factor) : null,
+            isActive: !MockDb.INACTIVE_SERVICES.has(key),
+          });
+        }
+
+        return { id, nameAr, nameEn, createdAt: now, updatedAt: null, prices };
+      },
+    );
+
+    this.nextServiceId = services.length + 1;
+    return services;
+  }
 
   private seedBarbers(): MockBarber[] {
     const barbers: MockBarber[] = [];

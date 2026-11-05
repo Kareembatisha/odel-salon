@@ -1,0 +1,241 @@
+<div class="odl-page">
+  <app-page-header [title]="'SERVICES.TITLE' | translate" [subtitle]="'SERVICES.SUBTITLE' | translate">
+    @if (canBulk()) {
+      <app-button variant="outline" iconClass="pi pi-percentage" (clicked)="openTool('adjust')">
+        {{ 'SERVICES.BULK.ADJUST' | translate }}
+      </app-button>
+    }
+    @if (canCopy()) {
+      <app-button variant="outline" iconClass="pi pi-copy" (clicked)="openTool('copy')">
+        {{ 'SERVICES.BULK.COPY_FROM' | translate }}
+      </app-button>
+    }
+    @if (canCreate()) {
+      <app-button variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
+        {{ 'SERVICES.NEW' | translate }}
+      </app-button>
+    }
+  </app-page-header>
+
+  @if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state [title]="'SERVICES.NO_BRANCHES_TITLE' | translate" [description]="'SERVICES.NO_BRANCHES_TEXT' | translate" icon="pi pi-building" />
+    </div>
+  } @else {
+    <!-- Summary cards: counted by the backend over the WHOLE selected branch, ignoring search and filters. -->
+    @if (showStats()) {
+      <section class="stats" [attr.aria-label]="'SERVICES.STATS.LABEL' | translate">
+        <app-stat-card [label]="'SERVICES.STATS.TOTAL' | translate" [value]="summary().total" icon="pi pi-list" tone="neutral" [hint]="statsHint()" />
+        <app-stat-card [label]="'SERVICES.STATS.ACTIVE' | translate" [value]="summary().active" icon="pi pi-check-circle" tone="success" [hint]="statsHint()" />
+        <app-stat-card [label]="'SERVICES.STATS.HOME' | translate" [value]="summary().homeAvailable" icon="pi pi-home" tone="info" [hint]="statsHint()" />
+        <app-stat-card [label]="'SERVICES.STATS.UNPRICED' | translate" [value]="summary().unpriced" icon="pi pi-tag" tone="warning" [hint]="statsHint()" />
+      </section>
+    } @else if (loading()) {
+      <div class="stats" aria-busy="true">
+        @for (n of skeletonStats; track n) {
+          <div class="odl-card sk-stat">
+            <app-skeleton width="55%" height="14px" />
+            <app-skeleton width="30%" height="28px" />
+            <app-skeleton width="40%" height="12px" />
+          </div>
+        }
+      </div>
+    }
+
+    <div class="toolbar">
+      <app-filter-select class="toolbar__branch" [label]="'SERVICES.FILTER.BRANCH' | translate" [options]="branchOptions()"
+        [value]="branchId() !== null ? '' + branchId() : ''" (changed)="onBranch($event)" />
+      <app-search-input [placeholder]="'SERVICES.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+      <app-filter-select [label]="'SERVICES.FILTER.STATUS' | translate" [options]="statusFilterOptions()"
+        [value]="query().isActive === undefined ? '' : '' + query().isActive" (changed)="onStatusFilter($event)" />
+      <app-filter-select [label]="'SERVICES.FILTER.HOME' | translate" [options]="homeFilterOptions()"
+        [value]="query().isHomeAvailable === undefined ? '' : '' + query().isHomeAvailable" (changed)="onHomeFilter($event)" />
+
+      @if (selection().length) {
+        <div class="bulk" role="status">
+          <span class="bulk__count">{{ 'COMMON.SELECTED' | translate: { count: selection().length } }}</span>
+          <app-button variant="ghost" size="sm" (clicked)="selection.set([])">{{ 'COMMON.CLEAR_SELECTION' | translate }}</app-button>
+          @if (canEdit()) {
+            <app-button variant="secondary" size="sm" iconClass="pi pi-building" (clicked)="openTool('status')">{{ 'SERVICES.BULK.SET_STATUS' | translate }}</app-button>
+          }
+          @if (canDelete()) {
+          <app-button variant="danger" size="sm" iconClass="pi pi-trash" (clicked)="askBulkDelete()">{{ 'COMMON.DELETE' | translate }}</app-button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (hasError() && !rows().length) {
+      <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+    } @else {
+      <app-data-table
+        [data]="rows()"
+        [totalRecords]="meta()?.totalCount ?? 0"
+        [page]="meta()?.currentPage ?? 1"
+        [pageSize]="meta()?.pageSize ?? 20"
+        [loading]="loading() && rows().length === 0"
+        [caption]="'SERVICES.TITLE' | translate"
+        [selectable]="canDelete()"
+        [(selection)]="selection"
+        [selectAllLabel]="'COMMON.SELECT_ALL' | translate"
+        [selectRowLabel]="'COMMON.SELECT_ROW' | translate"
+        [emptyTitle]="(isFiltered() ? 'SERVICES.NO_RESULTS_TITLE' : 'SERVICES.EMPTY_TITLE') | translate"
+        [emptyDescription]="(isFiltered() ? 'SERVICES.NO_RESULTS_TEXT' : 'SERVICES.EMPTY_TEXT') | translate"
+        emptyIcon="pi pi-list"
+        (pageChange)="onPage($event)"
+        (rowClick)="openEdit($event)"
+      >
+        <ng-template odlCol="service" [label]="'SERVICES.COL.SERVICE' | translate" width="26%" let-row>
+          <span class="svc">
+            <span class="cell-text svc__name" [attr.title]="name(row)">{{ name(row) }}</span>
+            <span class="cell-text svc__other" [attr.title]="otherName(row)">{{ otherName(row) }}</span>
+          </span>
+        </ng-template>
+        <ng-template odlCol="duration" [label]="'SERVICES.COL.DURATION' | translate" width="110px" let-row>
+          <span class="num" [class.muted]="!row.pricing.isPriced">{{ duration(row.pricing.durationMinutes) }}</span>
+        </ng-template>
+        <ng-template odlCol="regular" [label]="'SERVICES.COL.REGULAR' | translate" width="120px" let-row>
+          <span class="num" [class.muted]="!row.pricing.isPriced">{{ price(row.pricing.regularPrice) }}</span>
+        </ng-template>
+        <ng-template odlCol="vip" [label]="'SERVICES.COL.VIP' | translate" width="120px" let-row>
+          <span class="num" [class.muted]="!row.pricing.isPriced">{{ price(row.pricing.vipPrice) }}</span>
+        </ng-template>
+        <ng-template odlCol="home" [label]="'SERVICES.COL.HOME' | translate" width="140px" let-row>
+          @if (row.pricing.isPriced && !row.pricing.isHomeAvailable) {
+            <span class="muted">{{ 'SERVICES.IN_BRANCH_ONLY' | translate }}</span>
+          } @else {
+            <span class="num" [class.muted]="!row.pricing.isPriced">{{ price(row.pricing.homePrice) }}</span>
+          }
+        </ng-template>
+        <ng-template odlCol="status" [label]="'SERVICES.COL.STATUS' | translate" width="190px" let-row>
+          <span class="status" (click)="$event.stopPropagation()">
+            @if (!row.pricing.isPriced) {
+              <app-status-badge variant="warning">{{ 'SERVICES.STATUS.NOT_PRICED' | translate }}</app-status-badge>
+            } @else {
+              @if (canEdit()) {
+                <app-switch [checked]="row.pricing.isActive" [disabled]="saving()"
+                  [label]="(row.pricing.isActive ? 'SERVICES.SWITCH.DEACTIVATE' : 'SERVICES.SWITCH.ACTIVATE') | translate"
+                  (toggled)="toggle(row, $event)" />
+              }
+              <app-status-badge [variant]="row.pricing.isActive ? 'success' : 'neutral'">
+                {{ (row.pricing.isActive ? 'SERVICES.STATUS.ACTIVE' : 'SERVICES.STATUS.INACTIVE') | translate }}
+              </app-status-badge>
+            }
+          </span>
+        </ng-template>
+        <ng-template odlCol="actions" label="" align="end" width="150px" let-row>
+          <span class="row-actions" (click)="$event.stopPropagation()">
+            @if (canEdit()) {
+              @if (row.pricing.isPriced) {
+                <app-button variant="ghost" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="openEdit(row)" />
+              } @else {
+                <app-button variant="secondary" size="sm" iconClass="pi pi-tag" (clicked)="openEdit(row)">{{ 'SERVICES.SET_PRICES' | translate }}</app-button>
+              }
+            }
+            @if (canDelete()) {
+              <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+            }
+          </span>
+        </ng-template>
+
+        <!-- Narrow viewport (< 768px): same data and actions, laid out as a card. -->
+        <ng-template odlCard let-row let-selected="selected" let-toggleSelected="toggleSelected">
+          <div class="card__top">
+            @if (canDelete()) {
+              <input type="checkbox" class="odl-check" [checked]="selected"
+                [attr.aria-label]="'COMMON.SELECT_ROW' | translate" (click)="$event.stopPropagation()" (change)="toggleSelected()" />
+            }
+            <span class="card__who">
+              <span class="card__name">{{ name(row) }}</span>
+              <span class="card__sub">{{ otherName(row) }}</span>
+            </span>
+            @if (!row.pricing.isPriced) {
+              <app-status-badge variant="warning">{{ 'SERVICES.STATUS.NOT_PRICED' | translate }}</app-status-badge>
+            } @else {
+              <app-status-badge [variant]="row.pricing.isActive ? 'success' : 'neutral'">
+                {{ (row.pricing.isActive ? 'SERVICES.STATUS.ACTIVE' : 'SERVICES.STATUS.INACTIVE') | translate }}
+              </app-status-badge>
+            }
+          </div>
+
+          <dl class="card__prices" [class.muted]="!row.pricing.isPriced">
+            <div><dt>{{ 'SERVICES.COL.DURATION' | translate }}</dt><dd>{{ duration(row.pricing.durationMinutes) }}</dd></div>
+            <div><dt>{{ 'SERVICES.COL.REGULAR' | translate }}</dt><dd>{{ price(row.pricing.regularPrice) }}</dd></div>
+            <div><dt>{{ 'SERVICES.COL.VIP' | translate }}</dt><dd>{{ price(row.pricing.vipPrice) }}</dd></div>
+            <div>
+              <dt>{{ 'SERVICES.COL.HOME' | translate }}</dt>
+              <dd>{{ row.pricing.isPriced && !row.pricing.isHomeAvailable ? ('SERVICES.IN_BRANCH_ONLY' | translate) : price(row.pricing.homePrice) }}</dd>
+            </div>
+          </dl>
+
+          <div class="card__actions" (click)="$event.stopPropagation()">
+            @if (canEdit() && row.pricing.isPriced) {
+              <app-switch [checked]="row.pricing.isActive" [disabled]="saving()"
+                [label]="(row.pricing.isActive ? 'SERVICES.SWITCH.DEACTIVATE' : 'SERVICES.SWITCH.ACTIVATE') | translate"
+                (toggled)="toggle(row, $event)" />
+            }
+            <span class="card__spacer"></span>
+            @if (canEdit()) {
+              @if (row.pricing.isPriced) {
+                <app-button variant="secondary" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="openEdit(row)" />
+              } @else {
+                <app-button variant="secondary" size="sm" iconClass="pi pi-tag" (clicked)="openEdit(row)">{{ 'SERVICES.SET_PRICES' | translate }}</app-button>
+              }
+            }
+            @if (canDelete()) {
+              <app-button variant="secondary" size="sm" iconClass="pi pi-trash" [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+            }
+          </div>
+        </ng-template>
+      </app-data-table>
+    }
+  }
+</div>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete().length > 0"
+  [title]="(pendingDelete().length > 1 ? 'SERVICES.DELETE.TITLE_MANY' : 'SERVICES.DELETE.TITLE_ONE') | translate"
+  [message]="deleteMessage()"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set([])"
+/>
+
+<app-drawer
+  [open]="tool() === 'adjust'"
+  [title]="'SERVICES.BULK.ADJUST' | translate"
+  [subtitle]="'SERVICES.BULK.ADJUST_SUBTITLE' | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeTool()"
+>
+  @if (tool() === 'adjust') {
+    <app-adjust-prices-form [branches]="branches()" [initialBranchId]="branchId()" [selectedIds]="selectedIds()"
+      (done)="closeTool()" (cancelled)="closeTool()" />
+  }
+</app-drawer>
+
+<app-drawer
+  [open]="tool() === 'copy'"
+  [title]="'SERVICES.BULK.COPY_FROM' | translate"
+  [subtitle]="'SERVICES.BULK.COPY_SUBTITLE' | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeTool()"
+>
+  @if (tool() === 'copy') {
+    <app-copy-prices-form [branches]="branches()" [initialBranchId]="branchId()" (done)="closeTool()" (cancelled)="closeTool()" />
+  }
+</app-drawer>
+
+<app-drawer
+  [open]="tool() === 'status'"
+  [title]="'SERVICES.BULK.SET_STATUS' | translate"
+  [subtitle]="'SERVICES.BULK.STATUS_SUBTITLE' | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeTool()"
+>
+  @if (tool() === 'status') {
+    <app-bulk-status-form [branches]="branches()" [serviceIds]="selectedIds()" (done)="statusDone()" (cancelled)="closeTool()" />
+  }
+</app-drawer>

@@ -127,6 +127,44 @@ export const MAIN_ROUTES: Routes = [
       ),
   },
 
+  {
+    path: "services",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Service.View,
+      breadcrumb: "LAYOUT.NAV.SERVICES",
+    },
+    loadComponent: () =>
+      import("./services/pages/services-list/services-list").then(
+        (m) => m.ServicesList,
+      ),
+  },
+
+  {
+    path: "services/new",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Service.Create,
+      breadcrumb: ["LAYOUT.NAV.SERVICES", "SERVICES.FORM.CREATE_TITLE"],
+    },
+    loadComponent: () =>
+      import("./services/pages/services-form/services-form").then(
+        (m) => m.ServicesForm,
+      ),
+  },
+  {
+    path: "services/:id/edit",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Service.Edit,
+      breadcrumb: ["LAYOUT.NAV.SERVICES", "SERVICES.FORM.EDIT_TITLE"],
+    },
+    loadComponent: () =>
+      import("./services/pages/services-form/services-form").then(
+        (m) => m.ServicesForm,
+      ),
+  },
+
   // ── Account ──────────────────────────────────────────
   {
     path: "profile",
