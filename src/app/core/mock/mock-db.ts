@@ -7,6 +7,7 @@ import {
   BranchWorkingHour,
 } from "@modules/branches/model/branch.model";
 import { ChairDetails, ChairType } from "@modules/chairs/model/chair.model";
+import { BarberDetails } from "@modules/barbers/model/barber.model";
 
 // ============================================================
 // Types
@@ -40,6 +41,9 @@ export type MockBranch = BranchListItem & Omit<BranchDetails, "id">;
 
 /** A chair stored in the mock database (details shape, so the list and detail endpoints share it). */
 export type MockChair = ChairDetails;
+
+/** A barber stored in the mock database (details shape, so the list and detail endpoints share it). */
+export type MockBarber = BarberDetails;
 
 // ============================================================
 // Constants
@@ -96,6 +100,7 @@ export class MockDb {
   nextUserId = 13;
   nextBranchId = 15;
   nextChairId = 1;
+  nextBarberId = 1;
 
   // ----------------------------------------------------------
   // Roles
@@ -329,6 +334,17 @@ export class MockDb {
   chairs: MockChair[] = this.seedChairs();
 
   // ----------------------------------------------------------
+  // Barbers
+  // ----------------------------------------------------------
+
+  /**
+   * Seeded from each branch's `barbersCount`, so the Branches and Barbers screens
+   * agree. Every visible branch keeps at least one active barber (the same invariant
+   * the real backend enforces), and a few barbers start suspended.
+   */
+  barbers: MockBarber[] = this.seedBarbers();
+
+  // ----------------------------------------------------------
   // Lookups
   // ----------------------------------------------------------
 
@@ -343,6 +359,60 @@ export class MockDb {
 
   /** `branchId:name` of seeded chairs that start inactive (counts stay totals, as in the real API). */
   private static readonly INACTIVE_SEED = new Set(["2:R4", "5:V3", "9:R2"]);
+
+  /** `branchId:position` (1-based inside the branch) of seeded barbers that start suspended. */
+  private static readonly SUSPENDED_BARBERS = new Set(["1:4", "2:5", "5:7", "5:8", "9:2", "13:1"]);
+
+  private static readonly BARBER_NAMES = [
+    "Ahmed Fathy", "Mahmoud Saber", "Hassan Gamal", "Mostafa Ezzat", "Ali Hegazy",
+    "Tamer Nabil", "Sherif Lotfy", "Walid Samir", "Yehia Adly", "Karim Mostafa",
+    "Omar Adel", "Ziad Ramy", "Hossam Anwar", "Ibrahim Zaki", "Khaled Mounir",
+    "Amr Diab Younes", "Mohamed Salah Eldin", "Ramy Sabry", "Adel Fouad", "Nader Hamdy",
+    "Fady Boules", "Mina Samuel", "George Wahba", "Peter Ishak", "Sameh Hosny",
+    "Bassem Yousry", "Essam Kamel", "Gaber Atef", "Hany Shaker", "Ismail Radwan",
+    "Magdy Tawfik", "Nabil Sherbiny", "Osama Refaat", "Reda Mekawy", "Saad Zaghloul",
+    "Taha Mansour", "Usama Badr", "Wael Gomaa", "Yasser Hamed", "Zakaria Awad",
+    "Anas Farouk", "Badr Abdelaziz", "Fawzy Helmy", "Galal Moussa", "Hatem Ragheb",
+    "Ihab Soliman", "Jamal Nasser", "Kamal Darwish", "Labib Shawky", "Maher Galal",
+    "Nasser Eid", "Raouf Talaat", "Sayed Barakat", "Talaat Younis", "Wagdy Rizk",
+  ];
+
+  /** Phones of seeded barbers that match the API contract's examples. */
+  private static readonly BARBER_PHONE_OVERRIDES: Record<string, string> = {
+    "Karim Mostafa": "+201001234567",
+    "Omar Adel": "+201112223344",
+  };
+
+  private seedBarbers(): MockBarber[] {
+    const barbers: MockBarber[] = [];
+    let id = 1;
+    const now = new Date().toISOString();
+    const operators = ["0", "1", "2", "5"];
+
+    for (const branch of this.branches) {
+      for (let n = 1; n <= branch.barbersCount; n++) {
+        const fullName = MockDb.BARBER_NAMES[(id - 1) % MockDb.BARBER_NAMES.length];
+        const generated = `+201${operators[id % 4]}${String(10000000 + ((id * 7654321) % 89999999))}`;
+
+        barbers.push({
+          id,
+          branchId: branch.id,
+          branchNameAr: branch.nameAr,
+          branchNameEn: branch.nameEn,
+          fullName,
+          phone: MockDb.BARBER_PHONE_OVERRIDES[fullName] ?? generated,
+          imageUrl: null,
+          isActive: !MockDb.SUSPENDED_BARBERS.has(`${branch.id}:${n}`),
+          createdAt: now,
+          updatedAt: null,
+        });
+        id++;
+      }
+    }
+
+    this.nextBarberId = id;
+    return barbers;
+  }
 
   private seedChairs(): MockChair[] {
     const chairs: MockChair[] = [];

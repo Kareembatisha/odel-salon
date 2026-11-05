@@ -48,6 +48,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { id: 'branches', labelKey: 'LAYOUT.NAV.BRANCHES', icon: 'pi pi-building', route: '/main/branches', permission: PERMISSIONS.Branch.View },
       { id: 'chairs', labelKey: 'LAYOUT.NAV.CHAIRS', icon: 'pi pi-stop', route: '/main/chairs', permission: PERMISSIONS.Chair.View },
+      { id: 'barbers', labelKey: 'LAYOUT.NAV.BARBERS', icon: 'pi pi-id-card', route: '/main/barbers', permission: PERMISSIONS.Barber.View },
     ],
   },
   // Developer reference — never shipped to production (environment.showDesignSystem = false).

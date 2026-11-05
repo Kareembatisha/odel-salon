@@ -51,6 +51,9 @@ src/
       auth/               login · forgot password · OTP · new password · success
       users/              list + filters + bulk delete · create/edit drawer · status switch
       roles/              list · role details (permission matrix)
+      branches/           cards · create/edit pages · details · visibility switch
+      chairs/             cards + summary · create/edit drawer · status switch
+      barbers/            table + filters + bulk delete · create/edit drawer with photo · status switch
       dashboard/          model · repository (api + mock) · service · page
       profile-management/ profile + change password
       design-system/      living reference page (dev only)
@@ -117,6 +120,9 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 | Users | `/main/users` | `User.View` (+ `Create` / `Edit` / `Delete` for the actions) |
 | Roles & permissions | `/main/roles` | `Role.View` (+ `Create` / `Edit` / `Delete`) |
 | Role details (permission matrix) | `/main/roles/:id` | `Role.View` (editing needs `Role.Edit`) |
+| Branches | `/main/branches` | `Branch.View` (+ `Create` / `Edit` / `Delete` for the actions) |
+| Chairs | `/main/chairs` | `Chair.View` (+ `Create` / `Edit` / `ToggleStatus` / `Delete` for the actions) |
+| Barbers | `/main/barbers` | `Barber.View` (+ `Create` / `Edit` / `Delete` for the actions) |
 | My profile | `/main/profile` | sign-in only |
 | Design system (dev builds only) | `/main/design-system` | — |
 
@@ -145,6 +151,21 @@ Fixed, and re-verified with axe-core across every page in light/dark × English/
 
 Known remaining findings (moderate/minor, pre-existing, not touched this round — out of scope per this change's instructions): the auth pages (`/login`, `/forget-password`) have no `<main>` landmark and no level-one heading; the sidebar's two `<nav>` regions aren't uniquely labelled; the sortable/empty table header cell has no visible text for screen readers. None are regressions from this change.
 
+## Barbers
+
+Implements `API Contract — Barbers` (all 6 endpoints) in `modules/barbers/`, built the same way as Users (table, filters, drawer, bulk delete).
+
+- **List** — Users-style table: photo (or the name's initial), branch (Arabic or English by UI language), phone, status. Server-side search (full name or phone), branch and status filters, 10 per page, sorted by name by the API. Below 768px the table becomes cards.
+- **Create / edit** — side drawer. Edit loads `GET /barbers/{id}` first. Fields: branch, full name (max 100), phone, optional photo.
+  - **Phone** is typed any common Egyptian way (`01001234567`, `+20 100 123 4567`…) and sent as `+201XXXXXXXXX` (`utils/barber-phone.util.ts`). Uniqueness is checked by the backend.
+  - **Photo** — JPG / PNG / WEBP up to 5 MB, checked in the browser before upload. Sent as `multipart/form-data` with PascalCase fields (`BranchId, FullName, Phone, Image, RemoveImage`) — see `utils/barber-form-data.ts`. Picking a photo replaces it; **Remove photo** sends `RemoveImage=true` with no `Image`; neither keeps the current one. The photo only changes when the form is saved.
+  - **Branch** can be changed on edit — that *transfers* the barber, and the form says so.
+- **Status** — the switch flips `isActive` (`PATCH …/toggle-status`, `Barber.Edit`). Suspended barbers are hidden from the app and can't be booked.
+- **Delete** — one barber from the row, or select several for one bulk `DELETE /barbers` with `{ ids }`. All-or-nothing, permanent (photos too), always behind a confirmation.
+- **Last active barber rule** — in a *visible* branch the last active barber can't be suspended, deleted or moved (409 "…is the last active barber in a visible branch. Hide the branch first"); the check covers the whole bulk request. Hidden branches have no such restriction. The backend's message is shown as-is.
+- **Mock backend** — `core/mock/mock-db.ts` seeds each branch with as many barbers as its `barbersCount` (a few suspended), and the mock repository enforces the same rules (valid + unique phone, photo type/size, the 409 lock, all-or-nothing delete) and keeps `barbersCount` on the Branches screen in sync. In mock mode, "showing" a hidden branch also needs an *active* barber.
+- **Permissions** — `Barber.View` opens the page; `Create`, `Edit` (also the status switch) and `Delete` show or hide their actions. The mock `BranchManager` role has `Barber.View` only; `SuperAdmin` has everything.
+
 ## Notes and assumptions
 
 - The AlSalam README says Angular 22 / PrimeNG 19; its `package.json` and lockfile say Angular 21 / PrimeNG 21. The latter were followed.
@@ -160,4 +181,5 @@ Known remaining findings (moderate/minor, pre-existing, not touched this round �
 - `GET /users/{id}` returns the role **name**, not its id, so the edit form maps the name back to an id through the roles list (`GET /roles?PageSize=100`). If role names aren't unique this is ambiguous — ask backend to return `roleId` too.
 - Deleting a role that still has users is *allowed* by the UI (with a warning); the contract says the backend may refuse, and its message is shown.
 - Success toasts use the app's own translated messages, not the backend's English `message`; error messages come from the backend.
+- Barbers: the list endpoint returns no summary data, so there are no stat cards; the page size is 10 (contract default 20, max 100). Photo limit is 5 MB per the Barbers contract (profile photos stay at the 2 MB client-side default).
 - Page size is fixed at 10 (the contract's default). Create-user requires every field, including phone (contract: "all fields are required").

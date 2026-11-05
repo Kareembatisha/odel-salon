@@ -114,6 +114,19 @@ export const MAIN_ROUTES: Routes = [
       ),
   },
 
+  {
+    path: "barbers",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Barber.View,
+      breadcrumb: "LAYOUT.NAV.BARBERS",
+    },
+    loadComponent: () =>
+      import("./barbers/pages/barbers-list/barbers-list").then(
+        (m) => m.BarbersList,
+      ),
+  },
+
   // ── Account ──────────────────────────────────────────
   {
     path: "profile",

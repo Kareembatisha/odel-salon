@@ -1,0 +1,44 @@
+@use "styles/variables" as v;
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: v.$space-3; min-height: 42px; }
+
+.bulk {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  margin-inline-start: auto;
+  padding: v.$space-1 v.$space-2 v.$space-1 v.$space-4;
+  background: v.$primary-soft;
+  border: 1px solid v.$primary-soft-border;
+  border-radius: v.$radius-md;
+  &__count { color: v.$primary-text; font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+}
+
+.who { display: inline-flex; align-items: center; gap: v.$space-3; min-width: 0; max-width: 100%; }
+.who__name { font-weight: v.$fw-semibold; }
+
+// Phone numbers stay left-to-right (and readable) even inside an RTL page.
+.phone {
+  color: v.$text;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  unicode-bidi: isolate;
+  &:hover { color: v.$primary-text; text-decoration: underline; }
+}
+
+.status { display: inline-flex; align-items: center; gap: v.$space-3; }
+.row-actions { display: inline-flex; gap: v.$space-1; }
+
+.drawer-loading { display: flex; flex-direction: column; gap: v.$space-4; padding: v.$space-6; }
+
+// ── Mobile card content (structure lives in data-table.component.scss) ──
+.card {
+  &__top { display: flex; align-items: center; gap: v.$space-3; }
+  &__top input.odl-check { width: 20px; height: 20px; flex-shrink: 0; }
+  &__who { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: v.$lh-snug; }
+  &__name { font-weight: v.$fw-semibold; }
+  &__sub { color: v.$text-secondary; font-size: v.$text-sm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  &__meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: v.$space-2; }
+  &__actions { display: flex; align-items: center; gap: v.$space-2; padding-top: v.$space-2; border-top: 1px solid v.$border; }
+  &__spacer { flex: 1; }
+}

@@ -1,0 +1,154 @@
+<div class="odl-page">
+  <app-page-header [title]="'BARBERS.TITLE' | translate" [subtitle]="'BARBERS.SUBTITLE' | translate">
+    @if (canCreate()) {
+      <app-button variant="primary" iconClass="pi pi-user-plus" (clicked)="openCreate()">
+        {{ 'BARBERS.NEW' | translate }}
+      </app-button>
+    }
+  </app-page-header>
+
+  <div class="toolbar">
+    <app-search-input [placeholder]="'BARBERS.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+    <app-filter-select [label]="'BARBERS.FILTER.BRANCH' | translate" [options]="branchFilterOptions()"
+      [value]="query().branchId !== undefined ? '' + query().branchId : ''" (changed)="onBranchFilter($event)" />
+    <app-filter-select [label]="'BARBERS.FILTER.STATUS' | translate" [options]="statusFilterOptions()"
+      [value]="query().isActive === undefined ? '' : '' + query().isActive" (changed)="onStatusFilter($event)" />
+
+    @if (selection().length) {
+      <div class="bulk" role="status">
+        <span class="bulk__count">{{ 'COMMON.SELECTED' | translate: { count: selection().length } }}</span>
+        <app-button variant="ghost" size="sm" (clicked)="selection.set([])">{{ 'COMMON.CLEAR_SELECTION' | translate }}</app-button>
+        <app-button variant="danger" size="sm" iconClass="pi pi-trash" (clicked)="askBulkDelete()">{{ 'COMMON.DELETE' | translate }}</app-button>
+      </div>
+    }
+  </div>
+
+  @if (hasError() && !rows().length) {
+    <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+  } @else {
+    <app-data-table
+      [data]="rows()"
+      [totalRecords]="meta()?.totalCount ?? 0"
+      [page]="meta()?.currentPage ?? 1"
+      [pageSize]="meta()?.pageSize ?? 10"
+      [loading]="loading()"
+      [caption]="'BARBERS.TITLE' | translate"
+      [selectable]="canDelete()"
+      [(selection)]="selection"
+      [selectAllLabel]="'COMMON.SELECT_ALL' | translate"
+      [selectRowLabel]="'COMMON.SELECT_ROW' | translate"
+      [emptyTitle]="(isFiltered() ? 'BARBERS.NO_RESULTS_TITLE' : 'BARBERS.EMPTY_TITLE') | translate"
+      [emptyDescription]="(isFiltered() ? 'BARBERS.NO_RESULTS_TEXT' : 'BARBERS.EMPTY_TEXT') | translate"
+      emptyIcon="pi pi-user"
+      (pageChange)="onPage($event)"
+      (rowClick)="openEdit($event)"
+    >
+      <ng-template odlCol="barber" [label]="'BARBERS.COL.BARBER' | translate" width="34%" let-row>
+        <span class="who">
+          <app-avatar size="md" [name]="row.fullName" [src]="row.imageUrl" />
+          <span class="cell-text who__name" [attr.title]="row.fullName">{{ row.fullName }}</span>
+        </span>
+      </ng-template>
+      <ng-template odlCol="branch" [label]="'BARBERS.COL.BRANCH' | translate" width="22%" let-row>
+        <span class="cell-text" [attr.title]="branchName(row)">{{ branchName(row) }}</span>
+      </ng-template>
+      <ng-template odlCol="phone" [label]="'BARBERS.COL.PHONE' | translate" width="170px" let-row>
+        <a class="phone" dir="ltr" [attr.href]="'tel:' + row.phone" (click)="$event.stopPropagation()">{{ row.phone }}</a>
+      </ng-template>
+      <ng-template odlCol="status" [label]="'BARBERS.COL.STATUS' | translate" width="190px" let-row>
+        <span class="status" (click)="$event.stopPropagation()">
+          @if (canEdit()) {
+            <app-switch [checked]="row.isActive" [disabled]="saving()"
+              [label]="(row.isActive ? 'BARBERS.SUSPEND' : 'BARBERS.ACTIVATE') | translate" (toggled)="toggle(row)" />
+          }
+          <app-status-badge [variant]="row.isActive ? 'success' : 'neutral'">
+            {{ (row.isActive ? 'BARBERS.STATUS.ACTIVE' : 'BARBERS.STATUS.SUSPENDED') | translate }}
+          </app-status-badge>
+        </span>
+      </ng-template>
+      <ng-template odlCol="actions" label="" align="end" width="120px" let-row>
+        <span class="row-actions" (click)="$event.stopPropagation()">
+          @if (canEdit()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="openEdit(row)" />
+          }
+          @if (canDelete()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+          }
+        </span>
+      </ng-template>
+
+      <!-- Narrow viewport (< 768px): same data and actions, laid out as a card. -->
+      <ng-template odlCard let-row let-selected="selected" let-toggleSelected="toggleSelected">
+        <div class="card__top">
+          @if (canDelete()) {
+            <input type="checkbox" class="odl-check" [checked]="selected"
+              [attr.aria-label]="'COMMON.SELECT_ROW' | translate" (click)="$event.stopPropagation()" (change)="toggleSelected()" />
+          }
+          <app-avatar size="md" [name]="row.fullName" [src]="row.imageUrl" />
+          <span class="card__who">
+            <span class="card__name">{{ row.fullName }}</span>
+            <span class="card__sub">{{ branchName(row) }}</span>
+          </span>
+        </div>
+
+        <div class="card__meta">
+          <a class="phone" dir="ltr" [attr.href]="'tel:' + row.phone" (click)="$event.stopPropagation()">{{ row.phone }}</a>
+          <app-status-badge [variant]="row.isActive ? 'success' : 'neutral'">
+            {{ (row.isActive ? 'BARBERS.STATUS.ACTIVE' : 'BARBERS.STATUS.SUSPENDED') | translate }}
+          </app-status-badge>
+        </div>
+
+        <div class="card__actions" (click)="$event.stopPropagation()">
+          @if (canEdit()) {
+            <app-switch [checked]="row.isActive" [disabled]="saving()"
+              [label]="(row.isActive ? 'BARBERS.SUSPEND' : 'BARBERS.ACTIVATE') | translate" (toggled)="toggle(row)" />
+          }
+          <span class="card__spacer"></span>
+          @if (canEdit()) {
+            <app-button variant="secondary" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="openEdit(row)" />
+          }
+          @if (canDelete()) {
+            <app-button variant="secondary" size="sm" iconClass="pi pi-trash" [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="askDelete(row, $event)" />
+          }
+        </div>
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="(drawerMode() === 'create' ? 'BARBERS.FORM.CREATE_TITLE' : 'BARBERS.FORM.EDIT_TITLE') | translate"
+  [subtitle]="(drawerMode() === 'create' ? 'BARBERS.FORM.CREATE_SUBTITLE' : 'BARBERS.FORM.EDIT_SUBTITLE') | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeDrawer()"
+>
+  @if (drawerOpen()) {
+    @if (drawerLoading()) {
+      <div class="drawer-loading">
+        @for (n of [1, 2, 3, 4]; track n) { <app-skeleton height="56px" /> }
+      </div>
+    } @else {
+      <app-barber-form
+        [mode]="drawerMode()"
+        [details]="editDetails()"
+        [branches]="branchList()"
+        [initialBranchId]="query().branchId ?? null"
+        [saving]="saving()"
+        (submitted)="onSubmitted($event)"
+        (cancelled)="closeDrawer()"
+      />
+    }
+  }
+</app-drawer>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete().length > 0"
+  [title]="(pendingDelete().length > 1 ? 'BARBERS.DELETE.TITLE_MANY' : 'BARBERS.DELETE.TITLE_ONE') | translate"
+  [message]="deleteMessage()"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set([])"
+/>

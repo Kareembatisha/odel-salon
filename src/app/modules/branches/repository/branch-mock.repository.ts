@@ -249,7 +249,9 @@ export class BranchMockRepository implements IBranchRepository {
       if (branch.allowsVip && branch.vipChairsCount === 0) {
         errors["AllowsVip"] = "BRANCHES.ERRORS.SHOW_NEEDS_CHAIR";
       }
-      if (branch.barbersCount === 0) {
+      // `barbersCount` is a total (suspended included), so also look for an ACTIVE barber.
+      const hasActiveBarber = this.db.barbers.some((b) => b.branchId === branch.id && b.isActive);
+      if (branch.barbersCount === 0 || !hasActiveBarber) {
         errors["Barbers"] = "BRANCHES.ERRORS.SHOW_NEEDS_BARBER";
       }
 

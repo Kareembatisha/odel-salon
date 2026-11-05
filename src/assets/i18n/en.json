@@ -152,6 +152,7 @@
       "ROLES_PERMISSIONS": "Roles & permissions",
       "BRANCHES": "Branches",
       "CHAIRS": "Chairs",
+      "BARBERS": "Barbers",
       "DESIGN_SYSTEM": "Design system"
     }
   },
@@ -487,6 +488,83 @@
       "SHOW_NEEDS_BARBER": "The branch needs at least one active barber before it can be shown."
     }
   },
+  "BARBERS": {
+    "CREATED": "Barber added.",
+    "UPDATED": "Barber updated.",
+    "SUSPENDED": "Barber suspended.",
+    "ACTIVATED": "Barber activated.",
+    "STATUS_UPDATED": "Barber status updated.",
+    "DELETED": "Barber deleted.",
+    "DELETED_MANY": "Barbers deleted.",
+    "ERRORS": {
+      "NOT_FOUND": "This barber no longer exists.",
+      "BRANCH_NOT_FOUND": "This branch no longer exists.",
+      "NAME_REQUIRED": "Full name is required",
+      "NAME_TOO_LONG": "The name can’t be longer than 100 characters",
+      "PHONE_REQUIRED": "Phone number is required",
+      "PHONE_INVALID": "Enter an Egyptian mobile number, like +201001234567",
+      "PHONE_TAKEN": "Another barber already uses this phone number.",
+      "INVALID_IMAGE": "Invalid image. Use a JPG, PNG or WEBP file up to 5 MB.",
+      "IDS_REQUIRED": "Select at least one barber.",
+      "LAST_ACTIVE": "{{name}} is the last active barber in a visible branch. Hide the branch first."
+    },
+    "TITLE": "Barbers",
+    "SUBTITLE": "The team that works in each branch, and who is available to book.",
+    "NEW": "New barber",
+    "SEARCH": "Search by name or phone…",
+    "EMPTY_TITLE": "No barbers yet",
+    "EMPTY_TEXT": "Add your first barber to start taking bookings.",
+    "NO_RESULTS_TITLE": "No barbers found",
+    "NO_RESULTS_TEXT": "Try a different search or filter.",
+    "SUSPEND": "Suspend barber",
+    "ACTIVATE": "Activate barber",
+    "COL": {
+      "BARBER": "Barber",
+      "BRANCH": "Branch",
+      "PHONE": "Phone",
+      "STATUS": "Status"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended"
+    },
+    "FILTER": {
+      "BRANCH": "Filter by branch",
+      "STATUS": "Filter by status",
+      "ALL_BRANCHES": "All branches",
+      "ALL_STATUSES": "All statuses"
+    },
+    "FORM": {
+      "CREATE_TITLE": "New barber",
+      "CREATE_SUBTITLE": "They can be booked as soon as they are added.",
+      "EDIT_TITLE": "Edit barber",
+      "EDIT_SUBTITLE": "Update their details, photo or branch.",
+      "BRANCH": "Branch",
+      "BRANCH_PLACEHOLDER": "Select a branch…",
+      "BRANCH_REQUIRED": "Choose a branch",
+      "TRANSFER_NOTE": "Saving will move this barber to the selected branch.",
+      "FULL_NAME": "Full name",
+      "NAME_REQUIRED": "Full name is required",
+      "NAME_MAX": "The name can’t be longer than 100 characters",
+      "PHONE": "Phone",
+      "PHONE_HINT": "Egyptian mobile, e.g. 01001234567. Only admins see it.",
+      "PHONE_REQUIRED": "Phone number is required",
+      "PHONE_INVALID": "Enter an Egyptian mobile number, like 01001234567",
+      "PHOTO": "Photo",
+      "PHOTO_ADD": "Add photo",
+      "PHOTO_CHANGE": "Change photo",
+      "PHOTO_REMOVE": "Remove photo",
+      "PHOTO_HINT": "JPG, PNG or WEBP up to 5 MB. Square, 600×600 or larger, works best.",
+      "PHOTO_PENDING": "The photo changes when you save.",
+      "CREATE": "Add barber"
+    },
+    "DELETE": {
+      "TITLE_ONE": "Delete this barber?",
+      "TITLE_MANY": "Delete selected barbers?",
+      "MESSAGE_ONE": "{{name}} and their photo will be permanently deleted. This can’t be undone.",
+      "MESSAGE_MANY": "{{count}} barbers and their photos will be permanently deleted. This can’t be undone."
+    }
+  },
   "CHAIRS": {
     "TITLE": "Chairs",
     "SUBTITLE": "The chairs in each branch, split into Regular and VIP, and whether each one is open for booking.",
@@ -578,6 +656,9 @@
     "Name": "Chair name",
     "BranchId": "Branch",
     "Type": "Type",
-    "Ids": "Chairs"
+    "Ids": "Chairs",
+    "FullName": "Full name",
+    "Image": "Photo",
+    "BarberIds": "Barbers"
   }
 }

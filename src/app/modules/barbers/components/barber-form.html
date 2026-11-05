@@ -1,0 +1,50 @@
+<form class="bf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="bf__body">
+    <section class="bf__photo" [attr.aria-label]="'BARBERS.FORM.PHOTO' | translate">
+      <app-avatar size="xl" [name]="displayName()" [src]="shownImage()" />
+
+      <div class="bf__photo-side">
+        <div class="bf__photo-actions">
+          <input #file type="file" class="sr-only" [accept]="accept" tabindex="-1"
+            [attr.aria-label]="'BARBERS.FORM.PHOTO_CHANGE' | translate" (change)="onPickPhoto($event)" />
+          <app-button variant="outline" size="sm" iconClass="pi pi-camera" [disabled]="saving()" (clicked)="file.click()">
+            {{ (hasPhoto() ? 'BARBERS.FORM.PHOTO_CHANGE' : 'BARBERS.FORM.PHOTO_ADD') | translate }}
+          </app-button>
+          @if (hasPhoto()) {
+            <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [disabled]="saving()" (clicked)="removePhoto()">
+              {{ 'BARBERS.FORM.PHOTO_REMOVE' | translate }}
+            </app-button>
+          }
+        </div>
+        <p class="bf__hint">{{ 'BARBERS.FORM.PHOTO_HINT' | translate }}</p>
+        @if (photoChanged()) {
+          <p class="bf__pending" role="status">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'BARBERS.FORM.PHOTO_PENDING' | translate }}
+          </p>
+        }
+      </div>
+    </section>
+
+    <app-float-label-select label="BARBERS.FORM.BRANCH" [options]="branchOptions()"
+      [errorMessage]="error('branchId')" formControlName="branchId" />
+    @if (isTransfer()) {
+      <p class="bf__note" role="status">
+        <i class="pi pi-arrow-right-arrow-left" aria-hidden="true"></i>
+        {{ 'BARBERS.FORM.TRANSFER_NOTE' | translate }}
+      </p>
+    }
+
+    <app-float-label-input label="BARBERS.FORM.FULL_NAME" iconLeft="pi pi-user" autocomplete="off"
+      [errorMessage]="error('fullName')" formControlName="fullName" />
+
+    <app-float-label-input label="BARBERS.FORM.PHONE" type="tel" iconLeft="pi pi-phone" autocomplete="off"
+      [ltr]="true" hint="BARBERS.FORM.PHONE_HINT" [errorMessage]="error('phone')" formControlName="phone" />
+  </div>
+
+  <footer class="bf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()">
+      {{ (mode() === 'create' ? 'BARBERS.FORM.CREATE' : 'COMMON.SAVE') | translate }}
+    </app-button>
+  </footer>
+</form>

@@ -19,6 +19,9 @@ import { BRANCH_REPOSITORY } from '@modules/branches/repository/branch.repositor
 import { ChairApiRepository } from '@modules/chairs/repository/chair-api.repository';
 import { ChairMockRepository } from '@modules/chairs/repository/chair-mock.repository';
 import { CHAIR_REPOSITORY } from '@modules/chairs/repository/chair.repository';
+import { BarberApiRepository } from '@modules/barbers/repository/barber-api.repository';
+import { BarberMockRepository } from '@modules/barbers/repository/barber-mock.repository';
+import { BARBER_REPOSITORY } from '@modules/barbers/repository/barber.repository';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -43,6 +46,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: CHAIR_REPOSITORY,
       useClass: environment.useMock ? ChairMockRepository : ChairApiRepository,
+    },
+
+    {
+      provide: BARBER_REPOSITORY,
+      useClass: environment.useMock ? BarberMockRepository : BarberApiRepository,
     },
 
     // HTTP + interceptors (token first, lang alongside it on the way out,
