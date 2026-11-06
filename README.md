@@ -55,6 +55,7 @@ src/
       chairs/             cards + summary · create/edit drawer · status switch
       barbers/            table + filters + bulk delete · create/edit drawer with photo · status switch
       services/           price table per branch + summary · create/edit page (price card per branch) · bulk tools
+      packages/           cards per branch + summary · create/edit drawer (service picker, "Before discount") · status switch
       dashboard/          model · repository (api + mock) · service · page
       profile-management/ profile + change password
       design-system/      living reference page (dev only)
@@ -127,6 +128,7 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 | Services (Menu & services) | `/main/services` | `Service.View` (+ `Edit` for the status switch and bulk tools, `Delete` for delete) |
 | New service | `/main/services/new` | `Service.Create` |
 | Edit service | `/main/services/:id/edit` | `Service.Edit` |
+| Packages | `/main/packages` | `Package.View` (+ `Create` / `Edit` for the drawer and the status switch, `Delete` for delete) |
 | My profile | `/main/profile` | sign-in only |
 | Design system (dev builds only) | `/main/design-system` | — |
 
@@ -184,8 +186,21 @@ A service is **one record with a price row per branch** (duration, Regular, VIP,
   - **Change prices by %** (`POST /services/adjust-prices`) — branch + percentage (-90…500, not 0), for every priced service of the branch or just the ticked ones. A preview lists old → new prices using the same rounding as the backend (nearest pound, never below 1; durations don't change). A result above 100,000 EGP blocks the request.
   - **Copy prices from another branch** (`POST /services/copy-prices`) — overwrites duration, prices, home availability and status of the services priced in the source; the target's other services stay. Shows how many services will be copied; identical branches are refused.
   - **Set status in branches** — for the ticked services, activate/deactivate in the chosen branches (one status request per service; one success toast).
-- **Mock backend** — `core/mock/mock-db.ts` + `service-mock.repository.ts` enforce unique names, every-branch-once, price/duration limits, the "last active service of a *visible* branch" 409 (deactivate / delete / copy) and all-or-nothing delete. Not simulated: the 409s for services used by packages or running offers (those modules don't exist yet).
+- **Mock backend** — `core/mock/mock-db.ts` + `service-mock.repository.ts` enforce unique names, every-branch-once, price/duration limits, the "last active service of a *visible* branch" 409 (deactivate / delete / copy) and all-or-nothing delete. Not simulated: the 409s for services used by running offers (that module doesn't exist yet). Packages don't block deleting or deactivating a service in the mock either — the contract for Services doesn't say the real API does.
 - **Permissions** — `Service.View` opens the page; `Create`, `Edit` (switch, edit, bulk tools) and `Delete` show or hide their actions.
+
+## Packages
+
+Implements `API Contract — Packages` (all 6 endpoints) in `modules/packages/`, built as `model → repository (interface + api + mock) → service (signals) → page`.
+
+A package bundles **at least two services of ONE branch** at a discounted price per booking type (Regular, VIP, optional Home). It never moves between branches, so — like Services — the list always shows ONE branch (the first by default, oldest first); there is no "all branches" view.
+
+- **List** (`/main/packages`) — branch selector, three summary cards (Packages, Active, Inactive — the API counts total and active over the whole branch, inactive is the difference; unaffected by search/filter), search (Arabic or English name), status filter, 12 per page. Each card shows the services, the total duration, a row per price with the services' total struck through and a **Save EGP X** pill, or **In branch only** when there is no home price.
+- **Status switch** — `PATCH /packages/{id}/toggle-status` (a flip, no body), gated by `Package.Edit` (the contract has no separate toggle permission). Re-activating can be refused (a service is no longer active, or no longer home-available); the switch stays where it was and the interceptor shows why.
+- **Create / edit** (drawer on the list, `Package.Create` / `Package.Edit`) — Arabic + English names, a checkbox picker of the branch's ACTIVE services (loaded through `ServicesService.loadBranchServices`), a **Before discount** box (totals + duration of the chosen services, same numbers the API returns as `original*Price` / `durationMinutes`; the 15-minute booking buffer is not included), and Regular / VIP / Home prices. Inline validation mirrors the contract (`model/package.model.ts` limits): ≥ 2 different services, every price > 0, ≤ 100,000, ≤ 2 decimals and **lower than its total**, a home price only while every chosen service allows home visits (empty = in branch only, sent as `null`). The branch is shown locked and is only sent on create. A service the package already has but that was deactivated since is listed as "no longer active" and must be removed before saving.
+- **Delete** — from the card, behind a confirmation → `DELETE /packages` with `{ ids }` (bulk, all-or-nothing; the UI deletes one at a time).
+- **Mock backend** — `core/mock/mock-db.ts` seeds each branch with the package templates whose services are priced and active there, and `package-mock.repository.ts` enforces the same rules (unique names per branch, service/price/home rules, re-activation checks, all-or-nothing delete). Names, totals and duration are derived from the services' CURRENT prices on every read.
+- **Permissions** — `Package.View` opens the page; `Create`, `Edit` (drawer + switch) and `Delete` show or hide their actions. The mock `BranchManager` role has `Package.View` only.
 
 ## Notes and assumptions
 

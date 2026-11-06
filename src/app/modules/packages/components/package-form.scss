@@ -1,0 +1,97 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+// The form fills the drawer body (a flex column with a fixed height). Without this the custom element
+// sizes to its full content and grows past the screen, so `.pf__body` never gets a bounded height to scroll in.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.pf {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  &__body { flex: 1; display: flex; flex-direction: column; gap: v.$space-4; padding: v.$space-6; overflow-y: auto; }
+  &__footer { display: flex; justify-content: flex-end; gap: v.$space-3; padding: v.$space-4 v.$space-6; border-top: 1px solid v.$border; }
+
+  // Branch line: fixed, with the reason.
+  &__branch {
+    display: flex;
+    align-items: flex-start;
+    gap: v.$space-2;
+    margin: 0;
+    padding: v.$space-3;
+    border-radius: v.$radius-md;
+    background: v.$surface-sunken;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+
+    i { margin-top: 2px; color: v.$text-muted; }
+    strong { color: v.$text; font-weight: v.$fw-semibold; }
+  }
+
+  // Service picker
+  &__services { min-width: 0; margin: 0; padding: 0; border: 0; }
+  &__legend { padding: 0; margin-bottom: v.$space-1; color: v.$text; font-size: v.$text-base; font-weight: v.$fw-semibold; }
+  &__hint { margin: 0 0 v.$space-3; color: v.$text-muted; font-size: v.$text-sm; }
+  &__empty { margin: 0; padding: v.$space-4; border: 1px dashed v.$border; border-radius: v.$radius-md; color: v.$text-muted; font-size: v.$text-sm; text-align: center; }
+  &__list { display: flex; flex-direction: column; gap: v.$space-2; margin: 0; padding: 0; list-style: none; }
+
+  &__service {
+    display: flex;
+    align-items: flex-start;
+    gap: v.$space-3;
+    padding: v.$space-3;
+    border: 1px solid v.$border;
+    border-radius: v.$radius-md;
+    background: v.$surface;
+    cursor: pointer;
+
+    &:hover { border-color: v.$text-muted; }
+    // Highlight the whole row when its checkbox is keyboard-focused.
+    &:has(.pf__check:focus-visible) { @include p.focus-ring; }
+
+    &--checked { border-color: v.$primary; background: v.$primary-soft; }
+    &--unavailable { border-style: dashed; }
+  }
+
+  &__check { flex-shrink: 0; width: 18px; height: 18px; margin: 2px 0 0; accent-color: v.$primary; cursor: pointer; }
+  &__service-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  &__service-name { color: v.$text; font-size: v.$text-base; font-weight: v.$fw-medium; overflow-wrap: anywhere; }
+  &__service--unavailable &__service-meta { color: v.$danger-text; }
+  &__service-meta { color: v.$text-muted; font-size: v.$text-xs; overflow-wrap: anywhere; }
+
+  &__error { margin: v.$space-2 0 0; color: v.$danger-text; font-size: v.$text-sm; }
+
+  // Before discount
+  &__summary { padding: v.$space-4; border: 1px solid v.$border; border-radius: v.$radius-md; background: v.$surface-sunken; }
+  &__summary-title { margin: 0 0 v.$space-3; color: v.$text; font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+  &__summary-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: v.$space-3;
+    margin: 0;
+
+    dt { color: v.$text-muted; font-size: v.$text-xs; }
+    dd { margin: 2px 0 0; color: v.$text; font-size: v.$text-base; font-weight: v.$fw-semibold; }
+  }
+
+  // Price fields + live saving
+  &__field { display: flex; flex-direction: column; gap: v.$space-2; }
+  &__saving {
+    align-self: flex-start;
+    padding: 1px v.$space-2;
+    border-radius: v.$radius-full;
+    background: v.$success-bg;
+    color: v.$success-text;
+    font-size: v.$text-xs;
+    font-weight: v.$fw-semibold;
+  }
+
+  &__note { display: flex; align-items: flex-start; gap: v.$space-2; margin: 0; color: v.$text-muted; font-size: v.$text-sm; i { margin-top: 2px; } }
+}

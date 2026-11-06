@@ -154,7 +154,8 @@
       "CHAIRS": "Chairs",
       "BARBERS": "Barbers",
       "DESIGN_SYSTEM": "Design system",
-      "SERVICES": "Menu & services"
+      "SERVICES": "Menu & services",
+      "PACKAGES": "Packages"
     }
   },
   "DASHBOARD": {
@@ -240,6 +241,7 @@
       "Availability": "Availability",
       "Branch": "Branches",
       "Service": "Menu & services",
+      "Package": "Packages",
       "Barber": "Barbers",
       "Chair": "Chairs",
       "Offer": "Offers",
@@ -802,6 +804,98 @@
       "BECOMES": "becomes"
     }
   },
+  "PACKAGES": {
+    "TITLE": "Packages",
+    "SUBTITLE": "Bundle several services of a branch into one discounted package.",
+    "SEARCH": "Search by package name…",
+    "EMPTY_TITLE": "No packages yet",
+    "EMPTY_TEXT": "Packages you add for this branch will appear here.",
+    "NO_RESULTS_TITLE": "No matching packages",
+    "NO_RESULTS_TEXT": "Try a different name or clear the filters.",
+    "NO_BRANCHES_TITLE": "No branches yet",
+    "NO_BRANCHES_TEXT": "Packages belong to a branch. Add a branch first.",
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "FILTER": {
+      "BRANCH": "Branch",
+      "STATUS": "Status",
+      "ALL_STATUSES": "All statuses"
+    },
+    "STATS": {
+      "LABEL": "Packages summary",
+      "TOTAL": "Packages",
+      "ACTIVE": "Active packages",
+      "INACTIVE": "Inactive packages"
+    },
+    "CARD": {
+      "SERVICES": "Included services",
+      "DURATION": "Total duration"
+    },
+    "PRICE": {
+      "REGULAR": "Regular",
+      "VIP": "VIP",
+      "HOME": "Home visit"
+    },
+    "IN_BRANCH_ONLY": "In branch only",
+    "SAVE": "Save {{amount}}",
+    "SWITCH": {
+      "LABEL": "Visible in the app",
+      "HINT": "Inactive packages are hidden from the app."
+    },
+    "DELETE": {
+      "TITLE_ONE": "Delete this package?",
+      "MESSAGE_ONE": "“{{name}}” will be permanently deleted. This can’t be undone."
+    },
+    "CREATED": "Package added.",
+    "UPDATED": "Package updated.",
+    "STATUS_UPDATED": "Package status updated.",
+    "DELETED": "Package deleted.",
+    "ERRORS": {
+      "NOT_FOUND": "This package no longer exists.",
+      "BRANCH_NOT_FOUND": "This branch no longer exists.",
+      "NAME_REQUIRED": "Package name is required",
+      "NAME_TOO_LONG": "The name can’t be longer than 100 characters",
+      "NAME_TAKEN": "A package with this name already exists in this branch.",
+      "SERVICES_MIN": "Choose at least 2 different services.",
+      "SERVICE_INACTIVE": "Every service in the package must be active in this branch.",
+      "PRICE_INVALID": "Enter a price above 0 and up to 100,000, with at most 2 decimals.",
+      "PRICE_TOO_HIGH": "The price must be lower than the total of the selected services.",
+      "HOME_UNAVAILABLE": "Home booking is only possible when every service is available for home visits.",
+      "IDS_REQUIRED": "Select at least one package."
+    },
+    "NEW": "Add package",
+    "FORM": {
+      "CREATE_TITLE": "Add package",
+      "CREATE_SUBTITLE": "Bundle services of this branch at a special price.",
+      "EDIT_TITLE": "Edit package",
+      "EDIT_SUBTITLE": "Change the name, services or prices.",
+      "CREATE": "Add package",
+      "BRANCH_NOTE_CREATE": "The package will be added to this branch. It can’t be changed later.",
+      "BRANCH_NOTE_EDIT": "A package can’t move to another branch.",
+      "NAME_AR": "Name (Arabic)",
+      "NAME_EN": "Name (English)",
+      "NAME_REQUIRED": "Package name is required",
+      "NAME_MAX": "The name can’t be longer than 100 characters",
+      "SERVICES": "Services",
+      "SERVICES_HINT": "Choose at least 2 services. Only services that are active in this branch are listed.",
+      "SERVICES_EMPTY": "This branch has no active services yet. Add or activate services first.",
+      "SERVICES_MIN": "Choose at least 2 different services.",
+      "SERVICES_UNAVAILABLE": "Remove the services that are no longer active in this branch.",
+      "UNAVAILABLE": "No longer active in this branch",
+      "BEFORE_DISCOUNT": "Before discount",
+      "TOTAL_DURATION": "Total duration",
+      "REGULAR_PRICE": "Regular price (EGP)",
+      "VIP_PRICE": "VIP price (EGP)",
+      "HOME_PRICE": "Home visit price (EGP)",
+      "HOME_HINT": "Leave empty for in branch only.",
+      "HOME_UNAVAILABLE": "A home visit price is available only when every selected service supports home visits.",
+      "PRICE_REQUIRED": "Price is required",
+      "PRICE_INVALID": "Enter a price above 0 and up to 100,000, with at most 2 decimals",
+      "PRICE_TOO_HIGH": "The price must be lower than the “Before discount” total"
+    }
+  },
   "VALIDATION_FIELDS": {
     "NameAr": "Arabic name",
     "NameEn": "English name",
@@ -829,6 +923,7 @@
     "Percentage": "Percentage",
     "SourceBranchId": "Source branch",
     "TargetBranchId": "Target branch",
-    "ServiceIds": "Services"
+    "ServiceIds": "Services",
+    "PackageIds": "Packages"
   }
 }

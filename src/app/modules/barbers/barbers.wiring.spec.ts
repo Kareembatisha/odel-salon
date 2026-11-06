@@ -33,8 +33,8 @@ describe('Barbers wiring', () => {
     expect(item!.icon).toMatch(/^pi pi-/);
   });
 
-  it('sits after Branches and Chairs in the sidebar (Services comes last)', () => {
+  it('sits after Branches and Chairs in the sidebar (Services and Packages come last)', () => {
     const ids = NAV_SECTIONS.find((s) => s.id === 'salon')!.items.map((i) => i.id);
-    expect(ids).toEqual(['branches', 'chairs', 'barbers', 'services']);
+    expect(ids).toEqual(['branches', 'chairs', 'barbers', 'services', 'packages']);
   });
 });

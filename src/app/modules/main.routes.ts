@@ -141,6 +141,19 @@ export const MAIN_ROUTES: Routes = [
   },
 
   {
+    path: "packages",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Package.View,
+      breadcrumb: "LAYOUT.NAV.PACKAGES",
+    },
+    loadComponent: () =>
+      import("./packages/pages/packages-list/packages-list").then(
+        (m) => m.PackagesList,
+      ),
+  },
+
+  {
     path: "services/new",
     canActivate: [permissionGuard],
     data: {

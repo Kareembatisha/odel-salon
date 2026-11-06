@@ -1,0 +1,136 @@
+<div class="odl-page">
+  <app-page-header [title]="'PACKAGES.TITLE' | translate" [subtitle]="'PACKAGES.SUBTITLE' | translate">
+    @if (canCreate() && !noBranches()) {
+      <app-button variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
+        {{ 'PACKAGES.NEW' | translate }}
+      </app-button>
+    }
+  </app-page-header>
+
+  @if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state [title]="'PACKAGES.NO_BRANCHES_TITLE' | translate" [description]="'PACKAGES.NO_BRANCHES_TEXT' | translate" icon="pi pi-building" />
+    </div>
+  } @else {
+    <!-- Summary cards: counted by the backend over the WHOLE selected branch, ignoring search and status. -->
+    @if (showStats()) {
+      <section class="stats" [attr.aria-label]="'PACKAGES.STATS.LABEL' | translate">
+        <app-stat-card [label]="'PACKAGES.STATS.TOTAL' | translate" [value]="summary().total" icon="pi pi-box" tone="neutral" [hint]="branchName()" />
+        <app-stat-card [label]="'PACKAGES.STATS.ACTIVE' | translate" [value]="summary().active" icon="pi pi-check-circle" tone="success" [hint]="branchName()" />
+        <app-stat-card [label]="'PACKAGES.STATS.INACTIVE' | translate" [value]="inactiveCount()" icon="pi pi-ban" tone="neutral" [hint]="branchName()" />
+      </section>
+    } @else if (loading()) {
+      <div class="stats" aria-busy="true">
+        @for (n of skeletonStats; track n) {
+          <div class="odl-card sk-stat">
+            <app-skeleton width="55%" height="14px" />
+            <app-skeleton width="30%" height="28px" />
+            <app-skeleton width="40%" height="12px" />
+          </div>
+        }
+      </div>
+    }
+
+    <div class="toolbar">
+      <app-filter-select [label]="'PACKAGES.FILTER.BRANCH' | translate" [options]="branchOptions()"
+        [value]="branchId() !== null ? '' + branchId() : ''" (changed)="onBranch($event)" />
+      <app-search-input [placeholder]="'PACKAGES.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+      <app-filter-select [label]="'PACKAGES.FILTER.STATUS' | translate" [options]="statusFilterOptions()"
+        [value]="query().isActive === undefined ? '' : '' + query().isActive" (changed)="onStatusFilter($event)" />
+    </div>
+
+    @if (showSkeleton()) {
+      <div class="grid" aria-busy="true">
+        @for (n of skeletons; track n) {
+          <div class="odl-card sk-card">
+            <div class="sk-card__head">
+              <app-skeleton width="50%" height="22px" />
+              <app-skeleton width="64px" height="22px" />
+            </div>
+            <div class="sk-card__chips">
+              <app-skeleton width="72px" height="22px" />
+              <app-skeleton width="88px" height="22px" />
+              <app-skeleton width="64px" height="22px" />
+            </div>
+            <app-skeleton width="30%" height="14px" />
+            <app-skeleton height="14px" />
+            <app-skeleton height="14px" />
+            <app-skeleton height="14px" />
+            <div class="sk-card__footer">
+              <app-skeleton width="45%" height="22px" />
+              <app-skeleton width="64px" height="28px" />
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (hasError() && !rows().length) {
+      <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+    } @else if (!rows().length) {
+      <div class="odl-card">
+        @if (isFiltered()) {
+          <app-empty-state [title]="'PACKAGES.NO_RESULTS_TITLE' | translate" [description]="'PACKAGES.NO_RESULTS_TEXT' | translate" icon="pi pi-search" />
+        } @else {
+          <app-empty-state [title]="'PACKAGES.EMPTY_TITLE' | translate" [description]="'PACKAGES.EMPTY_TEXT' | translate" icon="pi pi-box" />
+        }
+      </div>
+    } @else {
+      <div class="grid" [attr.aria-busy]="loading()">
+        @for (pkg of rows(); track pkg.id) {
+          <app-package-card
+            [pkg]="pkg"
+            [canEdit]="canEdit()"
+            [canDelete]="canDelete()"
+            [busy]="saving()"
+            (edit)="openEdit($event)"
+            (delete)="askDelete($event)"
+            (toggleStatus)="toggle($event)"
+          />
+        }
+      </div>
+      <app-pagination
+        [totalRecords]="meta()?.totalCount ?? 0"
+        [page]="meta()?.currentPage ?? 1"
+        [pageSize]="meta()?.pageSize ?? 12"
+        (pageChange)="onPage($event)"
+      />
+    }
+  }
+</div>
+
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="(drawerMode() === 'create' ? 'PACKAGES.FORM.CREATE_TITLE' : 'PACKAGES.FORM.EDIT_TITLE') | translate"
+  [subtitle]="(drawerMode() === 'create' ? 'PACKAGES.FORM.CREATE_SUBTITLE' : 'PACKAGES.FORM.EDIT_SUBTITLE') | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeDrawer()"
+>
+  @if (drawerOpen()) {
+    @if (drawerLoading() || drawerBranchId() === null) {
+      <div class="drawer-loading">
+        @for (n of [1, 2, 3, 4]; track n) { <app-skeleton height="56px" /> }
+      </div>
+    } @else {
+      <app-package-form
+        [mode]="drawerMode()"
+        [details]="editDetails()"
+        [branchId]="drawerBranchId()!"
+        [branchName]="branchName()"
+        [services]="serviceOptions()"
+        [saving]="saving()"
+        (submitted)="onSubmitted($event)"
+        (cancelled)="closeDrawer()"
+      />
+    }
+  }
+</app-drawer>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete() !== null"
+  [title]="'PACKAGES.DELETE.TITLE_ONE' | translate"
+  [message]="'PACKAGES.DELETE.MESSAGE_ONE' | translate: { name: deleteName() }"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set(null)"
+/>

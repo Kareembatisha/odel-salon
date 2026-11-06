@@ -1,0 +1,89 @@
+<article
+  class="pkg odl-card"
+  [class.pkg--inactive]="!pkg().isActive"
+  [attr.aria-labelledby]="'pkg-name-' + pkg().id"
+>
+  <div class="pkg__content">
+    <!-- Header: name + status -->
+    <header class="pkg__head">
+      <div class="pkg__titles">
+        <h3 class="pkg__name" [id]="'pkg-name-' + pkg().id" dir="auto">
+          @if (canEdit()) {
+          <!-- The name is the quick way into the edit drawer, like the chair / branch name. -->
+          <button type="button" class="pkg__link" [title]="'COMMON.EDIT' | translate" (click)="edit.emit(pkg())">
+            {{ name() }}
+          </button>
+          } @else {
+          {{ name() }}
+          }
+        </h3>
+        <p class="pkg__other-name" dir="auto" [attr.lang]="otherLang()">{{ otherName() }}</p>
+      </div>
+
+      <app-status-badge [variant]="statusVariant()">
+        {{ (pkg().isActive ? 'PACKAGES.STATUS.ACTIVE' : 'PACKAGES.STATUS.INACTIVE') | translate }}
+      </app-status-badge>
+    </header>
+
+    <!-- Included services + total duration -->
+    <section>
+      <h4 class="sr-only">{{ 'PACKAGES.CARD.SERVICES' | translate }}</h4>
+      <ul class="pkg__services">
+        @for (service of serviceNames(); track service.id) {
+        <li class="pkg__chip" dir="auto">{{ service.name }}</li>
+        }
+      </ul>
+    </section>
+
+    <p class="pkg__duration">
+      <i class="pi pi-clock" aria-hidden="true"></i>
+      <span class="sr-only">{{ 'PACKAGES.CARD.DURATION' | translate }}</span>
+      {{ duration() }}
+    </p>
+
+    <!-- Prices: the package price, the services' total (struck through) and the saving -->
+    <dl class="pkg__prices">
+      @for (line of lines(); track line.key) {
+      <div class="pkg__price-row">
+        <dt>{{ 'PACKAGES.PRICE.' + line.key | translate }}</dt>
+        <dd>
+          @if (line.price === null) {
+          <span class="pkg__muted">{{ 'PACKAGES.IN_BRANCH_ONLY' | translate }}</span>
+          } @else {
+          <span class="pkg__price">{{ line.price }}</span>
+          @if (line.original) {
+          <s class="pkg__original">{{ line.original }}</s>
+          <span class="pkg__saving">{{ 'PACKAGES.SAVE' | translate: { amount: line.saving } }}</span>
+          } }
+        </dd>
+      </div>
+      }
+    </dl>
+  </div>
+
+  <!-- Footer: status switch + actions -->
+  @if (hasFooter()) {
+  <footer class="pkg__footer">
+    @if (canEdit()) {
+    <!-- The text is the label: clicking it flips the switch, and the tooltip explains the effect. -->
+    <label class="pkg__availability" [class.pkg__availability--disabled]="busy()" [title]="'PACKAGES.SWITCH.HINT' | translate">
+      <app-switch
+        [checked]="pkg().isActive"
+        [disabled]="busy()"
+        [label]="'PACKAGES.SWITCH.LABEL' | translate"
+        (toggled)="toggleStatus.emit(pkg())"
+      />
+      <span class="pkg__availability-text">{{ 'PACKAGES.SWITCH.LABEL' | translate }}</span>
+    </label>
+    }
+
+    <div class="pkg__actions">
+      @if (canEdit()) {
+      <app-button variant="ghost" size="sm" iconClass="pi pi-pencil" [ariaLabel]="'COMMON.EDIT' | translate" (clicked)="edit.emit(pkg())" />
+      } @if (canDelete()) {
+      <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [ariaLabel]="'COMMON.DELETE' | translate" (clicked)="delete.emit(pkg())" />
+      }
+    </div>
+  </footer>
+  }
+</article>

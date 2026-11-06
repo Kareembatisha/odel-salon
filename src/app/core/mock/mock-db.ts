@@ -59,6 +59,25 @@ export interface MockService {
   prices: ServiceBranchPayload[];
 }
 
+/**
+ * A package stored in the mock database. Only what the backend stores: names, the service
+ * ids and the package prices — the services' names, "before discount" totals and duration
+ * are derived from the services' CURRENT prices when the package is read.
+ */
+export interface MockPackage {
+  id: number;
+  branchId: number;
+  nameAr: string;
+  nameEn: string;
+  serviceIds: number[];
+  regularPrice: number;
+  vipPrice: number;
+  homePrice: number | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 // ============================================================
 // Constants
 // ============================================================
@@ -72,6 +91,7 @@ export const MOCK_MANAGER_PERMISSIONS: string[] = [
   "Availability.View",
   "Branch.View",
   "Service.View",
+  "Package.View",
   "Barber.View",
   "Chair.View",
   "Offer.View",
@@ -116,6 +136,7 @@ export class MockDb {
   nextChairId = 1;
   nextBarberId = 1;
   nextServiceId = 1;
+  nextPackageId = 1;
 
   // ----------------------------------------------------------
   // Roles
@@ -371,6 +392,17 @@ export class MockDb {
   services: MockService[] = this.seedServices();
 
   // ----------------------------------------------------------
+  // Packages
+  // ----------------------------------------------------------
+
+  /**
+   * Seeded from the services above (so it must stay declared after `services`): each template
+   * becomes a package in every branch where ALL its services are priced and active, with a
+   * discount under the services' total — the same rules the backend enforces on create.
+   */
+  packages: MockPackage[] = this.seedPackages();
+
+  // ----------------------------------------------------------
   // Lookups
   // ----------------------------------------------------------
 
@@ -471,6 +503,64 @@ export class MockDb {
 
     this.nextServiceId = services.length + 1;
     return services;
+  }
+
+  /** `[nameAr, nameEn, serviceIds, regular discount, vip discount, home discount]` (1 − discount = price ÷ total). */
+  private static readonly PACKAGE_SEED: Array<
+    [string, string, number[], number, number, number]
+  > = [
+    ["الجنتل الكلاسيكي", "Classic Groom", [1, 2, 3], 0.9, 0.85, 0.9],
+    ["الجنتلمان", "Gentleman", [1, 3, 5], 0.88, 0.85, 0.88],
+    ["العناية المنزلية", "Home Refresh", [1, 5, 9], 0.9, 0.88, 0.85],
+    ["باقة العريس", "Groom Deluxe", [1, 2, 9, 5], 0.85, 0.8, 0.85],
+    ["باقة الأطفال", "Kids Duo", [10, 3], 0.9, 0.9, 0.9],
+    ["اللون والعناية", "Colour & Care", [4, 3], 0.92, 0.9, 0.9],
+  ];
+
+  /** `branchId:template position (1-based)` of seeded packages that start inactive. */
+  private static readonly INACTIVE_PACKAGES = new Set(["1:3", "2:2", "5:4", "9:1"]);
+
+  private seedPackages(): MockPackage[] {
+    const now = new Date().toISOString();
+    const packages: MockPackage[] = [];
+    let id = 1;
+
+    for (const branch of this.branches) {
+      MockDb.PACKAGE_SEED.forEach(
+        ([nameAr, nameEn, serviceIds, regular, vip, home], index) => {
+          const rows = serviceIds.map((serviceId) =>
+            this.services
+              .find((s) => s.id === serviceId)
+              ?.prices.find((p) => p.branchId === branch.id),
+          );
+          if (rows.some((row) => !row || !row.isActive)) return;
+
+          const priced = rows as ServiceBranchPayload[];
+          const total = (pick: (p: ServiceBranchPayload) => number) =>
+            priced.reduce((sum, p) => sum + pick(p), 0);
+          const price = (value: number, discount: number) =>
+            Math.round((value * discount) / 5) * 5;
+          const allHome = priced.every((p) => p.isHomeAvailable);
+
+          packages.push({
+            id: id++,
+            branchId: branch.id,
+            nameAr,
+            nameEn,
+            serviceIds: [...serviceIds],
+            regularPrice: price(total((p) => p.regularPrice), regular),
+            vipPrice: price(total((p) => p.vipPrice), vip),
+            homePrice: allHome ? price(total((p) => p.homePrice ?? 0), home) : null,
+            isActive: !MockDb.INACTIVE_PACKAGES.has(`${branch.id}:${index + 1}`),
+            createdAt: now,
+            updatedAt: null,
+          });
+        },
+      );
+    }
+
+    this.nextPackageId = id;
+    return packages;
   }
 
   private seedBarbers(): MockBarber[] {

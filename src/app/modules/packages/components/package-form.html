@@ -1,0 +1,131 @@
+<form class="pf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="pf__body">
+    <!-- The branch is fixed: the one selected on the list (create) or the package's own (edit). -->
+    <p class="pf__branch">
+      <i class="pi pi-lock" aria-hidden="true"></i>
+      <span>
+        <strong>{{ branchName() }}</strong>
+        {{ (mode() === 'create' ? 'PACKAGES.FORM.BRANCH_NOTE_CREATE' : 'PACKAGES.FORM.BRANCH_NOTE_EDIT') | translate }}
+      </span>
+    </p>
+
+    <app-float-label-input
+      label="PACKAGES.FORM.NAME_AR"
+      iconLeft="pi pi-tag"
+      autocomplete="off"
+      [errorMessage]="nameError('nameAr')"
+      formControlName="nameAr"
+    />
+    <app-float-label-input
+      label="PACKAGES.FORM.NAME_EN"
+      iconLeft="pi pi-tag"
+      autocomplete="off"
+      [errorMessage]="nameError('nameEn')"
+      formControlName="nameEn"
+    />
+
+    <!-- Service picker -->
+    <fieldset class="pf__services" [class.pf__services--invalid]="servicesError()" [attr.aria-describedby]="'pf-services-hint'">
+      <legend class="pf__legend">{{ 'PACKAGES.FORM.SERVICES' | translate }}</legend>
+      <p class="pf__hint" id="pf-services-hint">{{ 'PACKAGES.FORM.SERVICES_HINT' | translate }}</p>
+
+      @if (pickerItems().length === 0) {
+        <p class="pf__empty">{{ 'PACKAGES.FORM.SERVICES_EMPTY' | translate }}</p>
+      } @else {
+        <ul class="pf__list">
+          @for (item of pickerItems(); track item.id) {
+            <li>
+              <label class="pf__service" [class.pf__service--checked]="isSelected(item.id)" [class.pf__service--unavailable]="item.unavailable">
+                <input type="checkbox" class="pf__check" [checked]="isSelected(item.id)" (change)="toggleService(item.id)" />
+                <span class="pf__service-text">
+                  <span class="pf__service-name" dir="auto">{{ item.name }}</span>
+                  <span class="pf__service-meta">{{ item.meta }}</span>
+                </span>
+              </label>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (servicesError(); as key) {
+        <p class="pf__error" role="alert">{{ key | translate }}</p>
+      }
+    </fieldset>
+
+    <!-- Before discount: what the chosen services cost on their own -->
+    @if (hasSelection()) {
+      <section class="pf__summary" [attr.aria-label]="'PACKAGES.FORM.BEFORE_DISCOUNT' | translate">
+        <h4 class="pf__summary-title">{{ 'PACKAGES.FORM.BEFORE_DISCOUNT' | translate }}</h4>
+        <dl class="pf__summary-list">
+          <div><dt>{{ 'PACKAGES.PRICE.REGULAR' | translate }}</dt><dd>{{ summary().regular }}</dd></div>
+          <div><dt>{{ 'PACKAGES.PRICE.VIP' | translate }}</dt><dd>{{ summary().vip }}</dd></div>
+          @if (summary().home; as home) {
+            <div><dt>{{ 'PACKAGES.PRICE.HOME' | translate }}</dt><dd>{{ home }}</dd></div>
+          }
+          <div><dt>{{ 'PACKAGES.FORM.TOTAL_DURATION' | translate }}</dt><dd>{{ summary().duration }}</dd></div>
+        </dl>
+      </section>
+    }
+
+    <!-- Package prices: each must be lower than its "before discount" total -->
+    <div class="pf__field">
+      <app-float-label-input
+        label="PACKAGES.FORM.REGULAR_PRICE"
+        type="number"
+        iconLeft="pi pi-wallet"
+        [ltr]="true"
+        [errorMessage]="priceError('regularPrice')"
+        formControlName="regularPrice"
+      />
+      @if (savings().regular; as saving) {
+        <span class="pf__saving">{{ 'PACKAGES.SAVE' | translate: { amount: saving } }}</span>
+      }
+    </div>
+
+    <div class="pf__field">
+      <app-float-label-input
+        label="PACKAGES.FORM.VIP_PRICE"
+        type="number"
+        iconLeft="pi pi-star"
+        [ltr]="true"
+        [errorMessage]="priceError('vipPrice')"
+        formControlName="vipPrice"
+      />
+      @if (savings().vip; as saving) {
+        <span class="pf__saving">{{ 'PACKAGES.SAVE' | translate: { amount: saving } }}</span>
+      }
+    </div>
+
+    <!-- Home price: only when every chosen service allows home visits; empty = in branch only -->
+    @if (homeAllowed()) {
+      <div class="pf__field">
+        <app-float-label-input
+          label="PACKAGES.FORM.HOME_PRICE"
+          type="number"
+          iconLeft="pi pi-home"
+          hint="PACKAGES.FORM.HOME_HINT"
+          [ltr]="true"
+          [errorMessage]="priceError('homePrice')"
+          formControlName="homePrice"
+        />
+        @if (savings().home; as saving) {
+          <span class="pf__saving">{{ 'PACKAGES.SAVE' | translate: { amount: saving } }}</span>
+        }
+      </div>
+    } @else {
+      <p class="pf__note">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        {{ 'PACKAGES.FORM.HOME_UNAVAILABLE' | translate }}
+      </p>
+    }
+  </div>
+
+  <footer class="pf__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">
+      {{ 'COMMON.CANCEL' | translate }}
+    </app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()">
+      {{ (mode() === 'create' ? 'PACKAGES.FORM.CREATE' : 'COMMON.SAVE') | translate }}
+    </app-button>
+  </footer>
+</form>

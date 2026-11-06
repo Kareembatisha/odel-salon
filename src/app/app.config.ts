@@ -25,6 +25,9 @@ import { BARBER_REPOSITORY } from '@modules/barbers/repository/barber.repository
 import { ServiceApiRepository } from '@modules/services/repository/service-api.repository';
 import { ServiceMockRepository } from '@modules/services/repository/service-mock.repository';
 import { SERVICE_REPOSITORY } from '@modules/services/repository/service.repository';
+import { PackageApiRepository } from '@modules/packages/repository/package-api.repository';
+import { PackageMockRepository } from '@modules/packages/repository/package-mock.repository';
+import { PACKAGE_REPOSITORY } from '@modules/packages/repository/package.repository';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -59,6 +62,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: SERVICE_REPOSITORY,
       useClass: environment.useMock ? ServiceMockRepository : ServiceApiRepository,
+    },
+
+    {
+      provide: PACKAGE_REPOSITORY,
+      useClass: environment.useMock ? PackageMockRepository : PackageApiRepository,
     },
 
     // HTTP + interceptors (token first, lang alongside it on the way out,
