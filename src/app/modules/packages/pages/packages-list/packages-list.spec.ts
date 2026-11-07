@@ -9,6 +9,7 @@ import { BranchListItem } from '../../../branches/model/branch.model';
 import { BRANCH_REPOSITORY } from '../../../branches/repository/branch.repository';
 import { ServiceListItem } from '../../../services/model/service.model';
 import { ServicesService } from '../../../services/service/services.service';
+import { toServiceOptions } from '../../../services/utils/service-option.util';
 import { CreatePackagePayload, PackageDetails, PackageListItem, PackagesQuery, UpdatePackagePayload } from '../../model/package.model';
 import { PACKAGE_REPOSITORY } from '../../repository/package.repository';
 import { PackagesList } from './packages-list';
@@ -114,7 +115,7 @@ describe('PackagesList', () => {
       providers: [
         { provide: PACKAGE_REPOSITORY, useValue: repo },
         { provide: BRANCH_REPOSITORY, useValue: { getBranches: () => of({ ...ok(branches), meta: null }) } },
-        { provide: ServicesService, useValue: { loadBranchServices: () => of(SERVICE_ROWS) } },
+        { provide: ServicesService, useValue: { loadServiceOptions: () => of(toServiceOptions(SERVICE_ROWS)) } },
         { provide: AuthService, useValue: { hasPermission: (p: string) => permissions.has(p) } },
       ],
     });
@@ -303,7 +304,7 @@ describe('PackagesList', () => {
     const form = () => el().querySelector('app-package-form');
     const pencil = (card: HTMLElement) => card.querySelector<HTMLButtonElement>('button[aria-label="COMMON.EDIT"]')!;
     const formInput = (label: string) => el().querySelector<HTMLInputElement>(`app-package-form input[aria-label="${label}"]`)!;
-    const checkboxes = () => Array.from(el().querySelectorAll<HTMLInputElement>('app-package-form .pf__check'));
+    const checkboxes = () => Array.from(el().querySelectorAll<HTMLInputElement>('app-package-form .sp__check'));
     const formButtons = () => Array.from(el().querySelectorAll<HTMLButtonElement>('app-package-form .pf__footer button'));
 
     async function type(label: string, value: string) {

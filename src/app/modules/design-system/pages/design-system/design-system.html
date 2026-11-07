@@ -86,7 +86,14 @@
       <app-float-label-input label="AUTH.EMAIL_LABEL" type="email" iconLeft="pi pi-envelope" [formControl]="email" />
       <app-float-label-input label="AUTH.PASSWORD_LABEL" type="password" iconLeft="pi pi-lock" [formControl]="password" />
       <app-float-label-input label="AUTH.EMAIL_LABEL" iconLeft="pi pi-envelope" [formControl]="invalid" errorMessage="AUTH.EMAIL_INVALID" />
+      <app-float-label-input label="Start date" type="date" iconLeft="pi pi-calendar" [ltr]="true" [formControl]="startDate" />
     </div>
+  </section>
+
+  <!-- Tabs -->
+  <section class="odl-card block">
+    <h2 class="block__title">Tabs</h2>
+    <app-tabs [tabs]="demoTabs" [value]="demoTab()" ariaLabel="Demo tabs" (changed)="demoTab.set($event)" />
   </section>
 
   <!-- Stat cards -->

@@ -1,0 +1,128 @@
+<div class="odl-page">
+  <app-page-header [title]="'OFFERS.TITLE' | translate" [subtitle]="'OFFERS.SUBTITLE' | translate">
+    @if (canCreate() && !noBranches()) {
+      <app-button variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
+        {{ 'OFFERS.NEW' | translate }}
+      </app-button>
+    }
+  </app-page-header>
+
+  @if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state [title]="'OFFERS.NO_BRANCHES_TITLE' | translate" [description]="'OFFERS.NO_BRANCHES_TEXT' | translate" icon="pi pi-building" />
+    </div>
+  } @else {
+    <!-- Status tabs: counts cover the WHOLE selected branch, ignoring search. -->
+    <app-tabs
+      [tabs]="tabs()"
+      [value]="tab()"
+      [ariaLabel]="'OFFERS.TABS.LABEL' | translate"
+      idPrefix="offers-tab"
+      [panelId]="panelId"
+      (changed)="onTab($event)"
+    />
+
+    <div class="toolbar">
+      <app-filter-select [label]="'OFFERS.FILTER.BRANCH' | translate" [options]="branchOptions()"
+        [value]="branchId() !== null ? '' + branchId() : ''" (changed)="onBranch($event)" />
+      <app-search-input [placeholder]="'OFFERS.SEARCH' | translate" [clearLabel]="'COMMON.CLEAR' | translate" (search)="onSearch($event)" />
+    </div>
+
+    <!-- Polite live region: says what the list shows after every tab / search / branch change. -->
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</p>
+
+    <div [id]="panelId" role="tabpanel" tabindex="-1" class="panel" [attr.aria-labelledby]="'offers-tab-' + tab()">
+      @if (showSkeleton()) {
+        <div class="grid" aria-busy="true">
+          @for (n of skeletons; track n) {
+            <div class="odl-card sk-card">
+              <div class="sk-card__banner" aria-hidden="true"></div>
+              <div class="sk-card__body">
+                <div class="sk-card__head">
+                  <app-skeleton width="50%" height="22px" />
+                  <app-skeleton width="64px" height="22px" />
+                </div>
+                <app-skeleton width="60%" height="14px" />
+                <div class="sk-card__chips">
+                  <app-skeleton width="72px" height="22px" />
+                  <app-skeleton width="88px" height="22px" />
+                </div>
+                <app-skeleton height="14px" />
+                <app-skeleton height="14px" />
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (hasError() && !rows().length) {
+        <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+      } @else if (!rows().length) {
+        <div class="odl-card">
+          @if (isFiltered()) {
+            <app-empty-state [title]="'OFFERS.NO_RESULTS_TITLE' | translate" [description]="'OFFERS.NO_RESULTS_TEXT' | translate" icon="pi pi-search" />
+          } @else {
+            <app-empty-state [title]="'OFFERS.EMPTY_TITLE' | translate" [description]="'OFFERS.EMPTY_TEXT' | translate" icon="pi pi-tag" />
+          }
+        </div>
+      } @else {
+        <div class="grid" [attr.aria-busy]="loading()">
+          @for (offer of rows(); track offer.id) {
+            <app-offer-card
+              [offer]="offer"
+              [canEdit]="canEdit()"
+              [canToggle]="canToggle()"
+              [canDelete]="canDelete()"
+              [busy]="saving()"
+              (edit)="openEdit($event)"
+              (toggleStatus)="toggle($event)"
+              (delete)="askDelete($event)"
+            />
+          }
+        </div>
+        <app-pagination
+          [totalRecords]="meta()?.totalCount ?? 0"
+          [page]="meta()?.currentPage ?? 1"
+          [pageSize]="meta()?.pageSize ?? 12"
+          (pageChange)="onPage($event)"
+        />
+      }
+    </div>
+  }
+</div>
+
+<app-drawer
+  [open]="drawerOpen()"
+  [title]="(drawerMode() === 'create' ? 'OFFERS.FORM.CREATE_TITLE' : 'OFFERS.FORM.EDIT_TITLE') | translate"
+  [subtitle]="(drawerMode() === 'create' ? 'OFFERS.FORM.CREATE_SUBTITLE' : 'OFFERS.FORM.EDIT_SUBTITLE') | translate"
+  [closeLabel]="'COMMON.CLOSE' | translate"
+  (closed)="closeDrawer()"
+>
+  @if (drawerOpen()) {
+    @if (drawerLoading() || drawerBranchId() === null) {
+      <div class="drawer-loading">
+        @for (n of [1, 2, 3, 4]; track n) { <app-skeleton height="56px" /> }
+      </div>
+    } @else {
+      <app-offer-form
+        [mode]="drawerMode()"
+        [details]="editDetails()"
+        [branchId]="drawerBranchId()!"
+        [branchName]="branchName()"
+        [services]="serviceOptions()"
+        [saving]="saving()"
+        (submitted)="onSubmitted($event)"
+        (cancelled)="closeDrawer()"
+      />
+    }
+  }
+</app-drawer>
+
+<app-confirm-modal
+  [isOpen]="pendingDelete() !== null"
+  [title]="'OFFERS.DELETE.TITLE_ONE' | translate"
+  [message]="'OFFERS.DELETE.MESSAGE_ONE' | translate: { name: deleteName() }"
+  [confirmLabel]="'COMMON.DELETE' | translate"
+  [cancelLabel]="'COMMON.CANCEL' | translate"
+  [busy]="saving()"
+  (confirm)="confirmDelete()"
+  (cancel)="pendingDelete.set(null)"
+/>

@@ -25,31 +25,20 @@ import { startWith } from "rxjs";
 import { LanguageService } from "@core/services/language.service";
 import { AppButtonComponent } from "../../../shared/components/app-button/app-button.component";
 import { FloatLabelInput } from "../../../shared/components/float-label-input/float-label-input";
-import {
-  formatDuration,
-  formatPrice,
-  isValidPrice,
-} from "../../services/utils/service-price.util";
+import { ServiceOption } from "../../services/model/service.model";
+import { ServicePicker, UnavailableService } from "../../services/components/service-picker/service-picker";
+import { ServiceTotals } from "../../services/components/service-totals/service-totals";
+import { savingsAmount, servicesTotals } from "../../services/utils/service-option.util";
+import { formatPrice, isValidPrice } from "../../services/utils/service-price.util";
 import {
   CreatePackagePayload,
   PACKAGE_MIN_SERVICES,
   PACKAGE_NAME_MAX_LENGTH,
   PackageDetails,
-  PackageServiceOption,
   UpdatePackagePayload,
 } from "../model/package.model";
-import { localizedName } from "../utils/package-labels.util";
-import { packageSavings, servicesTotals } from "../utils/package-price.util";
 
 type PriceField = "regularPrice" | "vipPrice" | "homePrice";
-
-/** One row of the service picker: an active service of the branch, or a package service that is no longer active there. */
-interface PickerItem {
-  id: number;
-  name: string;
-  meta: string;
-  unavailable: boolean;
-}
 
 /** A name made only of spaces counts as empty (it would be trimmed to nothing). */
 function notBlank(control: AbstractControl): ValidationErrors | null {
@@ -80,7 +69,7 @@ function toNumber(value: unknown): number {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "app-package-form",
   standalone: true,
-  imports: [ReactiveFormsModule, TranslateModule, AppButtonComponent, FloatLabelInput],
+  imports: [ReactiveFormsModule, TranslateModule, AppButtonComponent, FloatLabelInput, ServicePicker, ServiceTotals],
   templateUrl: "./package-form.html",
   styleUrl: "./package-form.scss",
 })
@@ -101,7 +90,7 @@ export class PackageForm implements OnInit {
    * The ACTIVE services priced in that branch. Not `required`: the form's validators run while
    * the form is built, before Angular has bound any input.
    */
-  readonly services = input<PackageServiceOption[]>([]);
+  readonly services = input<ServiceOption[]>([]);
   readonly saving = input<boolean>(false);
 
   /** {@link CreatePackagePayload} in create mode, {@link UpdatePackagePayload} in edit mode. */
@@ -148,35 +137,12 @@ export class PackageForm implements OnInit {
   );
 
   // ── View models ──────────────────────────────────────
-  protected readonly pickerItems = computed<PickerItem[]>(() => {
-    const lang = this.language.currentLang();
-    const currency = this.translate.instant("SERVICES.CURRENCY");
-    const units = {
-      h: this.translate.instant("SERVICES.UNITS.H"),
-      min: this.translate.instant("SERVICES.UNITS.MIN"),
-    };
-    const regular = this.translate.instant("PACKAGES.PRICE.REGULAR");
-    const vip = this.translate.instant("PACKAGES.PRICE.VIP");
-
-    const active = this.services().map((s): PickerItem => ({
-      id: s.id,
-      name: localizedName(s.nameAr, s.nameEn, lang),
-      meta: `${formatDuration(s.durationMinutes, units)} · ${regular} ${formatPrice(s.regularPrice, lang, currency)} · ${vip} ${formatPrice(s.vipPrice, lang, currency)}`,
-      unavailable: false,
-    }));
-
-    // Services the package already has but that were deactivated in the branch since.
-    const known = new Set(active.map((i) => i.id));
-    const stale = (this.details()?.services ?? [])
-      .filter((s) => !known.has(s.serviceId))
-      .map((s): PickerItem => ({
-        id: s.serviceId,
-        name: localizedName(s.nameAr, s.nameEn, lang),
-        meta: this.translate.instant("PACKAGES.FORM.UNAVAILABLE"),
-        unavailable: true,
-      }));
-
-    return [...active, ...stale];
+  /** Services the package already has that were deactivated in the branch since (edit mode) — shown so they can be removed. */
+  protected readonly unavailableServices = computed<UnavailableService[]>(() => {
+    const active = new Set(this.services().map((s) => s.id));
+    return (this.details()?.services ?? [])
+      .filter((s) => !active.has(s.serviceId))
+      .map((s) => ({ id: s.serviceId, nameAr: s.nameAr, nameEn: s.nameEn }));
   });
 
   /** Message key for the picker, or "" when the selection is fine (or nothing was attempted yet). */
@@ -189,22 +155,6 @@ export class PackageForm implements OnInit {
 
   protected readonly hasSelection = computed(() => this.selected().length > 0);
 
-  /** "Before discount" box: the services' totals + duration, formatted. Home is `null` when it isn't possible. */
-  protected readonly summary = computed(() => {
-    const lang = this.language.currentLang();
-    const currency = this.translate.instant("SERVICES.CURRENCY");
-    const t = this.totals();
-    return {
-      regular: formatPrice(t.regular, lang, currency),
-      vip: formatPrice(t.vip, lang, currency),
-      home: this.homeAllowed() ? formatPrice(t.home, lang, currency) : null,
-      duration: formatDuration(t.durationMinutes, {
-        h: this.translate.instant("SERVICES.UNITS.H"),
-        min: this.translate.instant("SERVICES.UNITS.MIN"),
-      }),
-    };
-  });
-
   /** "Save EGP X" under each price field, shown only while the typed price is valid and cheaper than the total. */
   protected readonly savings = computed(() => {
     const lang = this.language.currentLang();
@@ -215,7 +165,7 @@ export class PackageForm implements OnInit {
     const saving = (raw: string | undefined, total: number | null): string => {
       const price = toNumber(raw);
       if (total === null || !isValidPrice(price) || price >= total) return "";
-      return formatPrice(packageSavings(total, price), lang, currency);
+      return formatPrice(savingsAmount(total, price), lang, currency);
     };
 
     return {
@@ -302,7 +252,7 @@ export class PackageForm implements OnInit {
     afterNextRender(
       () =>
         this.host.nativeElement
-          .querySelector<HTMLInputElement>(".fli--error input, .pf__services--invalid .pf__check")
+          .querySelector<HTMLInputElement>(".fli--error input, .sp--invalid .sp__check")
           ?.focus(),
       { injector: this.injector },
     );

@@ -1,0 +1,52 @@
+@use "styles/variables" as v;
+@use "styles/patterns" as p;
+
+:host { display: block; min-width: 0; }
+
+.tabs {
+  display: flex;
+  gap: v.$space-1;
+  border-bottom: 1px solid v.$border;
+  // Many tabs on a phone scroll sideways instead of wrapping or squeezing the labels.
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  &__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+    flex-shrink: 0;
+    margin: 0 0 -1px; // the active underline sits on the container's border
+    padding: v.$space-3 v.$space-4;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: v.$text-secondary;
+    font: inherit;
+    font-size: v.$text-base;
+    font-weight: v.$fw-medium;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color v.$transition-normal, border-color v.$transition-normal;
+
+    &:hover { color: v.$text; }
+    &:focus-visible { @include p.focus-ring(-2px); border-radius: v.$radius-sm; }
+
+    &--active { border-bottom-color: v.$primary; color: v.$primary-text; }
+  }
+
+  &__count {
+    min-width: 22px;
+    padding: 1px v.$space-2;
+    border-radius: v.$radius-full;
+    background: v.$surface-hover;
+    color: v.$text-secondary;
+    font-size: v.$text-xs;
+    font-weight: v.$fw-semibold;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  &__tab--active &__count { background: v.$primary-soft; color: v.$primary-text; }
+}

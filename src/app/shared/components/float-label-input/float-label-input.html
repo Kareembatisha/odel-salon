@@ -21,6 +21,8 @@
       [disabled]="isDisabled()"
       [autocomplete]="autocomplete()"
       [attr.dir]="ltr() ? 'ltr' : null"
+      [attr.min]="min() || null"
+      [attr.max]="max() || null"
       [attr.aria-label]="label() | translate"
       [attr.aria-invalid]="errorMessage() ? true : null"
       (input)="onInput($event)"

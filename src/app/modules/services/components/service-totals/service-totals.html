@@ -1,0 +1,11 @@
+<section class="st" [attr.aria-label]="'SERVICE_PICKER.BEFORE_DISCOUNT' | translate">
+  <h4 class="st__title">{{ 'SERVICE_PICKER.BEFORE_DISCOUNT' | translate }}</h4>
+  <dl class="st__list">
+    <div><dt>{{ 'SERVICE_PICKER.REGULAR' | translate }}</dt><dd>{{ view().regular }}</dd></div>
+    <div><dt>{{ 'SERVICE_PICKER.VIP' | translate }}</dt><dd>{{ view().vip }}</dd></div>
+    @if (view().home; as home) {
+      <div><dt>{{ 'SERVICE_PICKER.HOME' | translate }}</dt><dd>{{ home }}</dd></div>
+    }
+    <div><dt>{{ 'SERVICE_PICKER.TOTAL_DURATION' | translate }}</dt><dd>{{ view().duration }}</dd></div>
+  </dl>
+</section>

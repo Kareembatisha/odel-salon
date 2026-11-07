@@ -23,12 +23,14 @@ import {
   ServiceDetails,
   ServiceBranchPricing,
   ServiceListItem,
+  ServiceOption,
   ServicePayload,
   SERVICES_MAX_PAGE_SIZE,
   ServicesQuery,
   SetServiceStatusRequest,
 } from "../model/service.model";
 import { SERVICE_REPOSITORY } from "../repository/service.repository";
+import { toServiceOptions } from "../utils/service-option.util";
 import { readServicesSummary } from "../utils/service-summary.util";
 
 // ============================================================
@@ -271,6 +273,15 @@ export class ServicesService {
       map((rows) => rows.filter((row) => row.pricing.isPriced)),
       catchError(() => of([])),
     );
+  }
+
+  /**
+   * The services a package / offer can bundle in a branch: every ACTIVE priced service with the
+   * prices and duration the "Before discount" box needs (see {@link toServiceOptions}).
+   * Independent of the table's state; a failure yields an empty list.
+   */
+  loadServiceOptions(branchId: number): Observable<ServiceOption[]> {
+    return this.loadBranchServices(branchId).pipe(map(toServiceOptions));
   }
 
   /**

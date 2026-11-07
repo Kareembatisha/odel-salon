@@ -28,6 +28,9 @@ import { SERVICE_REPOSITORY } from '@modules/services/repository/service.reposit
 import { PackageApiRepository } from '@modules/packages/repository/package-api.repository';
 import { PackageMockRepository } from '@modules/packages/repository/package-mock.repository';
 import { PACKAGE_REPOSITORY } from '@modules/packages/repository/package.repository';
+import { OfferApiRepository } from '@modules/offers/repository/offer-api.repository';
+import { OfferMockRepository } from '@modules/offers/repository/offer-mock.repository';
+import { OFFER_REPOSITORY } from '@modules/offers/repository/offer.repository';
 
 export function httpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -67,6 +70,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: PACKAGE_REPOSITORY,
       useClass: environment.useMock ? PackageMockRepository : PackageApiRepository,
+    },
+
+    {
+      provide: OFFER_REPOSITORY,
+      useClass: environment.useMock ? OfferMockRepository : OfferApiRepository,
     },
 
     // HTTP + interceptors (token first, lang alongside it on the way out,

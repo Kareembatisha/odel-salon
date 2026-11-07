@@ -51,6 +51,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { id: 'barbers', labelKey: 'LAYOUT.NAV.BARBERS', icon: 'pi pi-id-card', route: '/main/barbers', permission: PERMISSIONS.Barber.View },
       { id: 'services', labelKey: 'LAYOUT.NAV.SERVICES', icon: 'pi pi-list', route: '/main/services', permission: PERMISSIONS.Service.View },
       { id: 'packages', labelKey: 'LAYOUT.NAV.PACKAGES', icon: 'pi pi-box', route: '/main/packages', permission: PERMISSIONS.Package.View },
+      { id: 'offers', labelKey: 'LAYOUT.NAV.OFFERS', icon: 'pi pi-percentage', route: '/main/offers', permission: PERMISSIONS.Offer.View },
     ],
   },
   // Developer reference — never shipped to production (environment.showDesignSystem = false).

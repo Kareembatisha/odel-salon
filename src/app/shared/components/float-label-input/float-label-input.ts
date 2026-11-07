@@ -11,7 +11,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-export type InputType = 'text' | 'email' | 'password' | 'tel' | 'number' | 'time' | 'url';
+export type InputType = 'text' | 'email' | 'password' | 'tel' | 'number' | 'time' | 'date' | 'url';
 
 /**
  * FloatLabelInput — the text field of the design system (ControlValueAccessor).
@@ -42,8 +42,11 @@ export class FloatLabelInput implements ControlValueAccessor {
   errorMessage = input<string>('');
   hint = input<string>('');
   autocomplete = input<string>('off');
-  /** Force left-to-right text direction (phone numbers, URLs, times) even inside an RTL page. */
+  /** Force left-to-right text direction (phone numbers, URLs, times, dates) even inside an RTL page. */
   ltr = input<boolean>(false);
+  /** Earliest / latest value of a `date` field (`yyyy-MM-dd`) — the native picker greys out the rest. */
+  min = input<string>('');
+  max = input<string>('');
 
   private readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('field');
 
@@ -52,9 +55,9 @@ export class FloatLabelInput implements ControlValueAccessor {
   protected showPassword = signal(false);
   protected isDisabled = signal(false);
 
-  /** A time field always shows its native "--:--" mask, so its label must stay lifted. */
+  /** A time / date field always shows its native mask ("--:--", "dd/mm/yyyy"), so its label must stay lifted. */
   protected isFloated = computed(
-    () => this.isFocused() || this.value().length > 0 || this.type() === 'time',
+    () => this.isFocused() || this.value().length > 0 || this.type() === 'time' || this.type() === 'date',
   );
   protected resolvedType = computed<InputType>(() =>
     this.type() === 'password' && this.showPassword() ? 'text' : this.type(),

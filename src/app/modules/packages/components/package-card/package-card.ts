@@ -13,10 +13,10 @@ import { AppButtonComponent } from "../../../../shared/components/app-button/app
 import { StatusBadgeComponent } from "../../../../shared/components/status-badge/status-badge.component";
 import { SwitchComponent } from "../../../../shared/components/switch/switch.component";
 import { activeBadgeVariant } from "../../../../shared/utils/status-badge.util";
+import { savingsAmount } from "../../../services/utils/service-option.util";
 import { formatDuration, formatPrice } from "../../../services/utils/service-price.util";
 import { PackageListItem } from "../../model/package.model";
 import { localizedName } from "../../utils/package-labels.util";
-import { packageSavings } from "../../utils/package-price.util";
 
 /** One price line of the card: what the package costs, what the services cost apart, and the saving. */
 interface PriceLine {
@@ -111,7 +111,7 @@ export class PackageCard {
       price: number | null,
       original: number | null,
     ): PriceLine => {
-      const saving = packageSavings(original, price);
+      const saving = savingsAmount(original, price);
       return {
         key,
         price: price === null ? null : fmt(price),

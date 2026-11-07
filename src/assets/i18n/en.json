@@ -155,7 +155,8 @@
       "BARBERS": "Barbers",
       "DESIGN_SYSTEM": "Design system",
       "SERVICES": "Menu & services",
-      "PACKAGES": "Packages"
+      "PACKAGES": "Packages",
+      "OFFERS": "Offers"
     }
   },
   "DASHBOARD": {
@@ -804,6 +805,16 @@
       "BECOMES": "becomes"
     }
   },
+  "SERVICE_PICKER": {
+    "LABEL": "Services",
+    "EMPTY": "This branch has no active services yet. Add or activate services first.",
+    "UNAVAILABLE": "No longer active in this branch",
+    "REGULAR": "Regular",
+    "VIP": "VIP",
+    "HOME": "Home visit",
+    "BEFORE_DISCOUNT": "Before discount",
+    "TOTAL_DURATION": "Total duration"
+  },
   "PACKAGES": {
     "TITLE": "Packages",
     "SUBTITLE": "Bundle several services of a branch into one discounted package.",
@@ -878,14 +889,9 @@
       "NAME_EN": "Name (English)",
       "NAME_REQUIRED": "Package name is required",
       "NAME_MAX": "The name can’t be longer than 100 characters",
-      "SERVICES": "Services",
       "SERVICES_HINT": "Choose at least 2 services. Only services that are active in this branch are listed.",
-      "SERVICES_EMPTY": "This branch has no active services yet. Add or activate services first.",
       "SERVICES_MIN": "Choose at least 2 different services.",
       "SERVICES_UNAVAILABLE": "Remove the services that are no longer active in this branch.",
-      "UNAVAILABLE": "No longer active in this branch",
-      "BEFORE_DISCOUNT": "Before discount",
-      "TOTAL_DURATION": "Total duration",
       "REGULAR_PRICE": "Regular price (EGP)",
       "VIP_PRICE": "VIP price (EGP)",
       "HOME_PRICE": "Home visit price (EGP)",
@@ -895,6 +901,127 @@
       "PRICE_INVALID": "Enter a price above 0 and up to 100,000, with at most 2 decimals",
       "PRICE_TOO_HIGH": "The price must be lower than the “Before discount” total"
     }
+  },
+  "OFFERS": {
+    "TITLE": "Offers",
+    "SUBTITLE": "Time-limited discounts on a bundle of a branch’s services.",
+    "SEARCH": "Search by offer name…",
+    "EMPTY_TITLE": "No offers yet",
+    "EMPTY_TEXT": "Offers you add for this branch will appear here.",
+    "NO_RESULTS_TITLE": "No matching offers",
+    "NO_RESULTS_TEXT": "Try a different name or another tab.",
+    "NO_BRANCHES_TITLE": "No branches yet",
+    "NO_BRANCHES_TEXT": "Offers belong to a branch. Add a branch first.",
+    "FILTER": {
+      "BRANCH": "Branch"
+    },
+    "CARD": {
+      "DATES": "Dates",
+      "BOOKINGS": "Bookings",
+      "SERVICES": "Included services",
+      "STOP_LABEL": "Stop offer {{name}}",
+      "RESUME_LABEL": "Resume offer {{name}}",
+      "EDIT_LABEL": "Edit offer {{name}}",
+      "DELETE_LABEL": "Delete offer {{name}}"
+    },
+    "PRICE": {
+      "REGULAR": "Regular",
+      "VIP": "VIP",
+      "HOME": "Home visit"
+    },
+    "IN_BRANCH_ONLY": "In branch only",
+    "SAVE": "Save {{percent}}%",
+    "STOP": "Stop offer",
+    "RESUME": "Resume",
+    "DELETE": {
+      "TITLE_ONE": "Delete this offer?",
+      "MESSAGE_ONE": "“{{name}}” will be permanently deleted, with its banner. This can’t be undone."
+    },
+    "CREATED": "Offer added.",
+    "UPDATED": "Offer updated.",
+    "STOPPED": "Offer stopped. It is now hidden from the app.",
+    "RESUMED": "Offer resumed.",
+    "DELETED": "Offers deleted.",
+    "NO_END": "No end",
+    "NO_LIMIT": "No limit",
+    "STATUS": {
+      "ACTIVE": "Active",
+      "SCHEDULED": "Scheduled",
+      "ENDED": "Ended",
+      "LIMIT_REACHED": "Fully booked",
+      "STOPPED": "Stopped"
+    },
+    "TABS": {
+      "LABEL": "Offer status",
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "SCHEDULED": "Scheduled",
+      "ENDED_OR_FULL": "Ended or full"
+    },
+    "ERRORS": {
+      "NOT_FOUND": "This offer no longer exists.",
+      "BRANCH_NOT_FOUND": "This branch no longer exists.",
+      "NAME_REQUIRED": "Offer name is required",
+      "NAME_TOO_LONG": "The name can’t be longer than 100 characters",
+      "SERVICES_MIN": "Choose at least 1 service.",
+      "SERVICES_DUPLICATE": "Each service can be added only once.",
+      "SERVICE_INACTIVE": "Every service in the offer must be active in this branch.",
+      "PRICE_INVALID": "Enter a price above 0 and up to 100,000, with at most 2 decimals.",
+      "PRICE_TOO_HIGH": "The price must be lower than the total of the selected services.",
+      "HOME_UNAVAILABLE": "Home booking is only possible when every service is available for home visits.",
+      "START_REQUIRED": "Start date is required.",
+      "START_INVALID": "Enter a valid start date.",
+      "START_PAST": "The start date can’t be in the past.",
+      "END_INVALID": "Enter a valid end date.",
+      "END_BEFORE_START": "The end date can’t be before the start date.",
+      "MAX_BOOKINGS_INVALID": "Enter a whole number from 1 to 100,000, or leave it empty for no limit.",
+      "INVALID_IMAGE": "Invalid banner. Use a JPG, PNG or WebP file up to 5 MB.",
+      "IDS_REQUIRED": "Select at least one offer."
+    },
+    "NEW": "Add offer",
+    "FORM": {
+      "CREATE_TITLE": "Add offer",
+      "CREATE_SUBTITLE": "Discount a bundle of this branch’s services for a period.",
+      "EDIT_TITLE": "Edit offer",
+      "EDIT_SUBTITLE": "Change the dates, services, prices or banner.",
+      "CREATE": "Add offer",
+      "BRANCH_NOTE_CREATE": "The offer will be added to this branch. It can’t be changed later.",
+      "BRANCH_NOTE_EDIT": "An offer can’t move to another branch.",
+      "BANNER": "Banner",
+      "BANNER_ADD": "Add banner",
+      "BANNER_CHANGE": "Change banner",
+      "BANNER_REMOVE": "Remove banner",
+      "BANNER_HINT": "JPG, PNG or WebP up to 5 MB. 1200 × 675 (16:9) works best.",
+      "BANNER_PENDING": "The banner changes when you save.",
+      "NAME_AR": "Name (Arabic)",
+      "NAME_EN": "Name (English)",
+      "NAME_REQUIRED": "Offer name is required",
+      "NAME_MAX": "The name can’t be longer than 100 characters",
+      "START_DATE": "Start date",
+      "END_DATE": "End date",
+      "END_HINT": "Leave empty for no end.",
+      "START_REQUIRED": "Start date is required",
+      "START_INVALID": "Enter a valid start date",
+      "START_PAST": "The start date can’t be in the past",
+      "END_INVALID": "Enter a valid end date",
+      "END_BEFORE_START": "The end date can’t be before the start date",
+      "MAX_BOOKINGS": "Max bookings",
+      "MAX_BOOKINGS_HINT": "Leave empty for no limit.",
+      "MAX_BOOKINGS_INVALID": "Enter a whole number from 1 to 100,000",
+      "SERVICES_HINT": "Choose at least 1 service. Only services that are active in this branch are listed.",
+      "SERVICES_MIN": "Choose at least 1 service.",
+      "SERVICES_UNAVAILABLE": "Remove the services that are no longer active in this branch.",
+      "REGULAR_PRICE": "Regular price (EGP)",
+      "VIP_PRICE": "VIP price (EGP)",
+      "HOME_PRICE": "Home visit price (EGP)",
+      "HOME_HINT": "Leave empty for in branch only.",
+      "HOME_UNAVAILABLE": "A home visit price is available only when every selected service supports home visits.",
+      "PRICE_REQUIRED": "Price is required",
+      "PRICE_INVALID": "Enter a price above 0 and up to 100,000, with at most 2 decimals",
+      "PRICE_TOO_HIGH": "The price must be lower than the “Before discount” total"
+    },
+    "RESULTS": "Showing {{count}} of {{total}} offers",
+    "RESULTS_NONE": "No offers found"
   },
   "VALIDATION_FIELDS": {
     "NameAr": "Arabic name",
@@ -924,6 +1051,10 @@
     "SourceBranchId": "Source branch",
     "TargetBranchId": "Target branch",
     "ServiceIds": "Services",
-    "PackageIds": "Packages"
+    "PackageIds": "Packages",
+    "StartDate": "Start date",
+    "EndDate": "End date",
+    "MaxBookings": "Maximum bookings",
+    "OfferIds": "Offers"
   }
 }

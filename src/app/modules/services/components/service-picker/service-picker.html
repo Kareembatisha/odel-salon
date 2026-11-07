@@ -1,0 +1,28 @@
+<fieldset class="sp" [class.sp--invalid]="error()" [attr.aria-describedby]="hint() ? hintId : null">
+  <legend class="sp__legend">{{ 'SERVICE_PICKER.LABEL' | translate }}</legend>
+  @if (hint()) {
+    <p class="sp__hint" [id]="hintId">{{ hint() | translate }}</p>
+  }
+
+  @if (items().length === 0) {
+    <p class="sp__empty">{{ 'SERVICE_PICKER.EMPTY' | translate }}</p>
+  } @else {
+    <ul class="sp__list">
+      @for (item of items(); track item.id) {
+        <li>
+          <label class="sp__service" [class.sp__service--checked]="isSelected(item.id)" [class.sp__service--unavailable]="item.unavailable">
+            <input type="checkbox" class="sp__check" [checked]="isSelected(item.id)" (change)="toggled.emit(item.id)" />
+            <span class="sp__text">
+              <span class="sp__name" dir="auto">{{ item.name }}</span>
+              <span class="sp__meta">{{ item.meta }}</span>
+            </span>
+          </label>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (error(); as key) {
+    <p class="sp__error" role="alert">{{ key | translate }}</p>
+  }
+</fieldset>

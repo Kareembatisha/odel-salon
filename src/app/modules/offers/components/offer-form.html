@@ -1,0 +1,114 @@
+<form class="of" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="of__body">
+    <!-- Banner (16:9, optional) -->
+    <section class="of__banner" [attr.aria-label]="'OFFERS.FORM.BANNER' | translate">
+      <div class="of__preview">
+        @if (shownImage(); as src) {
+          <img class="of__preview-img" [src]="src" alt="" />
+        } @else {
+          <div class="of__preview-empty" aria-hidden="true"><i class="pi pi-image"></i></div>
+        }
+      </div>
+
+      <div class="of__banner-actions">
+        <input #file type="file" class="sr-only" [accept]="accept" tabindex="-1"
+          [attr.aria-label]="'OFFERS.FORM.BANNER_CHANGE' | translate" (change)="onPickBanner($event)" />
+        <app-button variant="outline" size="sm" iconClass="pi pi-image" [disabled]="saving()" (clicked)="file.click()">
+          {{ (hasBanner() ? 'OFFERS.FORM.BANNER_CHANGE' : 'OFFERS.FORM.BANNER_ADD') | translate }}
+        </app-button>
+        @if (hasBanner()) {
+          <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [disabled]="saving()" (clicked)="removeBanner()">
+            {{ 'OFFERS.FORM.BANNER_REMOVE' | translate }}
+          </app-button>
+        }
+      </div>
+      <p class="of__hint">{{ 'OFFERS.FORM.BANNER_HINT' | translate }}</p>
+      @if (bannerChanged()) {
+        <p class="of__pending" role="status">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'OFFERS.FORM.BANNER_PENDING' | translate }}
+        </p>
+      }
+    </section>
+
+    <!-- The branch is fixed: the one selected on the list (create) or the offer's own (edit). -->
+    <p class="of__branch">
+      <i class="pi pi-lock" aria-hidden="true"></i>
+      <span>
+        <strong>{{ branchName() }}</strong>
+        {{ (mode() === 'create' ? 'OFFERS.FORM.BRANCH_NOTE_CREATE' : 'OFFERS.FORM.BRANCH_NOTE_EDIT') | translate }}
+      </span>
+    </p>
+
+    <app-float-label-input label="OFFERS.FORM.NAME_AR" iconLeft="pi pi-tag" autocomplete="off"
+      [errorMessage]="nameError('nameAr')" formControlName="nameAr" />
+    <app-float-label-input label="OFFERS.FORM.NAME_EN" iconLeft="pi pi-tag" autocomplete="off"
+      [errorMessage]="nameError('nameEn')" formControlName="nameEn" />
+
+    <!-- Dates -->
+    <div class="of__row">
+      <app-float-label-input label="OFFERS.FORM.START_DATE" type="date" [ltr]="true" [min]="startMin()"
+        [errorMessage]="startError()" formControlName="startDate" />
+      <app-float-label-input label="OFFERS.FORM.END_DATE" type="date" [ltr]="true" [min]="endMin()"
+        hint="OFFERS.FORM.END_HINT" [errorMessage]="endError()" formControlName="endDate" />
+    </div>
+
+    <app-float-label-input label="OFFERS.FORM.MAX_BOOKINGS" type="number" iconLeft="pi pi-users" [ltr]="true"
+      hint="OFFERS.FORM.MAX_BOOKINGS_HINT" [errorMessage]="maxBookingsError()" formControlName="maxBookings" />
+
+    <app-service-picker
+      [options]="services()"
+      [selected]="selected()"
+      [unavailable]="unavailableServices()"
+      hint="OFFERS.FORM.SERVICES_HINT"
+      [error]="servicesError()"
+      (toggled)="toggleService($event)"
+    />
+
+    <!-- Before discount: what the chosen services cost on their own -->
+    @if (hasSelection()) {
+      <app-service-totals [totals]="totals()" [showHome]="homeAllowed()" />
+    }
+
+    <!-- Offer prices: each must be lower than its "before discount" total -->
+    <div class="of__field">
+      <app-float-label-input label="OFFERS.FORM.REGULAR_PRICE" type="number" iconLeft="pi pi-wallet" [ltr]="true"
+        [errorMessage]="priceError('regularPrice')" formControlName="regularPrice" />
+      @if (savings().regular > 0) {
+        <span class="of__saving">{{ 'OFFERS.SAVE' | translate: { percent: savings().regular } }}</span>
+      }
+    </div>
+
+    <div class="of__field">
+      <app-float-label-input label="OFFERS.FORM.VIP_PRICE" type="number" iconLeft="pi pi-star" [ltr]="true"
+        [errorMessage]="priceError('vipPrice')" formControlName="vipPrice" />
+      @if (savings().vip > 0) {
+        <span class="of__saving">{{ 'OFFERS.SAVE' | translate: { percent: savings().vip } }}</span>
+      }
+    </div>
+
+    <!-- Home price: only when every chosen service allows home visits; empty = in branch only -->
+    @if (homeAllowed()) {
+      <div class="of__field">
+        <app-float-label-input label="OFFERS.FORM.HOME_PRICE" type="number" iconLeft="pi pi-home" hint="OFFERS.FORM.HOME_HINT"
+          [ltr]="true" [errorMessage]="priceError('homePrice')" formControlName="homePrice" />
+        @if (savings().home > 0) {
+          <span class="of__saving">{{ 'OFFERS.SAVE' | translate: { percent: savings().home } }}</span>
+        }
+      </div>
+    } @else {
+      <p class="of__note">
+        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        {{ 'OFFERS.FORM.HOME_UNAVAILABLE' | translate }}
+      </p>
+    }
+  </div>
+
+  <footer class="of__footer">
+    <app-button variant="secondary" [disabled]="saving()" (clicked)="cancelled.emit()">
+      {{ 'COMMON.CANCEL' | translate }}
+    </app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()">
+      {{ (mode() === 'create' ? 'OFFERS.FORM.CREATE' : 'COMMON.SAVE') | translate }}
+    </app-button>
+  </footer>
+</form>

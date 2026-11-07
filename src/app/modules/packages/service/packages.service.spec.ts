@@ -4,8 +4,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { NotificationService } from '@core/services/notification.service';
 import { BranchesService } from '@modules/branches/service/branches.service';
-import { ServiceListItem } from '@modules/services/model/service.model';
-import { ServicesService } from '@modules/services/service/services.service';
 import { ApiResponse } from '@shared/model/api_response.model';
 import { PackageListItem, PackagesQuery } from '../model/package.model';
 import { PACKAGE_REPOSITORY } from '../repository/package.repository';
@@ -66,17 +64,14 @@ describe('PackagesService', () => {
   let repo: FakeRepository;
   let service: PackagesService;
   let success: ReturnType<typeof vi.fn>;
-  let branchServices: ServiceListItem[];
 
   beforeEach(() => {
     repo = new FakeRepository();
     success = vi.fn();
-    branchServices = [];
     TestBed.configureTestingModule({
       providers: [
         { provide: PACKAGE_REPOSITORY, useValue: repo },
         { provide: BranchesService, useValue: { loadOptions: () => of(BRANCHES) } },
-        { provide: ServicesService, useValue: { loadBranchServices: () => of(branchServices) } },
         { provide: NotificationService, useValue: { success, warning: vi.fn() } },
       ],
     });
@@ -164,7 +159,6 @@ describe('PackagesService', () => {
         providers: [
           { provide: PACKAGE_REPOSITORY, useValue: repo },
           { provide: BranchesService, useValue: { loadOptions: () => of([]) } },
-          { provide: ServicesService, useValue: {} },
           { provide: NotificationService, useValue: { success, warning: vi.fn() } },
         ],
       });
@@ -246,24 +240,6 @@ describe('PackagesService', () => {
       repo.byId.mockReturnValue(throwError(() => new Error('404')));
       service.getPackage(1).subscribe((v) => (result = v));
       expect(result).toBeNull();
-    });
-  });
-
-  describe('loadServiceOptions', () => {
-    const row = (id: number, pricing: Partial<ServiceListItem['pricing']>): ServiceListItem => ({
-      id, nameAr: `خدمة ${id}`, nameEn: `Service ${id}`,
-      pricing: { isPriced: true, durationMinutes: 30, regularPrice: 100, vipPrice: 150, isHomeAvailable: false, homePrice: null, isActive: true, ...pricing },
-    });
-
-    it('keeps only ACTIVE services, flattened and sorted by id', () => {
-      branchServices = [row(3, {}), row(1, { isActive: false }), row(2, { isHomeAvailable: true, homePrice: 250 })];
-      let options: unknown[] = [];
-      service.loadServiceOptions(3).subscribe((v) => (options = v));
-
-      expect(options).toEqual([
-        { id: 2, nameAr: 'خدمة 2', nameEn: 'Service 2', durationMinutes: 30, regularPrice: 100, vipPrice: 150, isHomeAvailable: true, homePrice: 250 },
-        { id: 3, nameAr: 'خدمة 3', nameEn: 'Service 3', durationMinutes: 30, regularPrice: 100, vipPrice: 150, isHomeAvailable: false, homePrice: null },
-      ]);
     });
   });
 });

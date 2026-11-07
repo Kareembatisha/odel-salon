@@ -1,0 +1,107 @@
+<article
+  class="offer odl-card"
+  [class.offer--muted]="isMuted()"
+  [attr.aria-labelledby]="'offer-name-' + offer().id"
+>
+  <!-- Banner (16:9). Decorative: the name below already says what the offer is. -->
+  <div class="offer__banner">
+    @if (showImage()) {
+      <img class="offer__image" [src]="offer().imageUrl" alt="" loading="lazy" (error)="imageFailed.set(true)" />
+    } @else {
+      <div class="offer__placeholder" aria-hidden="true"><i class="pi pi-tag"></i></div>
+    }
+    @if (offer().savingPercent > 0) {
+      <span class="offer__save-badge">{{ 'OFFERS.SAVE' | translate: { percent: offer().savingPercent } }}</span>
+    }
+  </div>
+
+  <div class="offer__content">
+    <!-- Header: name + status -->
+    <header class="offer__head">
+      <div class="offer__titles">
+        <h3 class="offer__name" [id]="'offer-name-' + offer().id" dir="auto">
+          @if (canEdit()) {
+            <button type="button" class="offer__link" [title]="editLabel()" (click)="edit.emit(offer())">
+              {{ name() }}
+            </button>
+          } @else {
+            {{ name() }}
+          }
+        </h3>
+        <p class="offer__other-name" dir="auto" [attr.lang]="otherLang()">{{ otherName() }}</p>
+      </div>
+
+      <app-status-badge [variant]="statusVariant()">{{ statusKey() | translate }}</app-status-badge>
+    </header>
+
+    <!-- Dates + bookings -->
+    <ul class="offer__meta">
+      <li>
+        <i class="pi pi-calendar" aria-hidden="true"></i>
+        <span class="sr-only">{{ 'OFFERS.CARD.DATES' | translate }}</span>
+        <span dir="auto">{{ dates() }}</span>
+      </li>
+      <li>
+        <i class="pi pi-users" aria-hidden="true"></i>
+        <span class="sr-only">{{ 'OFFERS.CARD.BOOKINGS' | translate }}</span>
+        <span dir="auto">{{ bookings() }}</span>
+      </li>
+    </ul>
+
+    <!-- Included services -->
+    <section>
+      <h4 class="sr-only">{{ 'OFFERS.CARD.SERVICES' | translate }}</h4>
+      <ul class="offer__services">
+        @for (service of serviceNames(); track service.id) {
+          <li class="offer__chip" dir="auto">{{ service.name }}</li>
+        }
+      </ul>
+    </section>
+
+    <!-- Prices: the offer price and the services' total (struck through) -->
+    <dl class="offer__prices">
+      @for (line of lines(); track line.key) {
+        <div class="offer__price-row">
+          <dt>{{ 'OFFERS.PRICE.' + line.key | translate }}</dt>
+          <dd>
+            @if (line.price === null) {
+              <span class="offer__muted">{{ 'OFFERS.IN_BRANCH_ONLY' | translate }}</span>
+            } @else {
+              <span class="offer__price">{{ line.price }}</span>
+              @if (line.original) {
+                <s class="offer__original">{{ line.original }}</s>
+              }
+            }
+          </dd>
+        </div>
+      }
+    </dl>
+  </div>
+
+  <!-- Footer: Stop / Resume + actions -->
+  @if (hasFooter()) {
+    <footer class="offer__footer">
+      @if (showToggle()) {
+        <app-button
+          [variant]="isStopped() ? 'outline' : 'secondary'"
+          size="sm"
+          [iconClass]="isStopped() ? 'pi pi-play' : 'pi pi-pause'"
+          [disabled]="busy()"
+          [ariaLabel]="toggleLabel()"
+          (clicked)="toggleStatus.emit(offer())"
+        >
+          {{ (isStopped() ? 'OFFERS.RESUME' : 'OFFERS.STOP') | translate }}
+        </app-button>
+      }
+
+      <div class="offer__actions">
+        @if (canEdit()) {
+          <app-button variant="ghost" size="sm" iconClass="pi pi-pencil" [ariaLabel]="editLabel()" (clicked)="edit.emit(offer())" />
+        }
+        @if (canDelete()) {
+          <app-button variant="ghost" size="sm" iconClass="pi pi-trash" [ariaLabel]="deleteLabel()" (clicked)="delete.emit(offer())" />
+        }
+      </div>
+    </footer>
+  }
+</article>

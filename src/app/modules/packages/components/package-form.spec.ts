@@ -3,16 +3,17 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LanguageService } from '@core/services/language.service';
-import { CreatePackagePayload, PackageDetails, PackageServiceOption, UpdatePackagePayload } from '../model/package.model';
+import { ServiceOption } from '../../services/model/service.model';
+import { CreatePackagePayload, PackageDetails, UpdatePackagePayload } from '../model/package.model';
 import { PackageForm } from './package-form';
 
-const opt = (id: number, over: Partial<PackageServiceOption> = {}): PackageServiceOption => ({
+const opt = (id: number, over: Partial<ServiceOption> = {}): ServiceOption => ({
   id, nameAr: `[AR] Service ${id}`, nameEn: `Service ${id}`, durationMinutes: 30,
   regularPrice: 100, vipPrice: 150, isHomeAvailable: false, homePrice: null, ...over,
 });
 
 /** 1 + 2 can be booked at home; 3 can't. Regular: 100 + 60 = 160, VIP: 150 + 100 = 250, Home: 200 + 120 = 320. */
-const SERVICES: PackageServiceOption[] = [
+const SERVICES: ServiceOption[] = [
   opt(1, { durationMinutes: 30, regularPrice: 100, vipPrice: 150, isHomeAvailable: true, homePrice: 200 }),
   opt(2, { durationMinutes: 15, regularPrice: 60, vipPrice: 100, isHomeAvailable: true, homePrice: 120 }),
   opt(3, { durationMinutes: 15, regularPrice: 50, vipPrice: 80 }),
@@ -35,7 +36,7 @@ describe('PackageForm', () => {
   const text = () => el().textContent ?? '';
   const inputs = () => Array.from(el().querySelectorAll<HTMLInputElement>('app-float-label-input input'));
   const field = (label: string) => el().querySelector<HTMLInputElement>(`app-float-label-input input[aria-label="${label}"]`);
-  const checks = () => Array.from(el().querySelectorAll<HTMLInputElement>('.pf__check'));
+  const checks = () => Array.from(el().querySelectorAll<HTMLInputElement>('.sp__check'));
   const submitButton = () => el().querySelector<HTMLButtonElement>('button[type="submit"]')!;
 
   async function settle() {
@@ -47,7 +48,7 @@ describe('PackageForm', () => {
   async function setup(opts: {
     mode?: 'create' | 'edit';
     details?: PackageDetails | null;
-    services?: PackageServiceOption[];
+    services?: ServiceOption[];
     saving?: boolean;
   } = {}) {
     TestBed.configureTestingModule({ imports: [PackageForm, TranslateModule.forRoot()] });
@@ -102,12 +103,12 @@ describe('PackageForm', () => {
       expect(text()).toContain('PACKAGES.FORM.BRANCH_NOTE_CREATE');
       expect(inputs().every((i) => i.value === '')).toBe(true);
       expect(checks()).toHaveLength(3);
-      expect(el().querySelector('.pf__summary')).toBeNull();
+      expect(el().querySelector('.st')).toBeNull();
     });
 
     it('says so when the branch has no active services', async () => {
       await setup({ services: [] });
-      expect(text()).toContain('PACKAGES.FORM.SERVICES_EMPTY');
+      expect(text()).toContain('SERVICE_PICKER.EMPTY');
       expect(checks()).toHaveLength(0);
     });
 
@@ -115,7 +116,7 @@ describe('PackageForm', () => {
       await setup();
       await pick(1, 2);
 
-      const summary = el().querySelector('.pf__summary')!.textContent!;
+      const summary = el().querySelector('.st')!.textContent!;
       expect(summary).toContain('160'); // regular
       expect(summary).toContain('250'); // vip
       expect(summary).toContain('320'); // home — both services allow it
@@ -125,7 +126,7 @@ describe('PackageForm', () => {
     it('has no home total once a service without home visits is chosen', async () => {
       await setup();
       await pick(1, 3);
-      expect(el().querySelector('.pf__summary')!.textContent).not.toContain('PACKAGES.PRICE.HOME');
+      expect(el().querySelector('.st')!.textContent).not.toContain('SERVICE_PICKER.HOME');
     });
   });
 
@@ -337,8 +338,8 @@ describe('PackageForm', () => {
       await setup({ mode: 'edit', details: stale });
 
       expect(text()).toContain('Old service');
-      expect(text()).toContain('PACKAGES.FORM.UNAVAILABLE');
-      expect(el().querySelector('.pf__service--unavailable')).not.toBeNull();
+      expect(text()).toContain('SERVICE_PICKER.UNAVAILABLE');
+      expect(el().querySelector('.sp__service--unavailable')).not.toBeNull();
 
       await submit();
       expect(submitted).not.toHaveBeenCalled();

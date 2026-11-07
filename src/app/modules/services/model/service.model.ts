@@ -34,6 +34,22 @@ export interface ServiceListItem {
 }
 
 /**
+ * A service that can be bundled into a package or an offer: one ACTIVE service priced in the
+ * bundle's branch, flattened from `GET /services` (prices feed the "Before discount" box).
+ * `homePrice` is null when the service isn't available for home visits.
+ */
+export interface ServiceOption {
+  id: number;
+  nameAr: string;
+  nameEn: string;
+  durationMinutes: number;
+  regularPrice: number;
+  vipPrice: number;
+  isHomeAvailable: boolean;
+  homePrice: number | null;
+}
+
+/**
  * GET /services → meta.additionalData — the four summary cards.
  * Counts cover the WHOLE branch and ignore search / isActive / isHomeAvailable.
  * `homeAvailable` = ACTIVE services available for home visits.

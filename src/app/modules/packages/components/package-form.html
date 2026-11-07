@@ -24,47 +24,18 @@
       formControlName="nameEn"
     />
 
-    <!-- Service picker -->
-    <fieldset class="pf__services" [class.pf__services--invalid]="servicesError()" [attr.aria-describedby]="'pf-services-hint'">
-      <legend class="pf__legend">{{ 'PACKAGES.FORM.SERVICES' | translate }}</legend>
-      <p class="pf__hint" id="pf-services-hint">{{ 'PACKAGES.FORM.SERVICES_HINT' | translate }}</p>
-
-      @if (pickerItems().length === 0) {
-        <p class="pf__empty">{{ 'PACKAGES.FORM.SERVICES_EMPTY' | translate }}</p>
-      } @else {
-        <ul class="pf__list">
-          @for (item of pickerItems(); track item.id) {
-            <li>
-              <label class="pf__service" [class.pf__service--checked]="isSelected(item.id)" [class.pf__service--unavailable]="item.unavailable">
-                <input type="checkbox" class="pf__check" [checked]="isSelected(item.id)" (change)="toggleService(item.id)" />
-                <span class="pf__service-text">
-                  <span class="pf__service-name" dir="auto">{{ item.name }}</span>
-                  <span class="pf__service-meta">{{ item.meta }}</span>
-                </span>
-              </label>
-            </li>
-          }
-        </ul>
-      }
-
-      @if (servicesError(); as key) {
-        <p class="pf__error" role="alert">{{ key | translate }}</p>
-      }
-    </fieldset>
+    <app-service-picker
+      [options]="services()"
+      [selected]="selected()"
+      [unavailable]="unavailableServices()"
+      hint="PACKAGES.FORM.SERVICES_HINT"
+      [error]="servicesError()"
+      (toggled)="toggleService($event)"
+    />
 
     <!-- Before discount: what the chosen services cost on their own -->
     @if (hasSelection()) {
-      <section class="pf__summary" [attr.aria-label]="'PACKAGES.FORM.BEFORE_DISCOUNT' | translate">
-        <h4 class="pf__summary-title">{{ 'PACKAGES.FORM.BEFORE_DISCOUNT' | translate }}</h4>
-        <dl class="pf__summary-list">
-          <div><dt>{{ 'PACKAGES.PRICE.REGULAR' | translate }}</dt><dd>{{ summary().regular }}</dd></div>
-          <div><dt>{{ 'PACKAGES.PRICE.VIP' | translate }}</dt><dd>{{ summary().vip }}</dd></div>
-          @if (summary().home; as home) {
-            <div><dt>{{ 'PACKAGES.PRICE.HOME' | translate }}</dt><dd>{{ home }}</dd></div>
-          }
-          <div><dt>{{ 'PACKAGES.FORM.TOTAL_DURATION' | translate }}</dt><dd>{{ summary().duration }}</dd></div>
-        </dl>
-      </section>
+      <app-service-totals [totals]="totals()" [showHome]="homeAllowed()" />
     }
 
     <!-- Package prices: each must be lower than its "before discount" total -->

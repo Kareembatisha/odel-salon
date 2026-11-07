@@ -13,6 +13,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { StatCardComponent } from '../../../../shared/components/stat-card/stat-card.component';
 import { StatusBadgeComponent, StatusBadgeVariant } from '../../../../shared/components/status-badge/status-badge.component';
+import { TabItem, TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 
 interface DemoRow { id: number; name: string; branch: string; tier: 'VIP' | 'Regular'; active: boolean; }
 
@@ -28,7 +29,7 @@ interface DemoRow { id: number; name: string; branch: string; tier: 'VIP' | 'Reg
   imports: [
     ReactiveFormsModule, PageHeaderComponent, AppButtonComponent, StatusBadgeComponent, StatCardComponent,
     FloatLabelInput, DataTableComponent, DataTableColumnDirective, EmptyStateComponent, FailedStateComponent,
-    SkeletonComponent, ConfirmModalComponent,
+    SkeletonComponent, ConfirmModalComponent, TabsComponent,
   ],
   templateUrl: './design-system.html',
   styleUrl: './design-system.scss',
@@ -65,6 +66,15 @@ export class DesignSystem {
     { token: 'text-sm · meta', px: 13, sample: 'Updated 2 minutes ago', display: false },
     { token: 'text-xs · caption', px: 12, sample: 'Badges and captions never go below 12px', display: false },
   ];
+
+  protected readonly demoTabs: TabItem[] = [
+    { value: 'all', label: 'All', count: 5 },
+    { value: 'active', label: 'Active', count: 3 },
+    { value: 'scheduled', label: 'Scheduled', count: 1 },
+    { value: 'ended', label: 'Ended or full', count: 1 },
+  ];
+  protected readonly demoTab = signal('all');
+  protected readonly startDate = new FormControl('', { nonNullable: true });
 
   protected readonly email = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] });
   protected readonly password = new FormControl('secret12', { nonNullable: true });

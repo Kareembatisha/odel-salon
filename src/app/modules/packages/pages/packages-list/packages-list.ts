@@ -33,9 +33,10 @@ import {
   CreatePackagePayload,
   PackageDetails,
   PackageListItem,
-  PackageServiceOption,
   UpdatePackagePayload,
 } from "../../model/package.model";
+import { ServiceOption } from "../../../services/model/service.model";
+import { ServicesService } from "../../../services/service/services.service";
 import { PackagesService } from "../../service/packages.service";
 import { localizedName } from "../../utils/package-labels.util";
 
@@ -84,6 +85,7 @@ const SKELETON_STATS = [0, 1, 2];
 })
 export class PackagesList implements OnInit {
   private readonly packagesService = inject(PackagesService);
+  private readonly servicesService = inject(ServicesService);
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
   private readonly language = inject(LanguageService);
@@ -161,7 +163,7 @@ export class PackagesList implements OnInit {
   protected readonly drawerLoading = signal(false);
   protected readonly editDetails = signal<PackageDetails | null>(null);
   /** The active services the picker offers for the drawer's branch. */
-  protected readonly serviceOptions = signal<PackageServiceOption[]>([]);
+  protected readonly serviceOptions = signal<ServiceOption[]>([]);
   /** Branch of the package being created / edited (create: the selected one, edit: the package's own). */
   protected readonly drawerBranchId = signal<number | null>(null);
 
@@ -217,7 +219,7 @@ export class PackagesList implements OnInit {
     this.drawerLoading.set(true);
     this.drawerOpen.set(true);
 
-    this.packagesService.loadServiceOptions(branchId).subscribe((options) => {
+    this.servicesService.loadServiceOptions(branchId).subscribe((options) => {
       if (token !== this.drawerToken) return; // closed or replaced meanwhile
       this.serviceOptions.set(options);
       this.drawerLoading.set(false);
@@ -237,7 +239,7 @@ export class PackagesList implements OnInit {
 
     forkJoin({
       details: this.packagesService.getPackage(pkg.id),
-      options: this.packagesService.loadServiceOptions(pkg.branchId),
+      options: this.servicesService.loadServiceOptions(pkg.branchId),
     }).subscribe(({ details, options }) => {
       if (token !== this.drawerToken) return;
       if (!details) {

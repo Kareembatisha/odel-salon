@@ -154,6 +154,19 @@ export const MAIN_ROUTES: Routes = [
   },
 
   {
+    path: "offers",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Offer.View,
+      breadcrumb: "LAYOUT.NAV.OFFERS",
+    },
+    loadComponent: () =>
+      import("./offers/pages/offers-list/offers-list").then(
+        (m) => m.OffersList,
+      ),
+  },
+
+  {
     path: "services/new",
     canActivate: [permissionGuard],
     data: {

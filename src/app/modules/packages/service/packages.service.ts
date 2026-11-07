@@ -13,13 +13,11 @@ import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
 import { BranchListItem } from "@modules/branches/model/branch.model";
 import { BranchesService } from "@modules/branches/service/branches.service";
-import { ServicesService } from "@modules/services/service/services.service";
 import {
   CreatePackagePayload,
   DeletePackagesRequest,
   PackageDetails,
   PackageListItem,
-  PackageServiceOption,
   PackagesQuery,
   UpdatePackagePayload,
 } from "../model/package.model";
@@ -70,7 +68,6 @@ export class PackagesService {
 
   private readonly repository = inject(PACKAGE_REPOSITORY);
   private readonly branchesService = inject(BranchesService);
-  private readonly servicesService = inject(ServicesService);
   private readonly notify = inject(NotificationService);
 
   // ----------------------------------------------------------
@@ -234,7 +231,7 @@ export class PackagesService {
   }
 
   // ----------------------------------------------------------
-  // Detail & form data
+  // Detail
   // ----------------------------------------------------------
 
   /** One package, or `null` when it can't be loaded (error already toasted / `status: false` body). */
@@ -242,35 +239,6 @@ export class PackagesService {
     return this.repository.getPackageById(id).pipe(
       map((res) => (res.status ? res.data : null)),
       catchError(() => of(null)),
-    );
-  }
-
-  /**
-   * The services the form can pick for a branch: every ACTIVE service priced there, oldest
-   * first, with the prices and duration the "Before discount" box needs. Independent of the
-   * list state; a failure yields an empty list.
-   */
-  loadServiceOptions(branchId: number): Observable<PackageServiceOption[]> {
-    return this.servicesService.loadBranchServices(branchId).pipe(
-      map((rows) =>
-        rows
-          .filter((row) => row.pricing.isActive)
-          .map(
-            (row): PackageServiceOption => ({
-              id: row.id,
-              nameAr: row.nameAr,
-              nameEn: row.nameEn,
-              durationMinutes: row.pricing.durationMinutes ?? 0,
-              regularPrice: row.pricing.regularPrice ?? 0,
-              vipPrice: row.pricing.vipPrice ?? 0,
-              isHomeAvailable: row.pricing.isHomeAvailable,
-              homePrice: row.pricing.isHomeAvailable
-                ? row.pricing.homePrice
-                : null,
-            }),
-          )
-          .sort((a, b) => a.id - b.id),
-      ),
     );
   }
 

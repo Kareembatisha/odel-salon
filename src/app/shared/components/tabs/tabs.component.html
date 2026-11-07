@@ -1,0 +1,20 @@
+<div class="tabs" role="tablist" [attr.aria-label]="ariaLabel() || null" (keydown)="onKeydown($event)">
+  @for (tab of tabs(); track tab.value) {
+    <button
+      type="button"
+      role="tab"
+      class="tabs__tab"
+      [class.tabs__tab--active]="tab.value === value()"
+      [id]="idPrefix() + '-' + tab.value"
+      [attr.aria-selected]="tab.value === value()"
+      [attr.aria-controls]="panelId() || null"
+      [attr.tabindex]="tab.value === value() ? 0 : -1"
+      (click)="select(tab.value)"
+    >
+      <span class="tabs__label">{{ tab.label }}</span>
+      @if (tab.count != null) {
+        <span class="tabs__count">{{ tab.count }}</span>
+      }
+    </button>
+  }
+</div>

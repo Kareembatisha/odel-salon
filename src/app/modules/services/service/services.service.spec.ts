@@ -90,4 +90,26 @@ describe('ServicesService', () => {
     expect(result).toBe(true);
     expect(repo.calls.length).toBe(before + 1);
   });
+
+  describe('loadServiceOptions', () => {
+    it('returns the ACTIVE priced services as flat options, oldest first', () => {
+      let options: unknown[] = [];
+      service.loadServiceOptions(3).subscribe((v) => (options = v));
+
+      const inactive = item(1);
+      inactive.pricing.isActive = false;
+      const unpriced = item(4);
+      unpriced.pricing.isPriced = false;
+      const home = item(2);
+      Object.assign(home.pricing, { isHomeAvailable: true, homePrice: 250, durationMinutes: 45 });
+
+      repo.last.next(ok([item(3), inactive, home, unpriced]));
+
+      expect(repo.calls.at(-1)).toMatchObject({ branchId: 3, pageNumber: 1, pageSize: 100 });
+      expect(options).toEqual([
+        { id: 2, nameAr: 'خدمة 2', nameEn: 'Service 2', durationMinutes: 45, regularPrice: 100, vipPrice: 150, isHomeAvailable: true, homePrice: 250 },
+        { id: 3, nameAr: 'خدمة 3', nameEn: 'Service 3', durationMinutes: 30, regularPrice: 100, vipPrice: 150, isHomeAvailable: false, homePrice: null },
+      ]);
+    });
+  });
 });

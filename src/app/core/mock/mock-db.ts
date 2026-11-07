@@ -9,6 +9,7 @@ import {
 import { ChairDetails, ChairType } from "@modules/chairs/model/chair.model";
 import { BarberDetails } from "@modules/barbers/model/barber.model";
 import { ServiceBranchPayload } from "@modules/services/model/service.model";
+import { addDays, cairoToday } from "../../modules/offers/utils/offer-dates.util";
 
 // ============================================================
 // Types
@@ -78,6 +79,30 @@ export interface MockPackage {
   updatedAt: string | null;
 }
 
+/**
+ * An offer stored in the mock database. Only what the backend stores: names, banner, service
+ * ids, prices, dates, booking cap and the stop timestamp — the services' names, "was" prices,
+ * duration, `savingPercent` and the calculated `status` are derived when the offer is read.
+ * (`bookingsCount` is always 0 until the bookings module exists, so it isn't stored.)
+ */
+export interface MockOffer {
+  id: number;
+  branchId: number;
+  nameAr: string;
+  nameEn: string;
+  imageUrl: string | null;
+  serviceIds: number[];
+  regularPrice: number;
+  vipPrice: number;
+  homePrice: number | null;
+  startDate: string;
+  endDate: string | null;
+  maxBookings: number | null;
+  stoppedAt: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 // ============================================================
 // Constants
 // ============================================================
@@ -92,6 +117,7 @@ export const MOCK_MANAGER_PERMISSIONS: string[] = [
   "Branch.View",
   "Service.View",
   "Package.View",
+  "Offer.View",
   "Barber.View",
   "Chair.View",
   "Offer.View",
@@ -137,6 +163,7 @@ export class MockDb {
   nextBarberId = 1;
   nextServiceId = 1;
   nextPackageId = 1;
+  nextOfferId = 1;
 
   // ----------------------------------------------------------
   // Roles
@@ -403,6 +430,17 @@ export class MockDb {
   packages: MockPackage[] = this.seedPackages();
 
   // ----------------------------------------------------------
+  // Offers
+  // ----------------------------------------------------------
+
+  /**
+   * Seeded like packages (after `services`): each template becomes an offer in every branch where
+   * ALL its services are priced and active, with prices under the services' total — and dates
+   * relative to today (Cairo), so every status shows up: Active, Scheduled, Ended and Stopped.
+   */
+  offers: MockOffer[] = this.seedOffers();
+
+  // ----------------------------------------------------------
   // Lookups
   // ----------------------------------------------------------
 
@@ -561,6 +599,77 @@ export class MockDb {
 
     this.nextPackageId = id;
     return packages;
+  }
+
+  /**
+   * `[nameAr, nameEn, serviceIds, regular, vip, home discount, start (days from today),
+   *   end (days from today, null = no end), max bookings (null = no limit), stopped, banner hue (null = none)]`
+   */
+  private static readonly OFFER_SEED: Array<
+    [string, string, number[], number, number, number, number, number | null, number | null, boolean, number | null]
+  > = [
+    ["عرض نهاية الأسبوع", "Weekend Offer", [1, 2, 3], 0.78, 0.78, 0.8, -5, 10, 50, false, 30],
+    ["توهج الصيف", "Summer Glow", [1, 3, 5], 0.85, 0.82, 0.85, -30, null, null, false, 200],
+    ["عرض رمضان", "Ramadan Special", [1, 2, 5], 0.8, 0.8, 0.8, 7, 21, 100, false, 280],
+    ["العودة للمدارس", "Back to School", [10, 3], 0.88, 0.88, 0.88, -40, -10, 30, false, null],
+    ["تخفيضات خاطفة", "Flash Sale", [1, 5, 9], 0.75, 0.75, 0.75, -2, 3, 20, true, 0],
+    ["عرض السنة", "Yearly Offer", [4, 3], 0.9, 0.9, 0.9, 30, null, null, false, null],
+  ];
+
+  /** A flat 16:9 gradient standing in for an uploaded banner (an inline image, no network). */
+  private banner(hue: number): string {
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675"><defs>` +
+      `<linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${hue},55%,46%)"/>` +
+      `<stop offset="1" stop-color="hsl(${hue + 40},60%,28%)"/></linearGradient></defs>` +
+      `<rect width="1200" height="675" fill="url(#g)"/></svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  }
+
+  private seedOffers(): MockOffer[] {
+    const now = new Date().toISOString();
+    const today = cairoToday();
+    const offers: MockOffer[] = [];
+    let id = 1;
+
+    for (const branch of this.branches) {
+      for (const [nameAr, nameEn, serviceIds, regular, vip, home, start, end, max, stopped, hue] of MockDb.OFFER_SEED) {
+        const rows = serviceIds.map((serviceId) =>
+          this.services
+            .find((s) => s.id === serviceId)
+            ?.prices.find((p) => p.branchId === branch.id),
+        );
+        if (rows.some((row) => !row || !row.isActive)) continue;
+
+        const priced = rows as ServiceBranchPayload[];
+        const total = (pick: (p: ServiceBranchPayload) => number) =>
+          priced.reduce((sum, p) => sum + pick(p), 0);
+        const price = (value: number, discount: number) =>
+          Math.round((value * discount) / 5) * 5;
+        const allHome = priced.every((p) => p.isHomeAvailable);
+
+        offers.push({
+          id: id++,
+          branchId: branch.id,
+          nameAr,
+          nameEn,
+          imageUrl: hue === null ? null : this.banner(hue),
+          serviceIds: [...serviceIds],
+          regularPrice: price(total((p) => p.regularPrice), regular),
+          vipPrice: price(total((p) => p.vipPrice), vip),
+          homePrice: allHome ? price(total((p) => p.homePrice ?? 0), home) : null,
+          startDate: addDays(today, start),
+          endDate: end === null ? null : addDays(today, end),
+          maxBookings: max,
+          stoppedAt: stopped ? now : null,
+          createdAt: now,
+          updatedAt: null,
+        });
+      }
+    }
+
+    this.nextOfferId = id;
+    return offers;
   }
 
   private seedBarbers(): MockBarber[] {

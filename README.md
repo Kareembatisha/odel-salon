@@ -45,7 +45,7 @@ src/
     core/                 guards, interceptors (token, lang, error), services (theme, language,
                           notification, network, export…), auth/permissions.ts, theme/odel-preset.ts
     layout/               auth-layout, main-layout (sidebar, header, breadcrumbs, nav.config.ts)
-    shared/               components/ (button, inputs, badge, stat-card, data-table, modal, states…),
+    shared/               components/ (button, inputs, badge, stat-card, tabs, data-table, modal, states…),
                           model/, utils/, validators/
     modules/
       auth/               login · forgot password · OTP · new password · success
@@ -56,6 +56,7 @@ src/
       barbers/            table + filters + bulk delete · create/edit drawer with photo · status switch
       services/           price table per branch + summary · create/edit page (price card per branch) · bulk tools
       packages/           cards per branch + summary · create/edit drawer (service picker, "Before discount") · status switch
+      offers/             status tabs + cards per branch · create/edit drawer (banner, dates, service picker, "Before discount") · stop / resume
       dashboard/          model · repository (api + mock) · service · page
       profile-management/ profile + change password
       design-system/      living reference page (dev only)
@@ -129,6 +130,7 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 | New service | `/main/services/new` | `Service.Create` |
 | Edit service | `/main/services/:id/edit` | `Service.Edit` |
 | Packages | `/main/packages` | `Package.View` (+ `Create` / `Edit` for the drawer and the status switch, `Delete` for delete) |
+| Offers | `/main/offers` | `Offer.View` (+ `Create` for "Add offer", `Edit` for the edit drawer and Stop / Resume, `Delete` for delete) |
 | My profile | `/main/profile` | sign-in only |
 | Design system (dev builds only) | `/main/design-system` | — |
 
@@ -153,6 +155,7 @@ Fixed, and re-verified with axe-core across every page in light/dark × English/
 - **Profile page labels** — the photo file input and the scrollable permissions list in `profile-view.html` now have accessible names/focusability.
 - **Dead header search removed** — `header.html`/`.scss` (it did nothing and sat next to the real, working per-page search).
 - **404 inside the shell** — sized to the content area instead of a full 100vh, so it no longer adds a second scrollbar; it also now shows a breadcrumb.
+- **Tabs, date input, service picker (shared building blocks)** — `shared/components/tabs` (`<app-tabs>`: controlled WAI-ARIA tabs with optional count pills; arrow keys move focus and flip in RTL, Enter/Space/click selects), `type="date"` (+ `min` / `max`) on `FloatLabelInput` (native picker, `yyyy-MM-dd`, label always lifted), and in `modules/services`: `ServicePicker` (checkbox list of a branch's ACTIVE services, plus services a bundle has that were deactivated since), `ServiceTotals` (the "Before discount" box), `ServicesService.loadServiceOptions(branchId)` and `utils/service-option.util.ts` (`toServiceOptions`, `servicesTotals`, `savingsAmount`). Packages and Offers share them; the forms own the selection and the rules, the components only render.
 - **Mobile Users cards** — below 768px, the Users table (`modules/users/pages/users-list/users-list.html`) renders as cards instead of a horizontally-scrolling table, through a new generic, optional `odlCard` template on `DataTableComponent` (`shared/components/data-table/`). Same data, same server-side selection/pagination/permissions — nothing duplicated. Every other table (Roles, future ones) is unaffected since the feature is opt-in per usage.
 
 Known remaining findings (moderate/minor, pre-existing, not touched this round — out of scope per this change's instructions): the auth pages (`/login`, `/forget-password`) have no `<main>` landmark and no level-one heading; the sidebar's two `<nav>` regions aren't uniquely labelled; the sortable/empty table header cell has no visible text for screen readers. None are regressions from this change.
@@ -202,6 +205,33 @@ A package bundles **at least two services of ONE branch** at a discounted price 
 - **Mock backend** — `core/mock/mock-db.ts` seeds each branch with the package templates whose services are priced and active there, and `package-mock.repository.ts` enforces the same rules (unique names per branch, service/price/home rules, re-activation checks, all-or-nothing delete). Names, totals and duration are derived from the services' CURRENT prices on every read.
 - **Permissions** — `Package.View` opens the page; `Create`, `Edit` (drawer + switch) and `Delete` show or hide their actions. The mock `BranchManager` role has `Package.View` only.
 
+## Offers
+
+Implements `API Contract — Offers` (all 6 endpoints) in `modules/offers/`, built as `model → repository (interface + api + mock) → service (signals) → page`.
+
+An offer discounts a bundle of **at least ONE service of ONE branch** for a period (optionally capped by a number of bookings), with a Regular, a VIP and an optional Home price. Like Packages it never moves between branches, so the list shows ONE branch (the first by default, oldest first); there is no "all branches" view.
+
+- **List** (`/main/offers`) — branch selector, **status tabs with counts**, search (Arabic or English name), 12 per page, newest start date first. Tabs: *All* (no `statuses`), *Active* (`[0]`), *Scheduled* (`[1]`), *Ended or full* (`[2, 3, 4]` — the key is repeated). The counts come from `meta.additionalData` and cover the whole branch: they ignore the search and the selected tab, so they stay real when a tab is empty. They are hidden until the first response (no misleading zeros).
+- **Card** — 16:9 banner (placeholder icon when there is none or it fails to load), status badge, date range (*No end* when open), **Save 22%** (the API's `savingPercent`) over the banner, the services, a row per price with the services' total struck through (or *In branch only*), and the bookings line (*0 / 50*, or *0 · No limit*).
+- **Status** — `0` Active, `1` Scheduled, `2` Ended, `3` LimitReached, `4` Stopped. The backend calculates it from the dates (Cairo time) and the stop flag; the UI only displays it. Colour is never the only signal: every badge has text.
+- **Stop / Resume** — `PATCH /offers/{id}/toggle-status` (no body), gated by `Offer.Edit` (the contract has no separate permission). It is a button on the card, hidden on *Ended* offers (the contract doesn't say; there is nothing left to stop). Stopping hides the offer from the app immediately; resuming can be refused (a service is no longer active in the branch, or the home price is no longer allowed) and the interceptor shows why. No confirmation dialog: it is reversible.
+- **Create / edit** (drawer on the list, `Offer.Create` / `Offer.Edit`) — banner (optional JPG/PNG/WebP up to 5 MB, 1200 × 675 recommended; local preview, *Remove banner*), Arabic + English names (≤ 100, may repeat), start and end date (native date pickers), max bookings (1–100,000, empty = no limit), the shared service picker, the **Before discount** box and the prices with a live **Save %** pill. Inline validation mirrors the contract (`model/offer.model.ts` limits): every price > 0, ≤ 100,000, ≤ 2 decimals and **lower than its total**; a home price only while every chosen service allows home visits (empty = in branch only); the start date today or later **on create only** (a running offer must stay editable); the end date on or after the start. The branch is shown locked and sent only on create. A service the offer has but that was deactivated since is listed as "no longer active" and must be removed before saving.
+- **Dates** — plain `yyyy-MM-dd` strings, never `Date` objects, so the browser's time zone can't shift a day. "Today" for the start-date rule is computed in **Cairo time** (`utils/offer-dates.util.ts`), as the contract says.
+- **Banner on save (multipart)** — create sends the file or nothing; edit sends a new file to replace it, `RemoveImage=true` (and no file) to remove it, or neither to keep it. `ServiceIds` is repeated; an unset home price, end date or max bookings goes out empty. Field names are PascalCase like Barbers (`utils/offer-form-data.ts`, unit-tested).
+- **Delete** — from the card, behind a confirmation → `DELETE /offers` with `{ ids }` (bulk, all-or-nothing, banners are deleted too; the UI deletes one at a time).
+- **Mock backend** — `core/mock/mock-db.ts` seeds every branch with offers covering Active, Scheduled, Ended and Stopped (with and without banner, end date or booking limit); `offer-mock.repository.ts` enforces the contract rules (names may repeat, ≥ 1 distinct active service, price and home rules, dates, 1–100,000 bookings, banner type and size) and re-checks the services on resume. Not simulated: `bookingsCount` is always 0 and status `3` never appears (the contract says so until the bookings module exists). If an offer is both stopped and past its end date the mock shows *Stopped* — the contract doesn't say which wins.
+- **Permissions** — `Offer.View` opens the page; `Create`, `Edit` (drawer + Stop / Resume) and `Delete` show or hide their actions. Not included yet: *Send notification* (planned with the notifications module).
+
+### Offers accessibility
+
+- The status tabs are a WAI-ARIA tablist bound to one `role="tabpanel"` (`aria-controls` / `aria-labelledby`); arrow keys move focus and flip in RTL.
+- A polite live region announces *"Showing 12 of 30 offers"* (or *"No offers found"*) after every tab, search or branch change, and stays silent while loading and after a failed load, so a result is announced as a change even when the text repeats.
+- Card buttons are named after their offer (*"Stop offer Weekend Offer"*, *"Edit offer …"*, *"Delete offer …"*) and still contain their visible text. The offer name is the card's heading and labels its `article`.
+- After a successful stop, delete or save, if the card that had focus is no longer in the list (e.g. *Stop* on the *Active* tab), focus moves to the offers panel instead of dropping to the page body.
+- The drawer and the delete dialog trap focus, close on Escape and return focus to what opened them. After a failed validation focus jumps to the first invalid field or the service picker.
+- The *Save %* pill over the banner has an opaque backing, so its contrast never depends on the picture. Status badge and pill colours measure 5.2:1 or better in both themes (WCAG AA).
+- Banners are decorative (`alt=""`): the name next to them says what the offer is. Dates in forms are `dir="ltr"` inside RTL pages; card text uses logical properties (`inset-inline-*`) so it mirrors correctly in Arabic.
+
 ## Notes and assumptions
 
 - The AlSalam README says Angular 22 / PrimeNG 19; its `package.json` and lockfile say Angular 21 / PrimeNG 21. The latter were followed.
@@ -219,3 +249,4 @@ A package bundles **at least two services of ONE branch** at a discounted price 
 - Success toasts use the app's own translated messages, not the backend's English `message`; error messages come from the backend.
 - Barbers: the list endpoint returns no summary data, so there are no stat cards; the page size is 10 (contract default 20, max 100). Photo limit is 5 MB per the Barbers contract (profile photos stay at the 2 MB client-side default).
 - Page size is fixed at 10 (the contract's default). Create-user requires every field, including phone (contract: "all fields are required").
+- Offers: the banner limit (5 MB, JPG/PNG/WebP, 1200 × 675 recommended) and every field rule come from the Offers contract; the card grid, the 12-per-page size and "first branch by default" follow Packages. The mock treats Stopped as winning over Ended, and allows Stop on any status — the card hides it on Ended offers. A banner that fails to load shows the placeholder instead of a broken image.

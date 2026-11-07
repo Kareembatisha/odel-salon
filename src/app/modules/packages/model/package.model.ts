@@ -71,22 +71,6 @@ export interface PackageDetails extends PackageListItem {
   updatedAt: string | null;
 }
 
-/**
- * A service the package form can pick: one ACTIVE service priced in the package's branch,
- * flattened from `GET /services` (the prices feed the "Before discount" box).
- * `homePrice` is null when the service isn't available for home visits.
- */
-export interface PackageServiceOption {
-  id: number;
-  nameAr: string;
-  nameEn: string;
-  durationMinutes: number;
-  regularPrice: number;
-  vipPrice: number;
-  isHomeAvailable: boolean;
-  homePrice: number | null;
-}
-
 // ============================================================
 // Write models
 // ============================================================

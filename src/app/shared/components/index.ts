@@ -16,3 +16,4 @@ export * from './filter-select/filter-select.component';
 export * from './search-input/search-input.component';
 export * from './switch/switch.component';
 export * from './pagination/pagination.component';
+export * from './tabs/tabs.component';
