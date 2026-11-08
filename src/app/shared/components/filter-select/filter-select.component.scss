@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: block; }
+:host {
+  display: block;
+}
 
 .fs {
   position: relative;
@@ -20,9 +22,18 @@
     font-size: v.$text-base;
     cursor: pointer;
     transition: border-color v.$transition-normal;
-    &:hover { border-color: v.$text-muted; }
-    &:focus-visible { outline: 0; border-color: v.$primary; box-shadow: 0 0 0 3px v.tint(v.$primary, 22%); }
-    option { background: v.$surface-raised; color: v.$text; }
+    &:hover {
+      border-color: v.$text-muted;
+    }
+    &:focus-visible {
+      outline: 0;
+      border-color: v.$primary;
+      box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+    }
+    option {
+      background: v.$surface-raised;
+      color: v.$text;
+    }
   }
 
   i {

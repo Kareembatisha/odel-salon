@@ -67,7 +67,10 @@ export function isSafeReturnUrl(candidate: string | null | undefined): boolean {
 
   const path = resolved.pathname;
   const [, section] = path.split("/");
-  if (!section || !KNOWN_INTERNAL_SECTIONS.includes(section as (typeof KNOWN_INTERNAL_SECTIONS)[number])) {
+  if (
+    !section ||
+    !KNOWN_INTERNAL_SECTIONS.includes(section as (typeof KNOWN_INTERNAL_SECTIONS)[number])
+  ) {
     return false;
   }
 

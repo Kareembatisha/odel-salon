@@ -1,4 +1,4 @@
-import { UpdateProfileRequest } from '../model/profile.model';
+import { UpdateProfileRequest } from "../model/profile.model";
 
 /**
  * Builds the multipart body for PUT /auth/profile.
@@ -8,11 +8,11 @@ import { UpdateProfileRequest } from '../model/profile.model';
  */
 export function buildProfileFormData(req: UpdateProfileRequest): FormData {
   const body = new FormData();
-  body.append('FullName', req.fullName.trim());
-  body.append('Email', req.email.trim());
-  body.append('CountryCode', req.countryCode);
-  body.append('PhoneNumber', req.phoneNumber.trim());
-  if (req.image) body.append('Image', req.image, req.image.name);
-  body.append('RemoveImage', String(req.removeImage));
+  body.append("FullName", req.fullName.trim());
+  body.append("Email", req.email.trim());
+  body.append("CountryCode", req.countryCode);
+  body.append("PhoneNumber", req.phoneNumber.trim());
+  if (req.image) body.append("Image", req.image, req.image.name);
+  body.append("RemoveImage", String(req.removeImage));
   return body;
 }

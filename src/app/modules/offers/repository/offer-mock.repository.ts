@@ -94,7 +94,8 @@ export class OfferMockRepository implements IOfferRepository {
       )
       .sort((a, b) => b.startDate.localeCompare(a.startDate) || b.id - a.id);
 
-    const count = (...statuses: OfferStatus[]) => own.filter((o) => statuses.includes(o.status)).length;
+    const count = (...statuses: OfferStatus[]) =>
+      own.filter((o) => statuses.includes(o.status)).length;
     const summary: OffersSummary = {
       all: own.length,
       active: count(OfferStatus.Active),
@@ -273,11 +274,7 @@ export class OfferMockRepository implements IOfferRepository {
   // ----------------------------------------------------------
 
   /** First rule `payload` breaks, in form order (names → services → prices → dates → bookings → banner), or `null`. */
-  private validate(
-    branchId: number,
-    payload: OfferFields,
-    creating: boolean,
-  ): Problem | null {
+  private validate(branchId: number, payload: OfferFields, creating: boolean): Problem | null {
     for (const [field, raw] of [
       ["NameAr", payload.nameAr],
       ["NameEn", payload.nameEn],
@@ -301,17 +298,26 @@ export class OfferMockRepository implements IOfferRepository {
     }
     const priced = this.priced(rows);
 
-    const regular = this.priceProblem(payload.regularPrice, this.sum(priced, (p) => p.regularPrice));
+    const regular = this.priceProblem(
+      payload.regularPrice,
+      this.sum(priced, (p) => p.regularPrice),
+    );
     if (regular) return { field: "RegularPrice", key: regular };
 
-    const vip = this.priceProblem(payload.vipPrice, this.sum(priced, (p) => p.vipPrice));
+    const vip = this.priceProblem(
+      payload.vipPrice,
+      this.sum(priced, (p) => p.vipPrice),
+    );
     if (vip) return { field: "VipPrice", key: vip };
 
     if (payload.homePrice !== null) {
       if (!this.allHome(priced)) {
         return { field: "HomePrice", key: "OFFERS.ERRORS.HOME_UNAVAILABLE" };
       }
-      const home = this.priceProblem(payload.homePrice, this.sum(priced, (p) => p.homePrice ?? 0));
+      const home = this.priceProblem(
+        payload.homePrice,
+        this.sum(priced, (p) => p.homePrice ?? 0),
+      );
       if (home) return { field: "HomePrice", key: home };
     }
 
@@ -364,9 +370,7 @@ export class OfferMockRepository implements IOfferRepository {
   /** The services' price rows in `branchId` (`undefined` = not priced there). */
   private rowsOf(serviceIds: number[], branchId: number): PriceRow[] {
     return serviceIds.map((serviceId) =>
-      this.db.services
-        .find((s) => s.id === serviceId)
-        ?.prices.find((p) => p.branchId === branchId),
+      this.db.services.find((s) => s.id === serviceId)?.prices.find((p) => p.branchId === branchId),
     );
   }
 
@@ -451,16 +455,16 @@ export class OfferMockRepository implements IOfferRepository {
   /** 400 — same shape as the interceptor's validation toast: field label + message. */
   private invalid({ field, key }: Problem): Observable<never> {
     this.notify.warning(`VALIDATION_FIELDS.${field}`, key);
-    return throwError(() =>
-      Object.assign(new Error("Validation failed"), { status: 400 }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error("Validation failed"), { status: 400 })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 
   /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
   private fail(message: string, statusCode: number): Observable<never> {
     this.notify.warning(message);
-    return throwError(() =>
-      Object.assign(new Error(message), { status: statusCode }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error(message), { status: statusCode })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 }

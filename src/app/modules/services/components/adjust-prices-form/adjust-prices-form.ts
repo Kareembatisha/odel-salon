@@ -9,18 +9,24 @@ import {
   signal,
 } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from "@angular/forms";
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from "@angular/forms";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { startWith } from "rxjs";
 
 import { LanguageService } from "@core/services/language.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { FloatLabelInput } from "../../../../shared/components/float-label-input/float-label-input";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
 import {
   FloatLabelSelect,
   SelectOption,
-} from "../../../../shared/components/float-label-select/float-label-select";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
+} from "@shared/components/float-label-select/float-label-select";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
 import {
   SERVICE_PERCENTAGE_MAX,
   SERVICE_PERCENTAGE_MIN,
@@ -108,23 +114,27 @@ export class AdjustPricesForm implements OnInit {
     scope: ["all"],
   });
 
-  private readonly value = toSignal(this.form.valueChanges.pipe(startWith(this.form.getRawValue())), {
-    initialValue: this.form.getRawValue(),
-  });
+  private readonly value = toSignal(
+    this.form.valueChanges.pipe(startWith(this.form.getRawValue())),
+    {
+      initialValue: this.form.getRawValue(),
+    },
+  );
 
   protected readonly min = SERVICE_PERCENTAGE_MIN;
   protected readonly max = SERVICE_PERCENTAGE_MAX;
 
   protected readonly branchOptions = computed<SelectOption[]>(() => {
     const lang = this.language.currentLang();
-    return this.branches().map((b) => ({ value: String(b.id), label: localizedName(b.nameAr, b.nameEn, lang) }));
+    return this.branches().map((b) => ({
+      value: String(b.id),
+      label: localizedName(b.nameAr, b.nameEn, lang),
+    }));
   });
 
   /** A row selection only makes sense for the branch the list is showing. */
   protected readonly canScopeToSelection = computed(
-    () =>
-      this.selectedIds().length > 0 &&
-      Number(this.value().branchId) === this.initialBranchId(),
+    () => this.selectedIds().length > 0 && Number(this.value().branchId) === this.initialBranchId(),
   );
 
   protected readonly scopeOptions = computed<SelectOption[]>(() => {
@@ -133,7 +143,9 @@ export class AdjustPricesForm implements OnInit {
       { value: "all", label: this.translate.instant("SERVICES.BULK.SCOPE_ALL") },
       {
         value: "selected",
-        label: this.translate.instant("SERVICES.BULK.SCOPE_SELECTED", { count: this.selectedIds().length }),
+        label: this.translate.instant("SERVICES.BULK.SCOPE_SELECTED", {
+          count: this.selectedIds().length,
+        }),
       },
     ];
   });
@@ -175,7 +187,10 @@ export class AdjustPricesForm implements OnInit {
     const price = (value: number | null): PreviewPrice | null =>
       value === null
         ? null
-        : { from: formatPrice(value, lang, currency), to: formatPrice(applyPercentage(value, pct), lang, currency) };
+        : {
+            from: formatPrice(value, lang, currency),
+            to: formatPrice(applyPercentage(value, pct), lang, currency),
+          };
 
     return this.targets()
       .slice(0, PREVIEW_ROWS)
@@ -191,7 +206,11 @@ export class AdjustPricesForm implements OnInit {
   protected readonly moreCount = computed(() => Math.max(0, this.targets().length - PREVIEW_ROWS));
 
   protected readonly canSubmit = computed(
-    () => this.percentage() !== null && this.targetCount() > 0 && this.overLimit() === 0 && !this.rowsLoading(),
+    () =>
+      this.percentage() !== null &&
+      this.targetCount() > 0 &&
+      this.overLimit() === 0 &&
+      !this.rowsLoading(),
   );
 
   ngOnInit(): void {

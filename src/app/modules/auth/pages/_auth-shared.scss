@@ -4,11 +4,15 @@
 @use "styles/variables" as v;
 
 @mixin common {
-  :host { display: block; }
+  :host {
+    display: block;
+  }
 
   .card-header {
     margin-bottom: v.$space-8;
-    &--center { text-align: center; }
+    &--center {
+      text-align: center;
+    }
   }
   .card-title {
     font-family: v.$font-display;
@@ -18,12 +22,28 @@
     letter-spacing: v.$ls-tight;
     color: v.$text;
   }
-  :host-context([dir="rtl"]) .card-title { font-weight: v.$fw-bold; font-size: v.$text-3xl; line-height: v.$lh-snug; }
-  .card-subtitle { margin-top: v.$space-2; color: v.$text-secondary; font-size: v.$text-md; }
+  :host-context([dir="rtl"]) .card-title {
+    font-weight: v.$fw-bold;
+    font-size: v.$text-3xl;
+    line-height: v.$lh-snug;
+  }
+  .card-subtitle {
+    margin-top: v.$space-2;
+    color: v.$text-secondary;
+    font-size: v.$text-md;
+  }
 
-  .auth-form { display: flex; flex-direction: column; gap: v.$space-5; }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-5;
+  }
 
-  .form-row-meta { display: flex; justify-content: flex-end; margin-top: calc(#{v.$space-2} * -1); }
+  .form-row-meta {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: calc(#{v.$space-2} * -1);
+  }
   .forgot-link,
   .help-link,
   .resend-link,
@@ -34,9 +54,14 @@
     color: v.$primary-text;
     font-weight: v.$fw-semibold;
     text-decoration: none;
-    &:hover { text-decoration: underline; text-underline-offset: 3px; }
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
   }
-  .forgot-link { font-size: v.$text-sm; }
+  .forgot-link {
+    font-size: v.$text-sm;
+  }
 
   .submit-btn,
   .primary-btn {
@@ -53,15 +78,39 @@
     font-size: v.$text-lg;
     font-weight: v.$fw-semibold;
     cursor: pointer;
-    transition: background v.$transition-normal, transform v.$transition-fast;
-    &:hover:not(:disabled) { background: v.$primary-hover; }
-    &:active:not(:disabled) { background: v.$primary-active; transform: translateY(1px); }
-    &:disabled { opacity: 0.55; cursor: progress; }
+    transition:
+      background v.$transition-normal,
+      transform v.$transition-fast;
+    &:hover:not(:disabled) {
+      background: v.$primary-hover;
+    }
+    &:active:not(:disabled) {
+      background: v.$primary-active;
+      transform: translateY(1px);
+    }
+    &:disabled {
+      opacity: 0.55;
+      cursor: progress;
+    }
   }
 
-  .card-footer { margin-top: v.$space-6; text-align: center; display: flex; flex-direction: column; gap: v.$space-3; }
-  .card-divider { width: 100%; margin: 0; border: 0; border-top: 1px solid v.$border; }
-  .help-text { color: v.$text-secondary; font-size: v.$text-sm; }
+  .card-footer {
+    margin-top: v.$space-6;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-3;
+  }
+  .card-divider {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid v.$border;
+  }
+  .help-text {
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+  }
 
   .back-link {
     display: inline-flex;
@@ -69,9 +118,13 @@
     gap: v.$space-2;
     margin-bottom: v.$space-6;
     font-size: v.$text-sm;
-    i { font-size: v.$text-xs; }
+    i {
+      font-size: v.$text-xs;
+    }
   }
-  :host-context([dir="rtl"]) .back-link i { transform: scaleX(-1); }
+  :host-context([dir="rtl"]) .back-link i {
+    transform: scaleX(-1);
+  }
 
   .icon-circle,
   .envelope-wrap {

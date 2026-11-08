@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Observable, delay, of } from 'rxjs';
+import { Injectable } from "@angular/core";
+import { Observable, delay, of } from "rxjs";
 
-import { ApiResponse } from '@shared/model/api_response.model';
-import { UpdateProfileRequest, UserProfile } from '../model/profile.model';
-import { IProfileRepository } from './profile.repository';
+import { ApiResponse } from "@shared/model/api_response.model";
+import { UpdateProfileRequest, UserProfile } from "../model/profile.model";
+import { IProfileRepository } from "./profile.repository";
 
 const MOCK_DELAY_MS = 600;
 
 function persistedUser(): { id?: number; fullName?: string; email?: string } {
   try {
-    return JSON.parse(localStorage.getItem('odl_user') ?? '{}');
+    return JSON.parse(localStorage.getItem("odl_user") ?? "{}");
   } catch {
     return {};
   }
@@ -20,7 +20,7 @@ function persistedUser(): { id?: number; fullName?: string; email?: string } {
  * (not a reload). A chosen photo becomes a blob: URL, so after a reload the
  * avatar falls back to initials — acceptable for mock mode.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ProfileMockRepository implements IProfileRepository {
   private profile: UserProfile | null = null;
 
@@ -45,7 +45,7 @@ export class ProfileMockRepository implements IProfileRepository {
     return of<ApiResponse<null>>({
       status: true,
       statusCode: 200,
-      message: 'Profile updated successfully.',
+      message: "Profile updated successfully.",
       errors: null,
       meta: null,
       data: null,
@@ -57,11 +57,11 @@ export class ProfileMockRepository implements IProfileRepository {
       const user = persistedUser();
       this.profile = {
         id: user.id ?? 1,
-        fullName: user.fullName ?? 'Omar Khaled',
-        email: user.email ?? 'admin@odel.com',
-        countryCode: '+20',
-        phoneNumber: '1029005195',
-        role: localStorage.getItem('odl_role') ?? 'SuperAdmin',
+        fullName: user.fullName ?? "Omar Khaled",
+        email: user.email ?? "admin@odel.com",
+        countryCode: "+20",
+        phoneNumber: "1029005195",
+        role: localStorage.getItem("odl_role") ?? "SuperAdmin",
         imageUrl: null,
       };
     }
@@ -69,6 +69,6 @@ export class ProfileMockRepository implements IProfileRepository {
   }
 
   private ok<T>(data: T): ApiResponse<T> {
-    return { status: true, statusCode: 200, message: 'OK', errors: null, meta: null, data };
+    return { status: true, statusCode: 200, message: "OK", errors: null, meta: null, data };
   }
 }

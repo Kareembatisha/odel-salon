@@ -19,11 +19,11 @@ $space-16: 64px;
 $space-20: 80px;
 
 // Radius is hierarchical, not uniform: the larger the surface, the larger the radius.
-$radius-xs: 4px;     // checkboxes, tiny chips
-$radius-sm: 6px;     // badges, table action buttons
-$radius-md: 10px;    // buttons, inputs
-$radius-lg: 14px;    // cards, panels
-$radius-xl: 20px;    // modals, auth card
+$radius-xs: 4px; // checkboxes, tiny chips
+$radius-sm: 6px; // badges, table action buttons
+$radius-md: 10px; // buttons, inputs
+$radius-lg: 14px; // cards, panels
+$radius-xl: 20px; // modals, auth card
 $radius-full: 999px; // pills, avatars
 
 // Component sizes
@@ -52,7 +52,7 @@ $z-tooltip: 700;
 $bp-xs: 360px;
 $bp-sm: 480px;
 $bp-md: 768px;
-$bp-lg: 900px;   // sidebar becomes off-canvas
+$bp-lg: 900px; // sidebar becomes off-canvas
 $bp-xl: 1280px;
 $bp-2xl: 1440px;
 

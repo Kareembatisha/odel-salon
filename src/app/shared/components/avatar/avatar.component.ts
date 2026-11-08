@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal, effect } from "@angular/core";
 
-import { initialsFor } from '../../utils/avatar.util';
+import { initialsFor } from "../../utils/avatar.util";
 
-export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
+export type AvatarSize = "sm" | "md" | "lg" | "xl";
 
 /**
  * Avatar — photo when there is one, brand-colored initials otherwise.
@@ -10,7 +10,7 @@ export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
  * instead of showing a broken-image icon.
  */
 @Component({
-  selector: 'app-avatar',
+  selector: "app-avatar",
   standalone: true,
   template: `
     @if (src() && !failed()) {
@@ -20,14 +20,14 @@ export type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
       <span class="sr-only">{{ name() }}</span>
     }
   `,
-  styleUrl: './avatar.component.scss',
-  host: { '[class]': "'av av--' + size()" },
+  styleUrl: "./avatar.component.scss",
+  host: { "[class]": "'av av--' + size()" },
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AvatarComponent {
-  name = input<string>('');
+  name = input<string>("");
   src = input<string | null | undefined>(null);
-  size = input<AvatarSize>('md');
+  size = input<AvatarSize>("md");
 
   protected readonly failed = signal(false);
   protected readonly initials = computed(() => initialsFor(this.name()));

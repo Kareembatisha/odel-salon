@@ -148,10 +148,10 @@
 
 // ── Typography variables (language aware) ─────────────────
 @mixin fonts-ltr {
-  --odl-font-ui: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --odl-font-ui: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --odl-font-display: #{b.$font-display};
 }
 @mixin fonts-rtl {
-  --odl-font-ui: 'IBM Plex Arabic', 'Segoe UI', system-ui, sans-serif;
-  --odl-font-display: 'IBM Plex Arabic', 'Segoe UI', system-ui, sans-serif;
+  --odl-font-ui: "IBM Plex Arabic", "Segoe UI", system-ui, sans-serif;
+  --odl-font-display: "IBM Plex Arabic", "Segoe UI", system-ui, sans-serif;
 }

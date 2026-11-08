@@ -11,9 +11,7 @@ import {
   UpdateChairPayload,
 } from "../model/chair.model";
 
-export const CHAIR_REPOSITORY = new InjectionToken<IChairRepository>(
-  "CHAIR_REPOSITORY",
-);
+export const CHAIR_REPOSITORY = new InjectionToken<IChairRepository>("CHAIR_REPOSITORY");
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IChairRepository {
@@ -30,10 +28,7 @@ export interface IChairRepository {
   createChair(payload: CreateChairPayload): Observable<ApiResponse<number>>;
 
   /** PUT /chairs/{id} — rename / change type. The branch can't change. */
-  updateChair(
-    id: number,
-    payload: UpdateChairPayload,
-  ): Observable<ApiResponse<null>>;
+  updateChair(id: number, payload: UpdateChairPayload): Observable<ApiResponse<null>>;
 
   /** PATCH /chairs/{id}/toggle-status — flips `isActive` (no body). */
   toggleChairStatus(id: number): Observable<ApiResponse<null>>;

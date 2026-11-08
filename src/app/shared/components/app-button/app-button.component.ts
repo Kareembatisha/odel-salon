@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
 /**
  * AppButton — the one button of the design system.
@@ -13,25 +13,25 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
  * Usage:
  *   <app-button variant="primary" iconClass="pi pi-plus" (clicked)="add()">Add branch</app-button>
  */
-export type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'danger' | 'ghost' | 'export';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonVariant = "primary" | "outline" | "secondary" | "danger" | "ghost" | "export";
+export type ButtonSize = "sm" | "md" | "lg";
 
 @Component({
-  selector: 'app-button',
+  selector: "app-button",
   standalone: true,
-  templateUrl: './app-button.component.html',
-  styleUrl: './app-button.component.scss',
+  templateUrl: "./app-button.component.html",
+  styleUrl: "./app-button.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppButtonComponent {
-  variant = input<ButtonVariant>('primary');
-  size = input<ButtonSize>('md');
-  type = input<'button' | 'submit' | 'reset'>('button');
+  variant = input<ButtonVariant>("primary");
+  size = input<ButtonSize>("md");
+  type = input<"button" | "submit" | "reset">("button");
   disabled = input<boolean>(false);
   /** Replaces the icon with a spinner and blocks clicks. */
   loading = input<boolean>(false);
   /** PrimeIcons class for a leading icon, e.g. "pi pi-download". */
-  iconClass = input<string>('');
+  iconClass = input<string>("");
   /** Stretch to the container width (stacked mobile footers, auth forms). */
   fullWidth = input<boolean>(false);
   /** Accessible name for icon-only buttons. */

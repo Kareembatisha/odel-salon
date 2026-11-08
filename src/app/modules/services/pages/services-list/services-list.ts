@@ -1,30 +1,37 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
 import { Router } from "@angular/router";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 import { PERMISSIONS } from "@core/auth/permissions";
 import { LanguageService } from "@core/services/language.service";
 import { AuthService } from "../../../auth/service/auth.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { DrawerComponent } from "../../../../shared/components/drawer/drawer.component";
-import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
 import {
   DataTableCardDirective,
   DataTableColumnDirective,
   DataTableComponent,
-} from "../../../../shared/components/data-table/data-table.component";
-import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
+} from "@shared/components/data-table/data-table.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
 import {
   FilterOption,
   FilterSelectComponent,
-} from "../../../../shared/components/filter-select/filter-select.component";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { SearchInputComponent } from "../../../../shared/components/search-input/search-input.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
-import { StatCardComponent } from "../../../../shared/components/stat-card/stat-card.component";
-import { StatusBadgeComponent } from "../../../../shared/components/status-badge/status-badge.component";
-import { SwitchComponent } from "../../../../shared/components/switch/switch.component";
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatCardComponent } from "@shared/components/stat-card/stat-card.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
 import { AdjustPricesForm } from "../../components/adjust-prices-form/adjust-prices-form";
 import { BulkStatusForm } from "../../components/bulk-status-form/bulk-status-form";
 import { CopyPricesForm } from "../../components/copy-prices-form/copy-prices-form";
@@ -100,9 +107,13 @@ export class ServicesList implements OnInit {
   protected readonly branchId = this.servicesService.branchId;
   protected readonly noBranches = this.servicesService.noBranches;
 
-  protected readonly canCreate = computed(() => this.auth.hasPermission(PERMISSIONS.Service.Create));
+  protected readonly canCreate = computed(() =>
+    this.auth.hasPermission(PERMISSIONS.Service.Create),
+  );
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Service.Edit));
-  protected readonly canDelete = computed(() => this.auth.hasPermission(PERMISSIONS.Service.Delete));
+  protected readonly canDelete = computed(() =>
+    this.auth.hasPermission(PERMISSIONS.Service.Delete),
+  );
 
   // ── Filters ──────────────────────────────────────────
   /** No "all branches" option: prices only exist per branch. */
@@ -186,7 +197,11 @@ export class ServicesList implements OnInit {
   }
 
   protected price(value: number | null): string {
-    return formatPrice(value, this.language.currentLang(), this.translate.instant("SERVICES.CURRENCY"));
+    return formatPrice(
+      value,
+      this.language.currentLang(),
+      this.translate.instant("SERVICES.CURRENCY"),
+    );
   }
 
   protected duration(minutes: number | null): string {
@@ -218,7 +233,9 @@ export class ServicesList implements OnInit {
 
   protected onHomeFilter(value: string): void {
     this.selection.set([]);
-    this.servicesService.setFilters({ isHomeAvailable: value === "" ? undefined : value === "true" });
+    this.servicesService.setFilters({
+      isHomeAvailable: value === "" ? undefined : value === "true",
+    });
   }
 
   protected onPage(page: number): void {

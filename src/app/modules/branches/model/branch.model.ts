@@ -37,7 +37,6 @@ export interface BranchesQuery {
   isVisible?: boolean;
 }
 
-
 /**
  * Day of week enum from API.
  */

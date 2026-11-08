@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: block; }
+:host {
+  display: block;
+}
 
 .ph {
   display: flex;
@@ -9,7 +11,10 @@
   justify-content: space-between;
   gap: v.$space-4;
 
-  &__text { min-width: 0; flex: 1 1 320px; }
+  &__text {
+    min-width: 0;
+    flex: 1 1 320px;
+  }
 
   &__title {
     font-family: v.$font-display;
@@ -31,8 +36,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: v.$space-3;
-    &:empty { display: none; }
+    &:empty {
+      display: none;
+    }
   }
 }
 
-:host-context([dir="rtl"]) .ph__title { font-size: v.$text-3xl; font-weight: v.$fw-bold; }
+:host-context([dir="rtl"]) .ph__title {
+  font-size: v.$text-3xl;
+  font-weight: v.$fw-bold;
+}

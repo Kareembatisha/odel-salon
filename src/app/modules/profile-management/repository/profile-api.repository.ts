@@ -1,14 +1,14 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from "@angular/common/http";
+import { Injectable, inject } from "@angular/core";
+import { Observable } from "rxjs";
 
-import { environment } from '@env/environment';
-import { ApiResponse } from '@shared/model/api_response.model';
-import { UpdateProfileRequest, UserProfile } from '../model/profile.model';
-import { buildProfileFormData } from '../utils/profile-form-data';
-import { IProfileRepository } from './profile.repository';
+import { environment } from "@env/environment";
+import { ApiResponse } from "@shared/model/api_response.model";
+import { UpdateProfileRequest, UserProfile } from "../model/profile.model";
+import { buildProfileFormData } from "../utils/profile-form-data";
+import { IProfileRepository } from "./profile.repository";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ProfileApiRepository implements IProfileRepository {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiUrl}/auth/profile`;

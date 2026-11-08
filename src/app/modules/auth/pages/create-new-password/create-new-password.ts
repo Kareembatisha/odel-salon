@@ -11,7 +11,7 @@ import {
 import { ActivatedRoute, Router } from "@angular/router";
 import { TranslateModule } from "@ngx-translate/core";
 
-import { FloatLabelInput } from "../../../../shared/components/float-label-input/float-label-input";
+import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
 import { AuthService } from "../../service/auth.service";
 import {
   PASSWORD_POLICY_RULES,
@@ -47,8 +47,7 @@ export class CreateNewPassword {
 
   /** Carried over from the email-verification step via query params. */
   private readonly email = this.route.snapshot.queryParamMap.get("email") ?? "";
-  private readonly resetToken =
-    this.route.snapshot.queryParamMap.get("token") ?? "";
+  private readonly resetToken = this.route.snapshot.queryParamMap.get("token") ?? "";
 
   constructor() {
     // This page must never present a working-looking reset form when it
@@ -61,9 +60,9 @@ export class CreateNewPassword {
       this.router.navigate(["/forget-password"]);
     }
 
-    this.form.controls.password.valueChanges.pipe(takeUntilDestroyed()).subscribe((v) =>
-      this.passwordValue.set(v),
-    );
+    this.form.controls.password.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((v) => this.passwordValue.set(v));
   }
 
   // PM-8 — these rules now live in @shared/validators/password-policy.validator
@@ -88,9 +87,7 @@ export class CreateNewPassword {
 
   private readonly passwordValue = signal("");
 
-  protected readonly passedRules = computed(() =>
-    passedPasswordRules(this.passwordValue()),
-  );
+  protected readonly passedRules = computed(() => passedPasswordRules(this.passwordValue()));
 
   protected readonly strengthScore = computed(() => this.passedRules().size);
 

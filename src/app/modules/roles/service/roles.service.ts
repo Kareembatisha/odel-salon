@@ -1,14 +1,19 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, finalize, map, of, tap } from 'rxjs';
+import { Injectable, inject, signal } from "@angular/core";
+import { Observable, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from '@env/environment';
-import { NotificationService } from '@core/services/notification.service';
-import { PaginationMeta } from '@shared/model/api_response.model';
-import { AuthService } from '../../auth/service/auth.service';
-import { RoleDetails, RoleListItem, RolesQuery, UpdateRolePermissionsRequest } from '../model/role.model';
-import { RoleApiRepository } from '../repository/role-api.repository';
-import { RoleMockRepository } from '../repository/role-mock.repository';
-import { IRoleRepository } from '../repository/role.repository';
+import { environment } from "@env/environment";
+import { NotificationService } from "@core/services/notification.service";
+import { PaginationMeta } from "@shared/model/api_response.model";
+import { AuthService } from "../../auth/service/auth.service";
+import {
+  RoleDetails,
+  RoleListItem,
+  RolesQuery,
+  UpdateRolePermissionsRequest,
+} from "../model/role.model";
+import { RoleApiRepository } from "../repository/role-api.repository";
+import { RoleMockRepository } from "../repository/role-mock.repository";
+import { IRoleRepository } from "../repository/role.repository";
 
 const PAGE_SIZE = 10;
 
@@ -17,7 +22,7 @@ const PAGE_SIZE = 10;
  * Every mutation resolves to `true/false` so pages can close drawers or stay open
  * on failure; the error interceptor has already told the user what went wrong.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class RolesService {
   private readonly notify = inject(NotificationService);
   private readonly auth = inject(AuthService);
@@ -28,7 +33,11 @@ export class RolesService {
 
   private readonly _roles = signal<RoleListItem[]>([]);
   private readonly _meta = signal<PaginationMeta | null>(null);
-  private readonly _query = signal<RolesQuery>({ pageNumber: 1, pageSize: PAGE_SIZE, includePermissions: true });
+  private readonly _query = signal<RolesQuery>({
+    pageNumber: 1,
+    pageSize: PAGE_SIZE,
+    includePermissions: true,
+  });
   private readonly _loading = signal(false);
   private readonly _saving = signal(false);
   private readonly _hasError = signal(false);
@@ -72,9 +81,10 @@ export class RolesService {
 
   /** All roles for dropdowns (user form, user filter). Independent of the list's search/paging. */
   loadOptions(): Observable<Array<{ id: number; name: string }>> {
-    return this.repository
-      .getRoles({ pageNumber: 1, pageSize: 100 })
-      .pipe(map((res) => (res.data ?? []).map((r) => ({ id: r.id, name: r.name }))), catchError(() => of([])));
+    return this.repository.getRoles({ pageNumber: 1, pageSize: 100 }).pipe(
+      map((res) => (res.data ?? []).map((r) => ({ id: r.id, name: r.name }))),
+      catchError(() => of([])),
+    );
   }
 
   // ── Detail ───────────────────────────────────────────
@@ -87,16 +97,23 @@ export class RolesService {
 
   // ── Mutations ────────────────────────────────────────
   create(name: string): Observable<boolean> {
-    return this.mutate(this.repository.createRole({ name: name.trim() }), 'ROLES.CREATED');
+    return this.mutate(this.repository.createRole({ name: name.trim() }), "ROLES.CREATED");
   }
 
   rename(id: number, name: string): Observable<boolean> {
-    return this.mutate(this.repository.updateRole(id, { name: name.trim() }), 'ROLES.RENAMED');
+    return this.mutate(this.repository.updateRole(id, { name: name.trim() }), "ROLES.RENAMED");
   }
 
   /** Saves the permission set. If it belongs to the signed-in user's own role, their session is refreshed. */
-  savePermissions(id: number, roleName: string, payload: UpdateRolePermissionsRequest): Observable<boolean> {
-    return this.mutate(this.repository.updatePermissions(id, payload), 'ROLES.PERMISSIONS_SAVED').pipe(
+  savePermissions(
+    id: number,
+    roleName: string,
+    payload: UpdateRolePermissionsRequest,
+  ): Observable<boolean> {
+    return this.mutate(
+      this.repository.updatePermissions(id, payload),
+      "ROLES.PERMISSIONS_SAVED",
+    ).pipe(
       tap((ok) => {
         if (ok && this.auth.hasRole(roleName)) this.auth.refreshToken().subscribe();
       }),
@@ -104,7 +121,7 @@ export class RolesService {
   }
 
   remove(ids: number[]): Observable<boolean> {
-    return this.mutate(this.repository.deleteRoles({ ids }), 'ROLES.DELETED');
+    return this.mutate(this.repository.deleteRoles({ ids }), "ROLES.DELETED");
   }
 
   /**

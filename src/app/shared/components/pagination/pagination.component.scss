@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: block; }
+:host {
+  display: block;
+}
 
 .pg {
   display: flex;
@@ -10,9 +12,16 @@
   gap: v.$space-3;
   color: v.$text-secondary;
   font-size: v.$text-sm;
-  strong { color: v.$text; font-weight: v.$fw-semibold; }
+  strong {
+    color: v.$text;
+    font-weight: v.$fw-semibold;
+  }
 
-  &__pager { display: flex; align-items: center; gap: v.$space-1; }
+  &__pager {
+    display: flex;
+    align-items: center;
+    gap: v.$space-1;
+  }
 
   &__page {
     min-width: 34px;
@@ -25,20 +34,46 @@
     font: inherit;
     font-weight: v.$fw-medium;
     cursor: pointer;
-    transition: background v.$transition-fast, color v.$transition-fast;
+    transition:
+      background v.$transition-fast,
+      color v.$transition-fast;
 
-    &:hover:not(:disabled):not(.pg__page--active) { background: v.$surface-hover; color: v.$text; }
-    &:disabled { opacity: 0.4; cursor: not-allowed; }
-    &--active { background: v.$primary-soft; border-color: v.$primary-soft-border; color: v.$primary-text; font-weight: v.$fw-semibold; }
+    &:hover:not(:disabled):not(.pg__page--active) {
+      background: v.$surface-hover;
+      color: v.$text;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    &--active {
+      background: v.$primary-soft;
+      border-color: v.$primary-soft-border;
+      color: v.$primary-text;
+      font-weight: v.$fw-semibold;
+    }
   }
 }
 
 // Arrow icons mirror in RTL
-:host-context([dir="rtl"]) .pg__page--arrow i { transform: scaleX(-1); }
+:host-context([dir="rtl"]) .pg__page--arrow i {
+  transform: scaleX(-1);
+}
 
 @media (max-width: v.$bp-md) {
-  .pg { flex-direction: column; align-items: stretch; gap: v.$space-3; }
-  .pg__range { text-align: center; }
-  .pg__pager { justify-content: center; }
-  .pg__page { min-width: 40px; height: 40px; }
+  .pg {
+    flex-direction: column;
+    align-items: stretch;
+    gap: v.$space-3;
+  }
+  .pg__range {
+    text-align: center;
+  }
+  .pg__pager {
+    justify-content: center;
+  }
+  .pg__page {
+    min-width: 40px;
+    height: 40px;
+  }
 }

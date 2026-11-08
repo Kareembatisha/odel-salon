@@ -1,6 +1,10 @@
 @use "styles/variables" as v;
 
-:host { display: block; height: 100%; overflow: hidden; }
+:host {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
 
 .shell {
   display: flex;
@@ -10,11 +14,24 @@
   // The shell is exactly one viewport tall; only the content area scrolls.
   overflow: hidden;
 
-  &__main { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+  &__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+  }
   // `position: relative` makes this the containing block for absolutely positioned
   // descendants (e.g. .sr-only labels in table rows). Without it they anchor to the
   // page and stretch the WINDOW scroll height, producing a second scrollbar.
-  &__content { position: relative; flex: 1; min-width: 0; min-height: 0; overflow-y: auto; outline: 0; }
+  &__content {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    outline: 0;
+  }
 }
 
 .route-progress {
@@ -26,7 +43,9 @@
   box-shadow: 0 0 8px v.tint(v.$primary, 60%);
   transition: width 0.25s ease;
 }
-:host-context([dir="rtl"]) .route-progress { inset: 0 0 auto auto; }
+:host-context([dir="rtl"]) .route-progress {
+  inset: 0 0 auto auto;
+}
 
 .skip-link {
   position: fixed;
@@ -40,5 +59,7 @@
   font-weight: v.$fw-semibold;
   text-decoration: none;
   transform: translateY(-200%);
-  &:focus { transform: none; }
+  &:focus {
+    transform: none;
+  }
 }

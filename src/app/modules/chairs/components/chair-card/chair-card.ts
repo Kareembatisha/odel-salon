@@ -1,18 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from "@angular/core";
 import { TranslateModule } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { StatusBadgeComponent } from "../../../../shared/components/status-badge/status-badge.component";
-import { SwitchComponent } from "../../../../shared/components/switch/switch.component";
-import { activeBadgeVariant } from "../../../../shared/utils/status-badge.util";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
+import { activeBadgeVariant } from "@shared/utils/status-badge.util";
 import { ChairListItem, ChairType } from "../../model/chair.model";
 import { localizedName } from "../../utils/chair-labels.util";
 
@@ -28,12 +21,7 @@ import { localizedName } from "../../utils/chair-labels.util";
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "app-chair-card",
   standalone: true,
-  imports: [
-    TranslateModule,
-    AppButtonComponent,
-    StatusBadgeComponent,
-    SwitchComponent,
-  ],
+  imports: [TranslateModule, AppButtonComponent, StatusBadgeComponent, SwitchComponent],
   templateUrl: "./chair-card.html",
   styleUrl: "./chair-card.scss",
 })

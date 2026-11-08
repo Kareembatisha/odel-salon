@@ -1,11 +1,7 @@
 import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 import { SERVICE_NAME_MAX_LENGTH } from "../model/service.model";
-import {
-  durationValidator,
-  homePriceValidator,
-  priceValidator,
-} from "./service-form.validators";
+import { durationValidator, homePriceValidator, priceValidator } from "./service-form.validators";
 
 /**
  * One branch's price row. Numbers are held as strings because the text field is a string

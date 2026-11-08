@@ -9,7 +9,12 @@
   border: 0;
   min-width: 0;
 
-  legend { padding: 0; margin-bottom: v.$space-2; font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+  legend {
+    padding: 0;
+    margin-bottom: v.$space-2;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-semibold;
+  }
 
   &__option {
     display: flex;
@@ -22,10 +27,19 @@
     background: v.$surface;
     font-size: v.$text-sm;
     cursor: pointer;
-    transition: border-color v.$transition-fast, background v.$transition-fast;
+    transition:
+      border-color v.$transition-fast,
+      background v.$transition-fast;
 
-    &:hover { border-color: v.$primary; }
-    &--on { border-color: v.$primary; background: v.$primary-soft; }
-    &--all { font-weight: v.$fw-semibold; }
+    &:hover {
+      border-color: v.$primary;
+    }
+    &--on {
+      border-color: v.$primary;
+      background: v.$primary-soft;
+    }
+    &--all {
+      font-weight: v.$fw-semibold;
+    }
   }
 }

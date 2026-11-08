@@ -5,7 +5,7 @@ import {
   inject,
   input,
   output,
-} from '@angular/core';
+} from "@angular/core";
 
 /** One tab: its value, the (already translated) label and an optional count pill. */
 export interface TabItem {
@@ -28,10 +28,10 @@ export interface TabItem {
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-tabs',
+  selector: "app-tabs",
   standalone: true,
-  templateUrl: './tabs.component.html',
-  styleUrl: './tabs.component.scss',
+  templateUrl: "./tabs.component.html",
+  styleUrl: "./tabs.component.scss",
 })
 export class TabsComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -40,11 +40,11 @@ export class TabsComponent {
   /** `value` of the selected tab. */
   readonly value = input.required<string>();
   /** Names the tab list for screen readers ("Offers by status"). */
-  readonly ariaLabel = input<string>('');
+  readonly ariaLabel = input<string>("");
   /** Prefix of the tab ids (`<prefix>-<value>`), so a panel can point back with `aria-labelledby`. */
-  readonly idPrefix = input<string>('tab');
+  readonly idPrefix = input<string>("tab");
   /** `id` of the panel the tabs control (`aria-controls`) — leave empty when there is none. */
-  readonly panelId = input<string>('');
+  readonly panelId = input<string>("");
 
   readonly changed = output<string>();
 
@@ -54,21 +54,32 @@ export class TabsComponent {
 
   /** Arrow keys flip with the reading direction; Home / End jump to the ends. */
   protected onKeydown(event: KeyboardEvent): void {
-    const buttons = Array.from(this.host.nativeElement.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const buttons = Array.from(
+      this.host.nativeElement.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    );
     const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
     if (current === -1) return;
 
-    const rtl = getComputedStyle(this.host.nativeElement).direction === 'rtl';
-    const forward = rtl ? 'ArrowLeft' : 'ArrowRight';
-    const backward = rtl ? 'ArrowRight' : 'ArrowLeft';
+    const rtl = getComputedStyle(this.host.nativeElement).direction === "rtl";
+    const forward = rtl ? "ArrowLeft" : "ArrowRight";
+    const backward = rtl ? "ArrowRight" : "ArrowLeft";
 
     let next: number;
     switch (event.key) {
-      case forward: next = (current + 1) % buttons.length; break;
-      case backward: next = (current - 1 + buttons.length) % buttons.length; break;
-      case 'Home': next = 0; break;
-      case 'End': next = buttons.length - 1; break;
-      default: return;
+      case forward:
+        next = (current + 1) % buttons.length;
+        break;
+      case backward:
+        next = (current - 1 + buttons.length) % buttons.length;
+        break;
+      case "Home":
+        next = 0;
+        break;
+      case "End":
+        next = buttons.length - 1;
+        break;
+      default:
+        return;
     }
 
     event.preventDefault();

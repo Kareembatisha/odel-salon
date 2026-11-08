@@ -1,20 +1,27 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
-import { PERMISSIONS } from '@core/auth/permissions';
-import { labelOrFallback } from '@shared/utils/translate-label';
-import { AuthService } from '../../../auth/service/auth.service';
-import { BreadcrumbService } from '../../../../layout/main-layout/components/header/breadcrumb.service';
-import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
-import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
-import { FailedStateComponent } from '../../../../shared/components/failed-state/failed-state.component';
-import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
-import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
-import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { RoleForm } from '../../components/role-form';
-import { PermissionModule, RoleDetails as RoleDetailsModel } from '../../model/role.model';
-import { RolesService } from '../../service/roles.service';
+import { PERMISSIONS } from "@core/auth/permissions";
+import { labelOrFallback } from "@shared/utils/translate-label";
+import { AuthService } from "../../../auth/service/auth.service";
+import { BreadcrumbService } from "../../../../layout/main-layout/components/header/breadcrumb.service";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { RoleForm } from "../../components/role-form/role-form";
+import { PermissionModule, RoleDetails as RoleDetailsModel } from "../../model/role.model";
+import { RolesService } from "../../service/roles.service";
 import {
   ModuleState,
   enabledValues,
@@ -22,7 +29,7 @@ import {
   sameSelection,
   setModule,
   setPermission,
-} from '../../utils/permission-matrix';
+} from "../../utils/permission-matrix";
 
 /**
  * Role details — the permission matrix. The page edits a working copy; nothing is
@@ -30,14 +37,21 @@ import {
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-role-details',
+  selector: "app-role-details",
   standalone: true,
   imports: [
-    RouterLink, TranslateModule, PageHeaderComponent, AppButtonComponent, StatusBadgeComponent,
-    DrawerComponent, FailedStateComponent, SkeletonComponent, RoleForm,
+    RouterLink,
+    TranslateModule,
+    PageHeaderComponent,
+    AppButtonComponent,
+    StatusBadgeComponent,
+    DrawerComponent,
+    FailedStateComponent,
+    SkeletonComponent,
+    RoleForm,
   ],
-  templateUrl: './role-details.html',
-  styleUrl: './role-details.scss',
+  templateUrl: "./role-details.html",
+  styleUrl: "./role-details.scss",
 })
 export class RoleDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -47,7 +61,7 @@ export class RoleDetails implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly breadcrumbs = inject(BreadcrumbService);
 
-  protected readonly id = Number(this.route.snapshot.paramMap.get('id'));
+  protected readonly id = Number(this.route.snapshot.paramMap.get("id"));
 
   protected readonly role = signal<RoleDetailsModel | null>(null);
   /** Working copy the user edits. */
@@ -63,8 +77,12 @@ export class RoleDetails implements OnInit {
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Role.Edit));
   protected readonly dirty = computed(() => !sameSelection(this.matrix(), this.baseline()));
   protected readonly enabledCount = computed(() => enabledValues(this.matrix()).length);
-  protected readonly totalCount = computed(() => this.matrix().reduce((n, m) => n + m.permissions.length, 0));
-  protected readonly isOwnRole = computed(() => !!this.role() && this.auth.hasRole(this.role()!.name));
+  protected readonly totalCount = computed(() =>
+    this.matrix().reduce((n, m) => n + m.permissions.length, 0),
+  );
+  protected readonly isOwnRole = computed(
+    () => !!this.role() && this.auth.hasRole(this.role()!.name),
+  );
 
   ngOnInit(): void {
     this.load();
@@ -84,13 +102,14 @@ export class RoleDetails implements OnInit {
   }
 
   private applyRole(role: RoleDetailsModel): void {
+    const modules = role.modules ?? [];
     this.role.set(role);
-    this.matrix.set(role.permissions);
-    this.baseline.set(role.permissions);
+    this.matrix.set(modules);
+    this.baseline.set(modules);
     // The route's static breadcrumb says "Role"; swap in the real name.
     this.breadcrumbs.setBreadcrumbs([
-      { label: 'LAYOUT.NAV.DASHBOARD', route: '/main' },
-      { label: 'LAYOUT.NAV.ROLES_PERMISSIONS', route: '/main/roles' },
+      { label: "LAYOUT.NAV.DASHBOARD", route: "/main" },
+      { label: "LAYOUT.NAV.ROLES_PERMISSIONS", route: "/main/roles" },
       { label: role.name },
     ]);
   }
@@ -120,7 +139,7 @@ export class RoleDetails implements OnInit {
 
   protected toggleModule(m: PermissionModule): void {
     if (!this.canEdit()) return;
-    this.matrix.update((all) => setModule(all, m.module, moduleState(m) !== 'all'));
+    this.matrix.update((all) => setModule(all, m.module, moduleState(m) !== "all"));
   }
 
   protected discard(): void {
@@ -130,9 +149,11 @@ export class RoleDetails implements OnInit {
   protected save(): void {
     const role = this.role();
     if (!role) return;
-    this.roles.savePermissions(role.id, role.name, { permissions: enabledValues(this.matrix()) }).subscribe((ok) => {
-      if (ok) this.baseline.set(this.matrix());
-    });
+    this.roles
+      .savePermissions(role.id, role.name, { permissions: enabledValues(this.matrix()) })
+      .subscribe((ok) => {
+        if (ok) this.baseline.set(this.matrix());
+      });
   }
 
   protected rename(name: string): void {
@@ -141,11 +162,11 @@ export class RoleDetails implements OnInit {
     this.roles.rename(role.id, name).subscribe((ok) => {
       if (!ok) return;
       this.renameOpen.set(false);
-      this.applyRole({ ...role, name, permissions: this.matrix() });
+      this.applyRole({ ...role, name, modules: this.matrix() });
     });
   }
 
   protected back(): void {
-    this.router.navigate(['/main/roles']);
+    this.router.navigate(["/main/roles"]);
   }
 }

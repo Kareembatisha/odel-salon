@@ -1,6 +1,10 @@
 @use "styles/variables" as v;
 
-:host { display: block; width: 100%; color: v.$text; }
+:host {
+  display: block;
+  width: 100%;
+  color: v.$text;
+}
 
 .back {
   display: inline-flex;
@@ -12,13 +16,25 @@
   font-weight: v.$fw-semibold;
   text-decoration: none;
 
-  &:hover { color: v.$text; }
-  i { font-size: v.$text-xs; }
+  &:hover {
+    color: v.$text;
+  }
+  i {
+    font-size: v.$text-xs;
+  }
 }
-:host-context([dir="rtl"]) .back i { transform: scaleX(-1); }
+:host-context([dir="rtl"]) .back i {
+  transform: scaleX(-1);
+}
 
-.skeletons { display: flex; flex-direction: column; gap: v.$space-3; }
-.sk-card { padding: v.$space-5; }
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+}
+.sk-card {
+  padding: v.$space-5;
+}
 
 .summary {
   display: flex;
@@ -43,17 +59,34 @@
   align-items: start;
 }
 
-.stack { display: flex; flex-direction: column; gap: v.$space-5; min-width: 0; }
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+  min-width: 0;
+}
 
 .panel {
   min-width: 0;
 
-  &__title { margin: 0; font-size: v.$text-lg; font-weight: v.$fw-semibold; }
-  &__hint { margin: v.$space-1 0 v.$space-4; color: v.$text-secondary; font-size: v.$text-sm; }
-  &__title + .facts { margin-top: v.$space-4; }
+  &__title {
+    margin: 0;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+  }
+  &__hint {
+    margin: v.$space-1 0 v.$space-4;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+  }
+  &__title + .facts {
+    margin-top: v.$space-4;
+  }
 }
 
-.muted { color: v.$text-muted; }
+.muted {
+  color: v.$text-muted;
+}
 
 // ── Facts (label / value rows) ──────────────────────────
 .facts {
@@ -61,7 +94,12 @@
   flex-direction: column;
   margin: 0;
 
-  &--inline { flex-direction: row; flex-wrap: wrap; gap: v.$space-6; margin-top: v.$space-3; }
+  &--inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: v.$space-6;
+    margin-top: v.$space-3;
+  }
 }
 
 .fact {
@@ -72,9 +110,17 @@
   padding-block: v.$space-3;
   border-top: 1px solid v.$border;
 
-  &:first-child { border-top: 0; padding-top: 0; }
-  &:last-child { padding-bottom: 0; }
-  .facts--inline & { border-top: 0; padding: 0; }
+  &:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  &:last-child {
+    padding-bottom: 0;
+  }
+  .facts--inline & {
+    border-top: 0;
+    padding: 0;
+  }
 
   dt {
     display: flex;
@@ -82,10 +128,17 @@
     gap: v.$space-2;
     color: v.$text-secondary;
     font-size: v.$text-sm;
-    i { color: v.$text-muted; }
+    i {
+      color: v.$text-muted;
+    }
   }
 
-  dd { margin: 0; font-size: v.$text-base; font-weight: v.$fw-medium; overflow-wrap: anywhere; }
+  dd {
+    margin: 0;
+    font-size: v.$text-base;
+    font-weight: v.$fw-medium;
+    overflow-wrap: anywhere;
+  }
 }
 
 .link {
@@ -94,11 +147,19 @@
   gap: v.$space-2;
   color: v.$primary-text;
   text-decoration: none;
-  &:hover { text-decoration: underline; }
-  i { font-size: v.$text-xs; }
+  &:hover {
+    text-decoration: underline;
+  }
+  i {
+    font-size: v.$text-xs;
+  }
 }
 
-.badges { display: flex; flex-wrap: wrap; gap: v.$space-2; }
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: v.$space-2;
+}
 
 // ── Working hours ───────────────────────────────────────
 .hours {
@@ -116,13 +177,27 @@
     padding-block: v.$space-3;
     border-top: 1px solid v.$border;
 
-    &:first-child { border-top: 0; padding-top: 0; }
-    &:last-child { padding-bottom: 0; }
+    &:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+    &:last-child {
+      padding-bottom: 0;
+    }
   }
 
-  &__day { font-weight: v.$fw-semibold; font-size: v.$text-sm; }
-  &__time { font-weight: v.$fw-medium; font-size: v.$text-sm; justify-self: end; }
-  &__row--closed &__day { color: v.$text-muted; }
+  &__day {
+    font-weight: v.$fw-semibold;
+    font-size: v.$text-sm;
+  }
+  &__time {
+    font-weight: v.$fw-medium;
+    font-size: v.$text-sm;
+    justify-self: end;
+  }
+  &__row--closed &__day {
+    color: v.$text-muted;
+  }
 
   &__off {
     display: inline-flex;
@@ -134,9 +209,14 @@
   }
 
   // Overnight badge drops under the time instead of squeezing it.
-  app-status-badge { grid-column: 1 / -1; justify-self: end; }
+  app-status-badge {
+    grid-column: 1 / -1;
+    justify-self: end;
+  }
 }
 
 @media (max-width: v.$bp-xl) {
-  .layout { grid-template-columns: 1fr; }
+  .layout {
+    grid-template-columns: 1fr;
+  }
 }

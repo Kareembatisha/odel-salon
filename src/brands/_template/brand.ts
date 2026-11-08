@@ -22,11 +22,11 @@ export interface BrandConfig {
 }
 
 export const BRAND: BrandConfig = {
-  name: 'Brand Name',
-  shortName: 'Brand',
-  nameAr: 'اسم العلامة',
-  logoMark: 'assets/brand/logo-mark.svg',
-  themeColor: '#11141b',
-  supportEmail: 'support@example.com',
-  copyrightHolder: 'Brand Name',
+  name: "Brand Name",
+  shortName: "Brand",
+  nameAr: "اسم العلامة",
+  logoMark: "assets/brand/logo-mark.svg",
+  themeColor: "#11141b",
+  supportEmail: "support@example.com",
+  copyrightHolder: "Brand Name",
 };

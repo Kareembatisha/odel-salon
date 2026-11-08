@@ -1,37 +1,70 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
-import { PERMISSIONS } from '@core/auth/permissions';
-import { AuthService } from '../../../auth/service/auth.service';
-import { RolesService } from '../../../roles/service/roles.service';
-import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
-import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
-import { DataTableCardDirective, DataTableColumnDirective, DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
-import { FailedStateComponent } from '../../../../shared/components/failed-state/failed-state.component';
-import { FilterOption, FilterSelectComponent } from '../../../../shared/components/filter-select/filter-select.component';
-import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
-import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
-import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
-import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { SwitchComponent } from '../../../../shared/components/switch/switch.component';
-import { HasPermissionDirective } from '../../../../shared/directives/has-permission.directive';
-import { UserForm } from '../../components/user-form';
-import { CreateUserRequest, UpdateUserRequest, UserDetails, UserListItem } from '../../model/user.model';
-import { UsersService } from '../../service/users.service';
+import { PERMISSIONS } from "@core/auth/permissions";
+import { AuthService } from "../../../auth/service/auth.service";
+import { RolesService } from "../../../roles/service/roles.service";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { AvatarComponent } from "@shared/components/avatar/avatar.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import {
+  DataTableCardDirective,
+  DataTableColumnDirective,
+  DataTableComponent,
+} from "@shared/components/data-table/data-table.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
+import {
+  FilterOption,
+  FilterSelectComponent,
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
+import { HasPermissionDirective } from "@shared/directives/has-permission.directive";
+import { UserForm } from "../../components/user-form/user-form";
+import {
+  CreateUserRequest,
+  UpdateUserRequest,
+  UserDetails,
+  UserListItem,
+} from "../../model/user.model";
+import { UsersService } from "../../service/users.service";
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-users-list',
+  selector: "app-users-list",
   standalone: true,
   imports: [
-    TranslateModule, PageHeaderComponent, AppButtonComponent, SearchInputComponent, FilterSelectComponent,
-    DataTableComponent, DataTableColumnDirective, DataTableCardDirective, StatusBadgeComponent, AvatarComponent, SwitchComponent,
-    DrawerComponent, ConfirmModalComponent, FailedStateComponent, SkeletonComponent, HasPermissionDirective, UserForm,
+    TranslateModule,
+    PageHeaderComponent,
+    AppButtonComponent,
+    SearchInputComponent,
+    FilterSelectComponent,
+    DataTableComponent,
+    DataTableColumnDirective,
+    DataTableCardDirective,
+    StatusBadgeComponent,
+    AvatarComponent,
+    SwitchComponent,
+    DrawerComponent,
+    ConfirmModalComponent,
+    FailedStateComponent,
+    SkeletonComponent,
+    HasPermissionDirective,
+    UserForm,
   ],
-  templateUrl: './users-list.html',
-  styleUrl: './users-list.scss',
+  templateUrl: "./users-list.html",
+  styleUrl: "./users-list.scss",
 })
 export class UsersList implements OnInit {
   private readonly users = inject(UsersService);
@@ -52,25 +85,27 @@ export class UsersList implements OnInit {
 
   /** You can't deactivate or delete your own account from here. */
   protected readonly selfId = computed(() => this.auth.currentUser()?.id);
-  protected readonly lockedIds = computed(() => (this.selfId() !== undefined ? [this.selfId()!] : []));
+  protected readonly lockedIds = computed(() =>
+    this.selfId() !== undefined ? [this.selfId()!] : [],
+  );
 
   // ── Filters ──────────────────────────────────────────
   protected readonly roleList = signal<Array<{ id: number; name: string }>>([]);
   protected readonly roleFilterOptions = computed<FilterOption[]>(() => [
-    { value: '', label: this.translate.instant('USERS.FILTER.ALL_ROLES') },
+    { value: "", label: this.translate.instant("USERS.FILTER.ALL_ROLES") },
     ...this.roleList().map((r) => ({ value: String(r.id), label: r.name })),
   ]);
   protected readonly statusFilterOptions = computed<FilterOption[]>(() => [
-    { value: '', label: this.translate.instant('USERS.FILTER.ALL_STATUSES') },
-    { value: 'true', label: this.translate.instant('USERS.STATUS.ACTIVE') },
-    { value: 'false', label: this.translate.instant('USERS.STATUS.INACTIVE') },
+    { value: "", label: this.translate.instant("USERS.FILTER.ALL_STATUSES") },
+    { value: "true", label: this.translate.instant("USERS.STATUS.ACTIVE") },
+    { value: "false", label: this.translate.instant("USERS.STATUS.INACTIVE") },
   ]);
 
   protected readonly selection = signal<Array<string | number>>([]);
 
   // ── Drawer (create / edit) ───────────────────────────
   protected readonly drawerOpen = signal(false);
-  protected readonly drawerMode = signal<'create' | 'edit'>('create');
+  protected readonly drawerMode = signal<"create" | "edit">("create");
   protected readonly editDetails = signal<UserDetails | null>(null);
   protected readonly drawerLoading = signal(false);
 
@@ -78,10 +113,10 @@ export class UsersList implements OnInit {
   protected readonly pendingDelete = signal<UserListItem[]>([]);
   protected readonly deleteMessage = computed(() => {
     const items = this.pendingDelete();
-    if (!items.length) return '';
+    if (!items.length) return "";
     return items.length === 1
-      ? this.translate.instant('USERS.DELETE.MESSAGE_ONE', { name: items[0].fullName })
-      : this.translate.instant('USERS.DELETE.MESSAGE_MANY', { count: items.length });
+      ? this.translate.instant("USERS.DELETE.MESSAGE_ONE", { name: items[0].fullName })
+      : this.translate.instant("USERS.DELETE.MESSAGE_MANY", { count: items.length });
   });
 
   ngOnInit(): void {
@@ -97,12 +132,12 @@ export class UsersList implements OnInit {
 
   protected onRoleFilter(value: string): void {
     this.selection.set([]);
-    this.users.setFilters({ roleId: value === '' ? undefined : Number(value) });
+    this.users.setFilters({ roleId: value === "" ? undefined : Number(value) });
   }
 
   protected onStatusFilter(value: string): void {
     this.selection.set([]);
-    this.users.setFilters({ status: value === '' ? undefined : value === 'true' });
+    this.users.setFilters({ status: value === "" ? undefined : value === "true" });
   }
 
   protected onPage(page: number): void {
@@ -116,7 +151,7 @@ export class UsersList implements OnInit {
 
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
-    this.drawerMode.set('create');
+    this.drawerMode.set("create");
     this.editDetails.set(null);
     this.drawerLoading.set(false);
     this.drawerOpen.set(true);
@@ -124,7 +159,7 @@ export class UsersList implements OnInit {
 
   protected openEdit(user: UserListItem): void {
     if (!this.canEdit()) return;
-    this.drawerMode.set('edit');
+    this.drawerMode.set("edit");
     this.editDetails.set(null);
     this.drawerLoading.set(true);
     this.drawerOpen.set(true);
@@ -137,7 +172,7 @@ export class UsersList implements OnInit {
 
   protected onSubmitted(payload: CreateUserRequest | UpdateUserRequest): void {
     const request =
-      this.drawerMode() === 'create'
+      this.drawerMode() === "create"
         ? this.users.create(payload as CreateUserRequest)
         : this.users.update(this.editDetails()!.id, payload as UpdateUserRequest);
     request.subscribe((ok) => ok && this.drawerOpen.set(false));

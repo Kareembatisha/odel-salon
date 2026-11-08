@@ -11,10 +11,10 @@ Angular admin dashboard for Odel Salon (Sprint 0 foundation): project structure,
 | Styling | SCSS design tokens + Tailwind 3.4 (layout utilities only, `preflight` off) + `tailwindcss-primeui` |
 | i18n | `@ngx-translate` 17 — English (default) and Arabic (RTL) |
 | Tests | Vitest 4 + jsdom (`ng test`) |
-| Export | `exceljs`, `file-saver`, browser print-to-PDF |
+| Tooling | Prettier 3 (`npm run format`) + ESLint 9 (`npm run lint`) — see *Architecture standard* |
 
 `package-lock.json` is carried over from the reference, so `npm install` resolves the same versions.
-Removed because Odel has no use for them: `pdfjs-dist`, `qrcode` and the `postinstall` PDF-worker copy.
+Removed because Odel has no use for them: `pdfjs-dist`, `qrcode`, the `postinstall` PDF-worker copy, and (Step 03) `exceljs` / `file-saver` together with the unused Excel/Print export services. Reintroduce them when an export feature is actually planned.
 
 ## Run
 
@@ -43,7 +43,7 @@ src/
   styles/                 ← design tokens (see below)
   app/
     core/                 guards, interceptors (token, lang, error), services (theme, language,
-                          notification, network, export…), auth/permissions.ts, theme/odel-preset.ts
+                          notification, network…), auth/permissions.ts, theme/odel-preset.ts
     layout/               auth-layout, main-layout (sidebar, header, breadcrumbs, nav.config.ts)
     shared/               components/ (button, inputs, badge, stat-card, tabs, data-table, modal, states…),
                           model/, utils/, validators/
@@ -67,6 +67,28 @@ src/
 
 Feature modules follow `model → repository (interface + api + mock) → service (signals) → pages`. Pages never call a repository directly.
 
+## Architecture standard
+
+The approved standard lives in [`docs/step-02/`](docs/step-02/step-02-architecture-standard.md) (reference modules: Chairs, Offers, Branches; decisions in `step-02-decisions-required.md`). Highlights that affect day-to-day work:
+
+- **Structure:** every component has its own folder (`components/<name>/<name>.ts|html|scss|spec.ts`), including forms. Cards, forms and details are only created when a module needs them.
+- **Routes:** all `/main` routes stay in `modules/main.routes.ts`.
+- **Imports:** reach `core/` and `shared/` through `@core/*` and `@shared/*`, never deep relative paths (enforced by ESLint).
+- **Approved exceptions:** `auth`, `dashboard`, `profile-management`, `no-access`, `not-found` and `design-system` do not follow the CRUD layout. Services keeps its 20-row page size; Chairs keeps its own `ToggleStatus` permission. `services/service/services.service.ts` is intentional (layer folder `service/`, module `services`).
+- **Cross-feature component:** `modules/services/components/service-picker` is also used by Packages and Offers. It stays in the Services module on purpose (decision D9); import it from there and keep it free of Packages/Offers-specific logic.
+- **Shared sibling stylesheet:** `modules/services/components/bulk-form.scss` is shared by the three bulk-tool forms through `styleUrls`.
+
+### Formatting and linting
+
+```bash
+npm run format         # Prettier (double quotes, LF, width 100) for ts / scss / json
+npm run format:check
+npm run lint           # ESLint: restricted deep relative imports, no `any`, OnPush + standalone,
+                       # non-null assertions reported as warnings
+```
+
+Angular HTML templates (and inline templates in `.ts`) are **not** auto-formatted yet: re-indenting them changes whitespace around interpolations and could shift spacing in the UI, so it waits for browser QA. The `@media print` block in `styles/styles.scss` was written for the removed print-export service and is currently unused.
+
 ## Design system
 
 **Direction:** warm charcoal + champagne gold. The sidebar and the sign-in brand panel stay charcoal in both themes; gold is used for the active state, primary actions and focus — nowhere else.
@@ -85,10 +107,10 @@ Feature modules follow `model → repository (interface + api + mock) → servic
 Everything client-specific is in `src/brands/<name>/` (`_brand.scss` palette + display font, `brand.ts` name/logo/support email, `assets/`).
 
 ```bash
-npm run build:template-brand   # builds with src/brands/_template instead of odel
+npm run build:template-brand   # production build with src/brands/_template instead of odel
 ```
 
-To add a client: copy `_template`, edit it, and add a configuration next to `brand-template` in `angular.json`.
+To add a client: copy `_template`, edit it, and add **two** configurations in `angular.json`: the brand one (like `brand-template`) and a production pair (like `production-brand-template`) that lists **both** the `environment.prod.ts` swap and the brand swap. Angular does not merge `fileReplacements` across combined configurations, so a brand configuration used alone with `production` silently keeps the development environment (mock data on).
 
 ## Auth, roles and permissions
 

@@ -1,0 +1,13 @@
+<form class="rf" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="rf__body">
+    <app-float-label-input label="ROLES.FORM.NAME" iconLeft="pi pi-shield"
+      [errorMessage]="nameError()" formControlName="name" />
+    @if (!initialName()) { <p class="rf__hint"><i class="pi pi-info-circle" aria-hidden="true"></i>{{ 'ROLES.FORM.CREATE_HINT' | translate }}</p> }
+  </div>
+  <footer class="rf__footer">
+    <app-button variant="secondary" (clicked)="cancelled.emit()">{{ 'COMMON.CANCEL' | translate }}</app-button>
+    <app-button type="submit" variant="primary" [loading]="saving()">
+      {{ (initialName() ? 'COMMON.SAVE' : 'ROLES.FORM.CREATE') | translate }}
+    </app-button>
+  </footer>
+</form>

@@ -30,7 +30,8 @@ export interface RoleDetails {
   id: number;
   name: string;
   countUsers: number;
-  permissions: PermissionModule[];
+  /** The permission matrix. The API names this `modules` (not `permissions`). */
+  modules: PermissionModule[];
 }
 
 /** GET /roles query. All optional; the backend defaults to page 1, size 10. */

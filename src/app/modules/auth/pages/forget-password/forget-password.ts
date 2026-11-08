@@ -1,18 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { Router } from "@angular/router";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { FloatLabelInput } from '../../../../shared/components/float-label-input/float-label-input';
-import { AuthService } from '../../service/auth.service';
+import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
+import { AuthService } from "../../service/auth.service";
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-forget-password',
+  selector: "app-forget-password",
   standalone: true,
   imports: [ReactiveFormsModule, TranslateModule, FloatLabelInput],
-  templateUrl: './forget-password.html',
-  styleUrl: './forget-password.scss',
+  templateUrl: "./forget-password.html",
+  styleUrl: "./forget-password.scss",
 })
 export class ForgetPassword {
   private readonly fb = inject(FormBuilder);
@@ -22,10 +22,12 @@ export class ForgetPassword {
   protected readonly loading = this.authService.loading;
 
   protected readonly form = this.fb.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ["", [Validators.required, Validators.email]],
   });
 
-  protected get email() { return this.form.controls.email; }
+  protected get email() {
+    return this.form.controls.email;
+  }
 
   protected onSubmit(): void {
     if (this.form.invalid) {
@@ -35,11 +37,11 @@ export class ForgetPassword {
     const { email } = this.form.getRawValue();
 
     this.authService.forgotPassword({ email }).subscribe((success) => {
-      if (success) this.router.navigate(['/email-verification'], { queryParams: { email } });
+      if (success) this.router.navigate(["/email-verification"], { queryParams: { email } });
     });
   }
 
   protected backToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(["/login"]);
   }
 }

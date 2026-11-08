@@ -5,13 +5,28 @@
   grid-template-columns: 320px minmax(0, 1fr);
   gap: v.$space-6;
   align-items: start;
-  @media (max-width: v.$bp-xl) { grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: v.$bp-xl) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-.side, .main { display: flex; flex-direction: column; gap: v.$space-4; min-width: 0; }
+.side,
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+  min-width: 0;
+}
 
-.card-title { font-size: v.$text-lg; font-weight: v.$fw-semibold; }
-.card-sub { margin-top: v.$space-1; color: v.$text-secondary; font-size: v.$text-sm; }
+.card-title {
+  font-size: v.$text-lg;
+  font-weight: v.$fw-semibold;
+}
+.card-sub {
+  margin-top: v.$space-1;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+}
 
 // ── Identity ────────────────────────
 .identity {
@@ -22,12 +37,40 @@
   padding: v.$space-8 v.$space-6;
   text-align: center;
 
-  &__text { display: flex; flex-direction: column; align-items: center; gap: v.$space-2; min-width: 0; max-width: 100%; }
-  &__name { font-family: v.$font-display; font-size: v.$text-3xl; font-weight: v.$fw-semibold; line-height: v.$lh-tight; word-break: break-word; }
-  :host-context([dir="rtl"]) &__name { font-size: v.$text-2xl; font-weight: v.$fw-bold; }
-  &__mail { color: v.$text-secondary; font-size: v.$text-sm; word-break: break-all; }
-  &__photo { display: flex; flex-wrap: wrap; justify-content: center; gap: v.$space-2; }
-  &__hint { color: v.$text-muted; font-size: v.$text-xs; }
+  &__text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: v.$space-2;
+    min-width: 0;
+    max-width: 100%;
+  }
+  &__name {
+    font-family: v.$font-display;
+    font-size: v.$text-3xl;
+    font-weight: v.$fw-semibold;
+    line-height: v.$lh-tight;
+    word-break: break-word;
+  }
+  :host-context([dir="rtl"]) &__name {
+    font-size: v.$text-2xl;
+    font-weight: v.$fw-bold;
+  }
+  &__mail {
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    word-break: break-all;
+  }
+  &__photo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: v.$space-2;
+  }
+  &__hint {
+    color: v.$text-muted;
+    font-size: v.$text-xs;
+  }
   &__pending {
     display: flex;
     align-items: center;
@@ -45,7 +88,11 @@
   display: flex;
   flex-direction: column;
   gap: v.$space-3;
-  &__count { color: v.$text-secondary; font-size: v.$text-sm; margin-top: -4px; }
+  &__count {
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    margin-top: -4px;
+  }
   &__list {
     display: flex;
     flex-wrap: wrap;
@@ -72,18 +119,33 @@
   flex-direction: column;
   gap: v.$space-6;
   padding: v.$space-8;
-  @media (max-width: v.$bp-md) { padding: v.$space-5; }
+  @media (max-width: v.$bp-md) {
+    padding: v.$space-5;
+  }
 }
-.fields { display: flex; flex-direction: column; gap: v.$space-4; max-width: 560px; }
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+  max-width: 560px;
+}
 
 .phone {
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
   gap: v.$space-3;
-  @media (max-width: v.$bp-sm) { grid-template-columns: 1fr; }
+  @media (max-width: v.$bp-sm) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.actions { display: flex; justify-content: flex-end; gap: v.$space-3; padding-top: v.$space-2; flex-wrap: wrap; }
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: v.$space-3;
+  padding-top: v.$space-2;
+  flex-wrap: wrap;
+}
 
 // ── Password strength ───────────────
 .strength {
@@ -92,25 +154,46 @@
   gap: v.$space-3;
   margin-top: calc(#{v.$space-1} * -1);
 
-  &__bar { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: v.$space-1; }
+  &__bar {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: v.$space-1;
+  }
   &__seg {
     height: 4px;
     border-radius: v.$radius-full;
     background: v.$border-strong;
     transition: background v.$transition-normal;
-    &--on[data-level="1"] { background: v.$danger; }
-    &--on[data-level="2"] { background: v.$warning; }
-    &--on[data-level="3"] { background: v.$info; }
-    &--on[data-level="4"] { background: v.$success; }
+    &--on[data-level="1"] {
+      background: v.$danger;
+    }
+    &--on[data-level="2"] {
+      background: v.$warning;
+    }
+    &--on[data-level="3"] {
+      background: v.$info;
+    }
+    &--on[data-level="4"] {
+      background: v.$success;
+    }
   }
   &__label {
     min-width: 64px;
     font-size: v.$text-sm;
     font-weight: v.$fw-semibold;
-    &[data-level="1"] { color: v.$danger-text; }
-    &[data-level="2"] { color: v.$warning-text; }
-    &[data-level="3"] { color: v.$info-text; }
-    &[data-level="4"] { color: v.$success-text; }
+    &[data-level="1"] {
+      color: v.$danger-text;
+    }
+    &[data-level="2"] {
+      color: v.$warning-text;
+    }
+    &[data-level="3"] {
+      color: v.$info-text;
+    }
+    &[data-level="4"] {
+      color: v.$success-text;
+    }
   }
 }
 
@@ -121,8 +204,22 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  @media (max-width: v.$bp-sm) { grid-template-columns: 1fr; }
+  @media (max-width: v.$bp-sm) {
+    grid-template-columns: 1fr;
+  }
 
-  &__item { display: flex; align-items: center; gap: v.$space-2; color: v.$text-muted; font-size: v.$text-sm; transition: color v.$transition-normal;
-    &--done { color: v.$text; i { color: v.$success; } } }
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    color: v.$text-muted;
+    font-size: v.$text-sm;
+    transition: color v.$transition-normal;
+    &--done {
+      color: v.$text;
+      i {
+        color: v.$success;
+      }
+    }
+  }
 }

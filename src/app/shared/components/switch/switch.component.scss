@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: inline-flex; }
+:host {
+  display: inline-flex;
+}
 
 .sw {
   position: relative;
@@ -25,7 +27,14 @@
     transition: inset-inline-start v.$transition-normal;
   }
 
-  &--on { background: v.$primary; }
-  &--on &__thumb { inset-inline-start: 19px; }
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &--on {
+    background: v.$primary;
+  }
+  &--on &__thumb {
+    inset-inline-start: 19px;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }

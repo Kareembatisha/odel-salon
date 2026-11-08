@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
 
-import { ApiResponse } from '@shared/model/api_response.model';
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   DeleteRolesRequest,
   RoleDetails,
@@ -8,7 +8,7 @@ import {
   RoleNameRequest,
   RolesQuery,
   UpdateRolePermissionsRequest,
-} from '../model/role.model';
+} from "../model/role.model";
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IRoleRepository {
@@ -21,7 +21,10 @@ export interface IRoleRepository {
   /** PUT /roles/{id} */
   updateRole(id: number, payload: RoleNameRequest): Observable<ApiResponse<null>>;
   /** PUT /roles/{id}/permissions */
-  updatePermissions(id: number, payload: UpdateRolePermissionsRequest): Observable<ApiResponse<null>>;
+  updatePermissions(
+    id: number,
+    payload: UpdateRolePermissionsRequest,
+  ): Observable<ApiResponse<null>>;
   /** DELETE /roles (body: { ids }) */
   deleteRoles(payload: DeleteRolesRequest): Observable<ApiResponse<null>>;
 }

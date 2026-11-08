@@ -1,14 +1,14 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from "@angular/core";
 
-export type ThemeMode = 'light' | 'dark';
+export type ThemeMode = "light" | "dark";
 
-const STORAGE_KEY = 'odl_theme';
+const STORAGE_KEY = "odl_theme";
 
 function readStoredTheme(): ThemeMode {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'dark' ? 'dark' : 'light';
+    return localStorage.getItem(STORAGE_KEY) === "dark" ? "dark" : "light";
   } catch {
-    return 'light';
+    return "light";
   }
 }
 
@@ -21,19 +21,19 @@ function readStoredTheme(): ThemeMode {
  * PrimeNG preset (darkModeSelector) key off. index.html applies the persisted
  * value before Angular boots, so there is no flash of the wrong theme.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ThemeService {
   private readonly _mode = signal<ThemeMode>(readStoredTheme());
 
   readonly mode = this._mode.asReadonly();
-  readonly isDark = computed(() => this._mode() === 'dark');
+  readonly isDark = computed(() => this._mode() === "dark");
 
   constructor() {
     effect(() => this.apply(this._mode()));
     // Enable colour transitions only after first paint, so the initial theme
     // never animates in from the wrong palette.
-    if (typeof window !== 'undefined') {
-      window.requestAnimationFrame(() => document.documentElement.classList.add('odl-theme-ready'));
+    if (typeof window !== "undefined") {
+      window.requestAnimationFrame(() => document.documentElement.classList.add("odl-theme-ready"));
     }
   }
 
@@ -47,10 +47,10 @@ export class ThemeService {
   }
 
   toggle(): void {
-    this.setTheme(this.isDark() ? 'light' : 'dark');
+    this.setTheme(this.isDark() ? "light" : "dark");
   }
 
   private apply(mode: ThemeMode): void {
-    document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.setAttribute("data-theme", mode);
   }
 }

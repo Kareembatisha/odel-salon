@@ -64,10 +64,7 @@ export class PackageMockRepository implements IPackageRepository {
    */
   getPackages(q: PackagesQuery): Observable<ApiResponse<PackageListItem[]>> {
     if (!this.db.branches.some((b) => b.id === q.branchId)) {
-      return this.fail(
-        this.translate.instant("PACKAGES.ERRORS.BRANCH_NOT_FOUND"),
-        404,
-      );
+      return this.fail(this.translate.instant("PACKAGES.ERRORS.BRANCH_NOT_FOUND"), 404);
     }
 
     const term = (q.search ?? "").trim().toLowerCase();
@@ -77,9 +74,7 @@ export class PackageMockRepository implements IPackageRepository {
       .filter(
         (p) =>
           (q.isActive === undefined || p.isActive === q.isActive) &&
-          (!term ||
-            p.nameAr.toLowerCase().includes(term) ||
-            p.nameEn.toLowerCase().includes(term)),
+          (!term || p.nameAr.toLowerCase().includes(term) || p.nameEn.toLowerCase().includes(term)),
       )
       .sort((a, b) => a.nameEn.localeCompare(b.nameEn));
 
@@ -104,9 +99,7 @@ export class PackageMockRepository implements IPackageRepository {
         hasNextPage: q.pageNumber < totalPages,
         additionalData: { ...summary },
       },
-      data: all
-        .slice(start, start + q.pageSize)
-        .map((p) => this.toListItem(p)),
+      data: all.slice(start, start + q.pageSize).map((p) => this.toListItem(p)),
     }).pipe(delay(MOCK_DELAY_MS));
   }
 
@@ -175,10 +168,7 @@ export class PackageMockRepository implements IPackageRepository {
   }
 
   /** Same rules as create, without `branchId`. The active status is not touched here. */
-  updatePackage(
-    id: number,
-    payload: UpdatePackagePayload,
-  ): Observable<ApiResponse<null>> {
+  updatePackage(id: number, payload: UpdatePackagePayload): Observable<ApiResponse<null>> {
     const pkg = this.db.packages.find((p) => p.id === id);
     if (!pkg) return this.notFound();
 
@@ -243,9 +233,7 @@ export class PackageMockRepository implements IPackageRepository {
       return this.notFound();
     }
 
-    this.db.packages = this.db.packages.filter(
-      (p) => !payload.ids.includes(p.id),
-    );
+    this.db.packages = this.db.packages.filter((p) => !payload.ids.includes(p.id));
 
     return this.reply(null, "Package Deleted Successfully");
   }
@@ -260,11 +248,10 @@ export class PackageMockRepository implements IPackageRepository {
     payload: UpdatePackagePayload,
     ignoreId?: number,
   ): Problem | null {
-    const names: Array<[field: string, value: string, own: keyof MockPackage]> =
-      [
-        ["NameAr", payload.nameAr, "nameAr"],
-        ["NameEn", payload.nameEn, "nameEn"],
-      ];
+    const names: Array<[field: string, value: string, own: keyof MockPackage]> = [
+      ["NameAr", payload.nameAr, "nameAr"],
+      ["NameEn", payload.nameEn, "nameEn"],
+    ];
 
     for (const [field, raw, own] of names) {
       const problem = this.nameProblem(raw.trim(), own, branchId, ignoreId);
@@ -343,14 +330,9 @@ export class PackageMockRepository implements IPackageRepository {
   }
 
   /** The services' price rows in `branchId` (`undefined` = not priced there). */
-  private rowsOf(
-    serviceIds: number[],
-    branchId: number,
-  ): Array<ServiceBranchPayload | undefined> {
+  private rowsOf(serviceIds: number[], branchId: number): Array<ServiceBranchPayload | undefined> {
     return serviceIds.map((serviceId) =>
-      this.db.services
-        .find((s) => s.id === serviceId)
-        ?.prices.find((p) => p.branchId === branchId),
+      this.db.services.find((s) => s.id === serviceId)?.prices.find((p) => p.branchId === branchId),
     );
   }
 
@@ -358,10 +340,7 @@ export class PackageMockRepository implements IPackageRepository {
     return rows.every((row) => row?.isHomeAvailable);
   }
 
-  private sum(
-    rows: ServiceBranchPayload[],
-    pick: (row: ServiceBranchPayload) => number,
-  ): number {
+  private sum(rows: ServiceBranchPayload[], pick: (row: ServiceBranchPayload) => number): number {
     return rows.reduce((total, row) => total + pick(row), 0);
   }
 
@@ -372,9 +351,7 @@ export class PackageMockRepository implements IPackageRepository {
   /** Derives names, "before discount" totals and duration from the services' current prices. */
   private toListItem(p: MockPackage): PackageListItem {
     const rows = this.rowsOf(p.serviceIds, p.branchId);
-    const priced = rows.filter(
-      (row): row is ServiceBranchPayload => row !== undefined,
-    );
+    const priced = rows.filter((row): row is ServiceBranchPayload => row !== undefined);
 
     return {
       id: p.id,
@@ -395,9 +372,7 @@ export class PackageMockRepository implements IPackageRepository {
       }),
       originalRegularPrice: this.sum(priced, (r) => r.regularPrice),
       originalVipPrice: this.sum(priced, (r) => r.vipPrice),
-      originalHomePrice: this.allHome(rows)
-        ? this.sum(priced, (r) => r.homePrice ?? 0)
-        : null,
+      originalHomePrice: this.allHome(rows) ? this.sum(priced, (r) => r.homePrice ?? 0) : null,
       durationMinutes: this.sum(priced, (r) => r.durationMinutes),
     };
   }
@@ -406,11 +381,7 @@ export class PackageMockRepository implements IPackageRepository {
   // Responses
   // ----------------------------------------------------------
 
-  private reply<T>(
-    data: T,
-    message: string,
-    statusCode = 200,
-  ): Observable<ApiResponse<T>> {
+  private reply<T>(data: T, message: string, statusCode = 200): Observable<ApiResponse<T>> {
     return of<ApiResponse<T>>({
       status: true,
       statusCode,
@@ -429,16 +400,16 @@ export class PackageMockRepository implements IPackageRepository {
   /** 400 — same shape as the interceptor's validation toast: field label + message. */
   private invalid({ field, key }: Problem): Observable<never> {
     this.notify.warning(`VALIDATION_FIELDS.${field}`, key);
-    return throwError(() =>
-      Object.assign(new Error("Validation failed"), { status: 400 }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error("Validation failed"), { status: 400 })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 
   /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
   private fail(message: string, statusCode: number): Observable<never> {
     this.notify.warning(message);
-    return throwError(() =>
-      Object.assign(new Error(message), { status: statusCode }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error(message), { status: statusCode })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 }

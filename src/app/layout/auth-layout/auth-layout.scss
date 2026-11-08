@@ -1,7 +1,10 @@
 @use "styles/variables" as v;
 @use "styles/patterns" as p;
 
-:host { display: block; min-height: 100%; }
+:host {
+  display: block;
+  min-height: 100%;
+}
 
 .auth {
   display: grid;
@@ -9,7 +12,9 @@
   min-height: 100vh;
   background: v.$bg-page;
 
-  @media (max-width: v.$bp-lg) { grid-template-columns: 1fr; }
+  @media (max-width: v.$bp-lg) {
+    grid-template-columns: 1fr;
+  }
 
   // ── Brand panel (charcoal in both themes) ──
   &__brand {
@@ -21,10 +26,20 @@
     background: var(--odl-neutral-950);
     color: var(--odl-neutral-100);
     overflow: hidden;
-    @media (max-width: v.$bp-lg) { display: none; }
+    @media (max-width: v.$bp-lg) {
+      display: none;
+    }
   }
-  &__brand-top { display: flex; align-items: center; gap: v.$space-3; position: relative; z-index: 1; }
-  &__mark { border-radius: v.$radius-md; }
+  &__brand-top {
+    display: flex;
+    align-items: center;
+    gap: v.$space-3;
+    position: relative;
+    z-index: 1;
+  }
+  &__mark {
+    border-radius: v.$radius-md;
+  }
   &__wordmark {
     font-family: v.$font-display;
     font-size: v.$text-3xl;
@@ -33,7 +48,11 @@
     color: #fff;
   }
 
-  &__pitch { position: relative; z-index: 1; max-width: 30rem; }
+  &__pitch {
+    position: relative;
+    z-index: 1;
+    max-width: 30rem;
+  }
   &__headline {
     font-family: v.$font-display;
     font-size: v.$text-6xl;
@@ -42,8 +61,17 @@
     letter-spacing: v.$ls-tight;
     color: #fff;
   }
-  :host-context([dir="rtl"]) &__headline { font-size: v.$text-5xl; font-weight: v.$fw-bold; line-height: 1.25; }
-  &__lead { margin-top: v.$space-5; color: var(--odl-neutral-300); font-size: v.$text-lg; line-height: v.$lh-relaxed; }
+  :host-context([dir="rtl"]) &__headline {
+    font-size: v.$text-5xl;
+    font-weight: v.$fw-bold;
+    line-height: 1.25;
+  }
+  &__lead {
+    margin-top: v.$space-5;
+    color: var(--odl-neutral-300);
+    font-size: v.$text-lg;
+    line-height: v.$lh-relaxed;
+  }
 
   // Razor line: thin concentric rings crossed by one gold diagonal — echoes the logo mark.
   &__motif {
@@ -104,8 +132,15 @@
     font-size: v.$text-sm;
     font-weight: v.$fw-semibold;
     cursor: pointer;
-    &:hover { color: v.$text; border-color: v.$border-strong; }
-    &--icon { width: 40px; justify-content: center; padding: 0; }
+    &:hover {
+      color: v.$text;
+      border-color: v.$border-strong;
+    }
+    &--icon {
+      width: 40px;
+      justify-content: center;
+      padding: 0;
+    }
   }
 
   &__card {
@@ -115,7 +150,9 @@
     margin-block: auto;
     border-radius: v.$radius-xl;
     box-shadow: v.$shadow-md;
-    @media (max-width: v.$bp-sm) { padding: v.$space-6 v.$space-5; }
+    @media (max-width: v.$bp-sm) {
+      padding: v.$space-6 v.$space-5;
+    }
   }
 
   &__mobile-brand {
@@ -126,9 +163,18 @@
     font-family: v.$font-display;
     font-size: v.$text-2xl;
     font-weight: v.$fw-semibold;
-    img { border-radius: v.$radius-md; }
-    @media (max-width: v.$bp-lg) { display: flex; }
+    img {
+      border-radius: v.$radius-md;
+    }
+    @media (max-width: v.$bp-lg) {
+      display: flex;
+    }
   }
 
-  &__footer { padding-top: v.$space-6; color: v.$text-muted; font-size: v.$text-sm; text-align: center; }
+  &__footer {
+    padding-top: v.$space-6;
+    color: v.$text-muted;
+    font-size: v.$text-sm;
+    text-align: center;
+  }
 }

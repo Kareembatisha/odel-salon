@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal } from "@angular/core";
 
 /**
  * Compact search box for list toolbars. Emits `search` after the user stops
  * typing (debounced) and immediately on Enter or when cleared.
  */
 @Component({
-  selector: 'app-search-input',
+  selector: "app-search-input",
   standalone: true,
   template: `
     <label class="si">
@@ -25,16 +25,16 @@ import { ChangeDetectionStrategy, Component, input, output, signal } from '@angu
       }
     </label>
   `,
-  styleUrl: './search-input.component.scss',
+  styleUrl: "./search-input.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchInputComponent {
-  placeholder = input<string>('Search…');
-  clearLabel = input<string>('Clear');
+  placeholder = input<string>("Search…");
+  clearLabel = input<string>("Clear");
   debounceMs = input<number>(350);
   search = output<string>();
 
-  protected readonly value = signal('');
+  protected readonly value = signal("");
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   protected onInput(event: Event): void {
@@ -50,7 +50,7 @@ export class SearchInputComponent {
   }
 
   protected clear(): void {
-    this.value.set('');
+    this.value.set("");
     this.flush();
   }
 }

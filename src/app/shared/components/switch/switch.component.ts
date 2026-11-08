@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
 /** On/off switch (role="switch"). Controlled: the parent owns `checked` and reacts to `toggled`. */
 @Component({
-  selector: 'app-switch',
+  selector: "app-switch",
   standalone: true,
   template: `
     <button
@@ -16,13 +16,13 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       (click)="toggled.emit(!checked())"
     ><span class="sw__thumb"></span></button>
   `,
-  styleUrl: './switch.component.scss',
+  styleUrl: "./switch.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SwitchComponent {
   checked = input<boolean>(false);
   disabled = input<boolean>(false);
   /** Accessible name — there is no visible text. */
-  label = input<string>('');
+  label = input<string>("");
   toggled = output<boolean>();
 }

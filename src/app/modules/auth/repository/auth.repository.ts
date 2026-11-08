@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
 
-import { ApiResponse } from '@shared/model/api_response.model';
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   ChangePasswordRequest,
   ForgotPasswordRequest,
@@ -13,7 +13,7 @@ import {
   ResetPasswordRequest,
   VerifyPasswordCodeRequest,
   VerifyPasswordCodeResponseData,
-} from '../model/auth.model';
+} from "../model/auth.model";
 
 /**
  * IAuthRepository
@@ -28,7 +28,11 @@ export interface IAuthRepository {
   logout(payload: LogoutRequest): Observable<ApiResponse<null>>;
   refreshToken(payload: RefreshTokenRequest): Observable<ApiResponse<RefreshTokenResponseData>>;
   changePassword(payload: ChangePasswordRequest): Observable<ApiResponse<null>>;
-  forgotPassword(payload: ForgotPasswordRequest): Observable<ApiResponse<ForgotPasswordResponseData>>;
-  verifyPasswordCode(payload: VerifyPasswordCodeRequest): Observable<ApiResponse<VerifyPasswordCodeResponseData>>;
+  forgotPassword(
+    payload: ForgotPasswordRequest,
+  ): Observable<ApiResponse<ForgotPasswordResponseData>>;
+  verifyPasswordCode(
+    payload: VerifyPasswordCodeRequest,
+  ): Observable<ApiResponse<VerifyPasswordCodeResponseData>>;
   resetPassword(payload: ResetPasswordRequest): Observable<ApiResponse<null>>;
 }

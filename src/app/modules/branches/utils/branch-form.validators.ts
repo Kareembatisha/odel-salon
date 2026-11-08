@@ -19,9 +19,7 @@ export function optionalUrlValidator(): ValidatorFn {
     try {
       const url = new URL(value);
 
-      return url.protocol === "http:" || url.protocol === "https:"
-        ? null
-        : { invalidUrl: true };
+      return url.protocol === "http:" || url.protocol === "https:" ? null : { invalidUrl: true };
     } catch {
       return { invalidUrl: true };
     }
@@ -33,9 +31,7 @@ export function atLeastOneBookingTypeValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const { allowsRegular, allowsVip, allowsHome } = control.value;
 
-    return allowsRegular || allowsVip || allowsHome
-      ? null
-      : { atLeastOneRequired: true };
+    return allowsRegular || allowsVip || allowsHome ? null : { atLeastOneRequired: true };
   };
 }
 
@@ -45,9 +41,7 @@ export function workingHourValidator(): ValidatorFn {
     const { isOpen, openTime, closeTime } = control.value;
 
     if (!isOpen) {
-      return openTime === null && closeTime === null
-        ? null
-        : { closedDayHasTimes: true };
+      return openTime === null && closeTime === null ? null : { closedDayHasTimes: true };
     }
 
     if (!openTime || !closeTime) {

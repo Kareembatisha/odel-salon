@@ -5,9 +5,12 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:template-brand": "ng build --configuration production,brand-template",
+    "build:template-brand": "ng build --configuration production,brand-template,production-brand-template",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.{ts,scss,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,scss,json}\""
   },
   "private": true,
   "packageManager": "npm@11.6.0",
@@ -23,8 +26,6 @@
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^16.0.0",
     "@primeuix/themes": "^2.0.2",
-    "exceljs": "^4.4.0",
-    "file-saver": "^2.0.5",
     "primeicons": "^7.0.0",
     "primeng": "^21.0.1",
     "rxjs": "~7.8.0",
@@ -35,14 +36,17 @@
     "@angular/build": "^21.0.0",
     "@angular/cli": "^21.0.0",
     "@angular/compiler-cli": "^21.0.0",
-    "@types/file-saver": "^2.0.7",
     "@types/node": "^22.9.0",
+    "angular-eslint": "^21.4.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.5",
     "jsdom": "^29.1.1",
     "postcss": "^8.4.49",
+    "prettier": "^3.9.10",
     "tailwindcss": "^3.4.15",
     "tailwindcss-primeui": "^0.6.1",
     "typescript": "5.9.3",
+    "typescript-eslint": "^8.72.1",
     "vitest": "^4.1.10"
   }
 }

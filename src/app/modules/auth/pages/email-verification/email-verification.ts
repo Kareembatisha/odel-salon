@@ -35,9 +35,7 @@ export class EmailVerification implements OnInit, OnDestroy {
 
   protected readonly loading = this.authService.loading;
 
-  @ViewChildren("digitInput") digitInputs!: QueryList<
-    ElementRef<HTMLInputElement>
-  >;
+  @ViewChildren("digitInput") digitInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   protected readonly digitKeys = ["d0", "d1", "d2", "d3"] as const;
 
@@ -120,8 +118,7 @@ export class EmailVerification implements OnInit, OnDestroy {
   }
 
   protected onPaste(event: ClipboardEvent): void {
-    const pasted =
-      event.clipboardData?.getData("text").replace(/[^0-9]/g, "") ?? "";
+    const pasted = event.clipboardData?.getData("text").replace(/[^0-9]/g, "") ?? "";
     if (!pasted) return;
     event.preventDefault();
     this.digitKeys.forEach((key, i) => {
@@ -139,11 +136,9 @@ export class EmailVerification implements OnInit, OnDestroy {
 
   protected resendCode(): void {
     if (this.secondsLeft > 0) return;
-    this.authService
-      .forgotPassword({ email: this.email })
-      .subscribe((success) => {
-        if (success) this.startTimer();
-      });
+    this.authService.forgotPassword({ email: this.email }).subscribe((success) => {
+      if (success) this.startTimer();
+    });
   }
 
   protected changeEmail(): void {
@@ -167,21 +162,17 @@ export class EmailVerification implements OnInit, OnDestroy {
       return;
     }
     this.submitError = "";
-    const code = this.digitKeys
-      .map((k) => this.form.controls[k].value)
-      .join("");
+    const code = this.digitKeys.map((k) => this.form.controls[k].value).join("");
 
-    this.authService
-      .verifyPasswordCode({ email: this.email, code })
-      .subscribe((resetToken) => {
-        if (!resetToken) {
-          this.submitError = "AUTH.OTP_INVALID";
-          this.cdr.markForCheck();
-          return;
-        }
-        this.router.navigate(["/create-new-password"], {
-          queryParams: { email: this.email, token: resetToken },
-        });
+    this.authService.verifyPasswordCode({ email: this.email, code }).subscribe((resetToken) => {
+      if (!resetToken) {
+        this.submitError = "AUTH.OTP_INVALID";
+        this.cdr.markForCheck();
+        return;
+      }
+      this.router.navigate(["/create-new-password"], {
+        queryParams: { email: this.email, token: resetToken },
       });
+    });
   }
 }

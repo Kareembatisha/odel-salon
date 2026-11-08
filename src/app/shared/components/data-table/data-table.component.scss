@@ -1,14 +1,21 @@
 @use "styles/variables" as v;
 @use "styles/patterns" as p;
 
-:host { display: block; min-width: 0; }
+:host {
+  display: block;
+  min-width: 0;
+}
 
 .dt {
   @include p.card(0);
   overflow: hidden;
 
-  &__scroll { overflow-x: auto; }
-  &__cards { display: none; }
+  &__scroll {
+    overflow-x: auto;
+  }
+  &__cards {
+    display: none;
+  }
 
   &__table {
     width: 100%;
@@ -40,14 +47,23 @@
     overflow: hidden;
   }
 
-  &__check { width: 52px; padding-inline-end: 0; }
+  &__check {
+    width: 52px;
+    padding-inline-end: 0;
+  }
 
-  &__row--selected { background: v.$primary-soft; }
+  &__row--selected {
+    background: v.$primary-soft;
+  }
 
   &__row {
     transition: background v.$transition-fast;
-    &:hover { background: v.$surface-hover; }
-    &:last-child td { border-bottom: 0; }
+    &:hover {
+      background: v.$surface-hover;
+    }
+    &:last-child td {
+      border-bottom: 0;
+    }
   }
 
   &__footer {
@@ -60,10 +76,17 @@
     border-top: 1px solid v.$border;
     color: v.$text-secondary;
     font-size: v.$text-sm;
-    strong { color: v.$text; font-weight: v.$fw-semibold; }
+    strong {
+      color: v.$text;
+      font-weight: v.$fw-semibold;
+    }
   }
 
-  &__pager { display: flex; align-items: center; gap: v.$space-1; }
+  &__pager {
+    display: flex;
+    align-items: center;
+    gap: v.$space-1;
+  }
 
   &__page {
     min-width: 34px;
@@ -76,17 +99,31 @@
     font: inherit;
     font-weight: v.$fw-medium;
     cursor: pointer;
-    transition: background v.$transition-fast, color v.$transition-fast;
+    transition:
+      background v.$transition-fast,
+      color v.$transition-fast;
 
-    &:hover:not(:disabled):not(.dt__page--active) { background: v.$surface-hover; color: v.$text; }
-    &:disabled { opacity: 0.4; cursor: not-allowed; }
-    &--active { background: v.$primary-soft; border-color: v.$primary-soft-border; color: v.$primary-text; font-weight: v.$fw-semibold; }
+    &:hover:not(:disabled):not(.dt__page--active) {
+      background: v.$surface-hover;
+      color: v.$text;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    &--active {
+      background: v.$primary-soft;
+      border-color: v.$primary-soft-border;
+      color: v.$primary-text;
+      font-weight: v.$fw-semibold;
+    }
   }
 }
 
 // Arrow icons mirror in RTL
-:host-context([dir="rtl"]) .dt__page--arrow i { transform: scaleX(-1); }
-
+:host-context([dir="rtl"]) .dt__page--arrow i {
+  transform: scaleX(-1);
+}
 
 // ── Mobile cards (only exist in the DOM when the host supplied odlCard) ─────
 // Below $bp-md, a table with 5+ columns either truncates to uselessness or forces
@@ -94,7 +131,9 @@
 // with one thumb and no sideways scrolling.
 :host(.dt-host--has-cards) {
   @media (max-width: v.$bp-md) {
-    .dt__scroll { display: none; }
+    .dt__scroll {
+      display: none;
+    }
 
     .dt__cards {
       display: flex;
@@ -113,7 +152,10 @@
       font-size: v.$text-sm;
       font-weight: v.$fw-medium;
       // Larger hit area than the 18px box itself (WCAG 2.5.5 / mobile tap-target guidance).
-      input.odl-check { width: 20px; height: 20px; }
+      input.odl-check {
+        width: 20px;
+        height: 20px;
+      }
     }
 
     .dt__card {
@@ -124,15 +166,37 @@
       cursor: pointer;
       transition: background v.$transition-fast;
 
-      &--selected { background: v.$primary-soft; border-color: v.$primary-soft-border; }
-      &--skeleton { flex-direction: row; align-items: center; gap: v.$space-3; cursor: default; }
+      &--selected {
+        background: v.$primary-soft;
+        border-color: v.$primary-soft-border;
+      }
+      &--skeleton {
+        flex-direction: row;
+        align-items: center;
+        gap: v.$space-3;
+        cursor: default;
+      }
     }
 
-    .dt__card-skel-lines { flex: 1; display: flex; flex-direction: column; gap: v.$space-2; }
+    .dt__card-skel-lines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: v.$space-2;
+    }
 
     // Footer stacks and its controls grow to comfortable tap size on mobile.
-    .dt__footer { flex-direction: column; align-items: stretch; gap: v.$space-3; }
-    .dt__pager { justify-content: center; }
-    .dt__page { min-width: 40px; height: 40px; }
+    .dt__footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: v.$space-3;
+    }
+    .dt__pager {
+      justify-content: center;
+    }
+    .dt__page {
+      min-width: 40px;
+      height: 40px;
+    }
   }
 }

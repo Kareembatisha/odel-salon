@@ -28,7 +28,7 @@ import { NotificationService } from "../services/notification.service";
 import { ErrorLoggingService } from "../services/error-logging.service";
 import { AuthApiRepository } from "../../modules/auth/repository/auth-api.repository";
 import { AuthService } from "../../modules/auth/service/auth.service";
-import { ApiErrors } from "../../shared/model/api_response.model";
+import { ApiErrors } from "@shared/model/api_response.model";
 import { parseRetryAfterMs } from "./retry-strategy.util";
 
 const REFRESH_TOKEN_KEY = "odl_refresh_token";
@@ -104,15 +104,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     timeout(DEFAULT_REQUEST_TIMEOUT_MS),
     catchError((err: HttpErrorResponse | TimeoutError) => {
-      const notify = runInInjectionContext(injector, () =>
-        inject(NotificationService),
-      );
-      const logging = runInInjectionContext(injector, () =>
-        inject(ErrorLoggingService),
-      );
-      const authService = runInInjectionContext(injector, () =>
-        inject(AuthService),
-      );
+      const notify = runInInjectionContext(injector, () => inject(NotificationService));
+      const logging = runInInjectionContext(injector, () => inject(ErrorLoggingService));
+      const authService = runInInjectionContext(injector, () => inject(AuthService));
 
       // rxjs `timeout()` throws a TimeoutError, NOT an HttpErrorResponse —
       // it never actually reached the server, so none of the status-code
@@ -166,9 +160,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         );
       }
 
-      const translate = runInInjectionContext(injector, () =>
-        inject(TranslateService),
-      );
+      const translate = runInInjectionContext(injector, () => inject(TranslateService));
       handleError(err, notify, router, translate);
       return throwError(() => err);
     }),
@@ -255,21 +247,14 @@ function handleUnauthorized(
   );
 }
 
-function cloneWithToken(
-  req: HttpRequest<unknown>,
-  accessToken: string,
-): HttpRequest<unknown> {
+function cloneWithToken(req: HttpRequest<unknown>, accessToken: string): HttpRequest<unknown> {
   return req.clone({
     setHeaders: { Authorization: `Bearer ${accessToken}` },
   });
 }
 
 /** Refresh failed (or no refresh token available) -> clear session, warn, redirect. */
-function forceLogout(
-  notify: NotificationService,
-  router: Router,
-  authService: AuthService,
-): void {
+function forceLogout(notify: NotificationService, router: Router, authService: AuthService): void {
   // Delegate to AuthService.clearSession() rather than removing the
   // localStorage keys directly here: this interceptor used to clear
   // localStorage but never touch AuthService's in-memory signals, so
@@ -329,11 +314,7 @@ function handleError(
       // e.g. two users editing/approving the same record at once, or a
       // duplicate-create race. Previously fell into the generic branch and
       // surfaced whatever raw string the backend happened to send.
-      notifyDeduped(
-        notify,
-        "warning",
-        extractMessage(err) ?? "ERRORS.CONFLICT",
-      );
+      notifyDeduped(notify, "warning", extractMessage(err) ?? "ERRORS.CONFLICT");
       break;
 
     case HttpStatusCode.PayloadTooLarge:
@@ -421,11 +402,7 @@ function handleError(
 function extractMessage(err: HttpErrorResponse): string | null {
   const body: unknown = err.error;
 
-  if (
-    typeof body === "string" &&
-    body.trim().length > 0 &&
-    !body.trim().startsWith("<")
-  ) {
+  if (typeof body === "string" && body.trim().length > 0 && !body.trim().startsWith("<")) {
     return body;
   }
 

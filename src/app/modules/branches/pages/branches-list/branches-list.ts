@@ -11,18 +11,18 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { PERMISSIONS } from "@core/auth/permissions";
 import { LanguageService } from "@core/services/language.service";
 import { AuthService } from "../../../auth/service/auth.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
-import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
 import {
   FilterOption,
   FilterSelectComponent,
-} from "../../../../shared/components/filter-select/filter-select.component";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { PaginationComponent } from "../../../../shared/components/pagination/pagination.component";
-import { SearchInputComponent } from "../../../../shared/components/search-input/search-input.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { PaginationComponent } from "@shared/components/pagination/pagination.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
 import { BranchCard } from "../../components/branch-card/branch-card";
 import { BranchListItem } from "../../model/branch.model";
 import { BranchesService } from "../../service/branches.service";
@@ -59,15 +59,9 @@ export class BranchesList implements OnInit {
   private readonly language = inject(LanguageService);
 
   /** Lazy on purpose: reading PERMISSIONS in a field initializer came back undefined in combined test runs. */
-  protected readonly canCreate = computed(() =>
-    this.auth.hasPermission(PERMISSIONS.Branch.Create),
-  );
-  protected readonly canEdit = computed(() =>
-    this.auth.hasPermission(PERMISSIONS.Branch.Edit),
-  );
-  protected readonly canDelete = computed(() =>
-    this.auth.hasPermission(PERMISSIONS.Branch.Delete),
-  );
+  protected readonly canCreate = computed(() => this.auth.hasPermission(PERMISSIONS.Branch.Create));
+  protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Branch.Edit));
+  protected readonly canDelete = computed(() => this.auth.hasPermission(PERMISSIONS.Branch.Delete));
   protected readonly branches = this.branchesService.branches;
   protected readonly meta = this.branchesService.meta;
   protected readonly loading = this.branchesService.loading;
@@ -83,10 +77,7 @@ export class BranchesList implements OnInit {
     return this.language.currentLang() === "ar" ? b.nameAr : b.nameEn;
   });
 
-  protected readonly skeletons = Array.from(
-    { length: SKELETON_CARDS },
-    (_, i) => i,
-  );
+  protected readonly skeletons = Array.from({ length: SKELETON_CARDS }, (_, i) => i);
 
   protected readonly visibilityFilterOptions = computed<FilterOption[]>(() => [
     { value: "", label: this.translate.instant("BRANCHES.FILTER.ALL") },

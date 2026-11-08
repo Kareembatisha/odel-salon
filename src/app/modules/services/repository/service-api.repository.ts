@@ -48,10 +48,7 @@ export class ServiceApiRepository implements IServiceRepository {
   }
 
   /** Replace names and the price rows of every branch. */
-  updateService(
-    id: number,
-    payload: ServicePayload,
-  ): Observable<ApiResponse<null>> {
+  updateService(id: number, payload: ServicePayload): Observable<ApiResponse<null>> {
     return this.http.put<ApiResponse<null>>(`${this.url}/${id}`, payload);
   }
 
@@ -64,14 +61,8 @@ export class ServiceApiRepository implements IServiceRepository {
   }
 
   /** Set (not toggle) `isActive` of one service in the listed branches. */
-  setStatusInBranches(
-    id: number,
-    payload: SetServiceStatusRequest,
-  ): Observable<ApiResponse<null>> {
-    return this.http.patch<ApiResponse<null>>(
-      `${this.url}/${id}/branches/status`,
-      payload,
-    );
+  setStatusInBranches(id: number, payload: SetServiceStatusRequest): Observable<ApiResponse<null>> {
+    return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/branches/status`, payload);
   }
 
   /** Copy duration, prices, home availability and status from one branch onto another. */

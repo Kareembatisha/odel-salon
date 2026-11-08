@@ -74,16 +74,14 @@ export function buildServicePayload(value: ServiceFormValue): ServicePayload {
   return {
     nameAr: value.nameAr.trim(),
     nameEn: value.nameEn.trim(),
-    branches: value.branches.map(
-      (b): ServiceBranchPayload => ({
-        branchId: b.branchId,
-        durationMinutes: Number(b.durationMinutes),
-        regularPrice: Number(b.regularPrice),
-        vipPrice: Number(b.vipPrice),
-        isHomeAvailable: b.isHomeAvailable,
-        homePrice: b.isHomeAvailable ? Number(b.homePrice) : null,
-        isActive: b.isActive,
-      }),
-    ),
+    branches: value.branches.map((b): ServiceBranchPayload => ({
+      branchId: b.branchId,
+      durationMinutes: Number(b.durationMinutes),
+      regularPrice: Number(b.regularPrice),
+      vipPrice: Number(b.vipPrice),
+      isHomeAvailable: b.isHomeAvailable,
+      homePrice: b.isHomeAvailable ? Number(b.homePrice) : null,
+      isActive: b.isActive,
+    })),
   };
 }

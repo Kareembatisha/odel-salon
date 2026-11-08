@@ -10,9 +10,7 @@ import {
 } from "../model/branch.model";
 import { InjectionToken } from "@angular/core";
 
-export const BRANCH_REPOSITORY = new InjectionToken<IBranchRepository>(
-  "BRANCH_REPOSITORY",
-);
+export const BRANCH_REPOSITORY = new InjectionToken<IBranchRepository>("BRANCH_REPOSITORY");
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IBranchRepository {
@@ -26,10 +24,7 @@ export interface IBranchRepository {
   createBranch(payload: BranchPayload): Observable<ApiResponse<number>>;
 
   /** PUT /branches/{id} */
-  updateBranch(
-    id: number,
-    payload: BranchPayload,
-  ): Observable<ApiResponse<null>>;
+  updateBranch(id: number, payload: BranchPayload): Observable<ApiResponse<null>>;
 
   /** PATCH /branches/{id}/toggle-status — flips `isVisible` (no body). */
   toggleBranchStatus(id: number): Observable<ApiResponse<null>>;

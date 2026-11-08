@@ -8,18 +8,16 @@ import { ServiceListItem, ServiceOption } from "../model/service.model";
 export function toServiceOptions(rows: readonly ServiceListItem[]): ServiceOption[] {
   return rows
     .filter((row) => row.pricing.isActive)
-    .map(
-      (row): ServiceOption => ({
-        id: row.id,
-        nameAr: row.nameAr,
-        nameEn: row.nameEn,
-        durationMinutes: row.pricing.durationMinutes ?? 0,
-        regularPrice: row.pricing.regularPrice ?? 0,
-        vipPrice: row.pricing.vipPrice ?? 0,
-        isHomeAvailable: row.pricing.isHomeAvailable,
-        homePrice: row.pricing.isHomeAvailable ? row.pricing.homePrice : null,
-      }),
-    )
+    .map((row): ServiceOption => ({
+      id: row.id,
+      nameAr: row.nameAr,
+      nameEn: row.nameEn,
+      durationMinutes: row.pricing.durationMinutes ?? 0,
+      regularPrice: row.pricing.regularPrice ?? 0,
+      vipPrice: row.pricing.vipPrice ?? 0,
+      isHomeAvailable: row.pricing.isHomeAvailable,
+      homePrice: row.pricing.isHomeAvailable ? row.pricing.homePrice : null,
+    }))
     .sort((a, b) => a.id - b.id);
 }
 

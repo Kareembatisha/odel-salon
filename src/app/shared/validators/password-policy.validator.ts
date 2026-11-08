@@ -60,9 +60,7 @@ export function passwordPolicyValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value: string = control.value ?? "";
     if (!value) return null; // `Validators.required` owns the empty case.
-    return PASSWORD_POLICY_RULES.every((rule) => rule.test(value))
-      ? null
-      : { weak: true };
+    return PASSWORD_POLICY_RULES.every((rule) => rule.test(value)) ? null : { weak: true };
   };
 }
 

@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { AppButtonComponent } from '../app-button/app-button.component';
+import { AppButtonComponent } from "../app-button/app-button.component";
 
 /**
  * Shared "failed to load" block. Drop it in wherever a service's `hasError()`
  * is true; the retry button emits `retry`.
  */
 @Component({
-  selector: 'app-failed-state',
+  selector: "app-failed-state",
   standalone: true,
   imports: [TranslateModule, AppButtonComponent],
   template: `
@@ -23,12 +23,12 @@ import { AppButtonComponent } from '../app-button/app-button.component';
       }
     </div>
   `,
-  styleUrl: './failed-state.component.scss',
+  styleUrl: "./failed-state.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FailedStateComponent {
-  titleKey = input<string>('COMMON.FAILED_STATE.TITLE');
-  subtitleKey = input<string>('COMMON.FAILED_STATE.SUBTITLE');
+  titleKey = input<string>("COMMON.FAILED_STATE.TITLE");
+  subtitleKey = input<string>("COMMON.FAILED_STATE.SUBTITLE");
   showRetry = input<boolean>(true);
   compact = input<boolean>(false);
   retry = output<void>();

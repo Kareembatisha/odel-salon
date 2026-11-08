@@ -64,7 +64,10 @@
   background: transparent;
   color: v.$text-secondary;
   cursor: pointer;
-  transition: background v.$transition-normal, color v.$transition-normal, border-color v.$transition-normal;
+  transition:
+    background v.$transition-normal,
+    color v.$transition-normal,
+    border-color v.$transition-normal;
 
   &:hover {
     background: v.$surface-hover;

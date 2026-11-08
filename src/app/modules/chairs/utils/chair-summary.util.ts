@@ -15,9 +15,7 @@ export const EMPTY_CHAIRS_SUMMARY: ChairsSummary = {
  * validated: anything missing or not a finite number becomes 0 instead of rendering
  * `undefined` / `NaN` in a stat card.
  */
-export function readChairsSummary(
-  meta: PaginationMeta | null | undefined,
-): ChairsSummary {
+export function readChairsSummary(meta: PaginationMeta | null | undefined): ChairsSummary {
   const data = meta?.additionalData;
   if (!data) return { ...EMPTY_CHAIRS_SUMMARY };
 

@@ -19,7 +19,6 @@ import { ALL_PERMISSIONS, Permission } from "@core/auth/permissions";
 import { MOCK_MANAGER_PERMISSIONS } from "@core/mock/mock-db";
 import { IAuthRepository } from "./auth.repository";
 
-
 /**
  * Two demo identities so permission-driven UI (sidebar filtering, route
  * guards, no-access page) can be exercised without a backend:
@@ -36,7 +35,7 @@ let MOCK_EMAIL = "admin@odel.com";
 function persistedEmail(): string {
   try {
     const raw = localStorage.getItem("odl_user");
-    return raw ? (JSON.parse(raw) as { email?: string }).email ?? MOCK_EMAIL : MOCK_EMAIL;
+    return raw ? ((JSON.parse(raw) as { email?: string }).email ?? MOCK_EMAIL) : MOCK_EMAIL;
   } catch {
     return MOCK_EMAIL;
   }
@@ -85,7 +84,9 @@ export class AuthMockRepository implements IAuthRepository {
       data: {
         user: {
           id: 1,
-          fullName: payload.email.toLowerCase().startsWith("manager") ? "Layla Hassan" : "Omar Khaled",
+          fullName: payload.email.toLowerCase().startsWith("manager")
+            ? "Layla Hassan"
+            : "Omar Khaled",
           email: payload.email,
           imageUrl: null,
         },
@@ -110,9 +111,7 @@ export class AuthMockRepository implements IAuthRepository {
     }).pipe(delay(MOCK_DELAY_MS));
   }
 
-  refreshToken(
-    _payload: RefreshTokenRequest,
-  ): Observable<ApiResponse<RefreshTokenResponseData>> {
+  refreshToken(_payload: RefreshTokenRequest): Observable<ApiResponse<RefreshTokenResponseData>> {
     return of<ApiResponse<RefreshTokenResponseData>>({
       status: true,
       statusCode: 200,
@@ -176,8 +175,7 @@ export class AuthMockRepository implements IAuthRepository {
       meta: null,
       data: {
         email: payload.email,
-        token:
-          "e7a36439cc1a410b5656b33d991b2657d3b400aed9ef07ddb87eec28103e1df2",
+        token: "e7a36439cc1a410b5656b33d991b2657d3b400aed9ef07ddb87eec28103e1df2",
       },
     }).pipe(delay(MOCK_DELAY_MS));
   }

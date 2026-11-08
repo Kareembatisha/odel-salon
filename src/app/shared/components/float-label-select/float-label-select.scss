@@ -1,6 +1,9 @@
 @use "styles/variables" as v;
 
-:host { display: block; width: 100%; }
+:host {
+  display: block;
+  width: 100%;
+}
 
 .fls {
   position: relative;
@@ -8,12 +11,24 @@
   background: v.$surface;
   border: 1px solid v.$border-strong;
   border-radius: v.$radius-md;
-  transition: border-color v.$transition-normal, box-shadow v.$transition-normal;
+  transition:
+    border-color v.$transition-normal,
+    box-shadow v.$transition-normal;
 
-  &:hover { border-color: v.$text-muted; }
-  &--focused { border-color: v.$primary; box-shadow: 0 0 0 3px v.tint(v.$primary, 24%); }
-  &--error { border-color: v.$danger; }
-  &--disabled { background: v.$surface-sunken; opacity: 0.7; }
+  &:hover {
+    border-color: v.$text-muted;
+  }
+  &--focused {
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 24%);
+  }
+  &--error {
+    border-color: v.$danger;
+  }
+  &--disabled {
+    background: v.$surface-sunken;
+    opacity: 0.7;
+  }
 
   // The label is always lifted: a select always shows a value.
   &__label {
@@ -25,7 +40,9 @@
     font-weight: v.$fw-semibold;
     pointer-events: none;
   }
-  &--focused &__label { color: v.$primary-text; }
+  &--focused &__label {
+    color: v.$primary-text;
+  }
 
   &__select {
     width: 100%;
@@ -41,9 +58,14 @@
     font-weight: v.$fw-medium;
     cursor: pointer;
     border-radius: v.$radius-md;
-    option { background: v.$surface-raised; color: v.$text; }
+    option {
+      background: v.$surface-raised;
+      color: v.$text;
+    }
   }
-  :host-context([dir="rtl"]) &__select { padding: 20px v.$space-4 4px 36px; }
+  :host-context([dir="rtl"]) &__select {
+    padding: 20px v.$space-4 4px 36px;
+  }
 
   &__chevron {
     position: absolute;
@@ -55,5 +77,11 @@
     pointer-events: none;
   }
 
-  &__message { display: block; margin-top: v.$space-1; padding-inline: v.$space-1; color: v.$danger-text; font-size: v.$text-sm; }
+  &__message {
+    display: block;
+    margin-top: v.$space-1;
+    padding-inline: v.$space-1;
+    color: v.$danger-text;
+    font-size: v.$text-sm;
+  }
 }

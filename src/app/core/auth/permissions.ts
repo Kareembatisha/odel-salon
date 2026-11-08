@@ -8,21 +8,21 @@
  * routes and nav config — never a raw string.
  */
 const SPEC = {
-  Booking: ['View', 'Cancel'],
-  Session: ['View', 'Manage'],
-  Availability: ['View'],
-  Branch: ['View', 'Create', 'Edit', 'Delete'],
-  Service: ['View', 'Create', 'Edit', 'Delete'],
-  Package: ['View', 'Create', 'Edit', 'Delete'],
-  Barber: ['View', 'Create', 'Edit', 'Delete'],
-  Chair: ['View', 'Create', 'Edit', 'ToggleStatus', 'Delete'],
-  Offer: ['View', 'Create', 'Edit', 'Delete'],
-  Points: ['View', 'Manage'],
-  Review: ['View', 'Moderate'],
-  Report: ['View', 'Export'],
-  Settings: ['View', 'Manage'],
-  User: ['View', 'Create', 'Edit', 'Delete'],
-  Role: ['View', 'Create', 'Edit', 'Delete'],
+  Booking: ["View", "Cancel"],
+  Session: ["View", "Manage"],
+  Availability: ["View"],
+  Branch: ["View", "Create", "Edit", "Delete"],
+  Service: ["View", "Create", "Edit", "Delete"],
+  Package: ["View", "Create", "Edit", "Delete"],
+  Barber: ["View", "Create", "Edit", "Delete"],
+  Chair: ["View", "Create", "Edit", "ToggleStatus", "Delete"],
+  Offer: ["View", "Create", "Edit", "Delete"],
+  Points: ["View", "Manage"],
+  Review: ["View", "Moderate"],
+  Report: ["View", "Export"],
+  Settings: ["View", "Manage"],
+  User: ["View", "Create", "Edit", "Delete"],
+  Role: ["View", "Create", "Edit", "Delete"],
 } as const;
 
 type Spec = typeof SPEC;
@@ -42,8 +42,8 @@ export const PERMISSIONS = Object.fromEntries(
   ]),
 ) as unknown as PermissionMap;
 
-export const ALL_PERMISSIONS: Permission[] = (Object.keys(SPEC) as (keyof Spec)[]).flatMap((resource) =>
-  SPEC[resource].map((action) => `${resource}.${action}` as Permission),
+export const ALL_PERMISSIONS: Permission[] = (Object.keys(SPEC) as (keyof Spec)[]).flatMap(
+  (resource) => SPEC[resource].map((action) => `${resource}.${action}` as Permission),
 );
 
 /** Catalog as `[{ module, actions }]` — used by mock data and to label permission matrices. */

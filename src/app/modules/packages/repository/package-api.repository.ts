@@ -29,9 +29,7 @@ export class PackageApiRepository implements IPackageRepository {
   private readonly url = `${environment.apiUrl}/packages`;
 
   /** Packages of one branch; `meta.additionalData` holds the summary counts. */
-  getPackages(
-    query: PackagesQuery,
-  ): Observable<ApiResponse<PackageListItem[]>> {
+  getPackages(query: PackagesQuery): Observable<ApiResponse<PackageListItem[]>> {
     return this.http.get<ApiResponse<PackageListItem[]>>(this.url, {
       params: buildPackagesParams(query),
     });
@@ -48,10 +46,7 @@ export class PackageApiRepository implements IPackageRepository {
   }
 
   /** Same rules as create; `branchId` is not part of the body — a package can't move branches. */
-  updatePackage(
-    id: number,
-    payload: UpdatePackagePayload,
-  ): Observable<ApiResponse<null>> {
+  updatePackage(id: number, payload: UpdatePackagePayload): Observable<ApiResponse<null>> {
     return this.http.put<ApiResponse<null>>(`${this.url}/${id}`, payload);
   }
 
@@ -60,19 +55,14 @@ export class PackageApiRepository implements IPackageRepository {
    * active in the branch (`serviceIds`) or the home price no longer fits (`homePrice`).
    */
   togglePackageStatus(id: number): Observable<ApiResponse<null>> {
-    return this.http.patch<ApiResponse<null>>(
-      `${this.url}/${id}/toggle-status`,
-      null,
-    );
+    return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/toggle-status`, null);
   }
 
   /**
    * Permanently delete one or more packages (all-or-nothing). `HttpClient.delete`
    * has no body argument, so the JSON goes through `options.body`.
    */
-  deletePackages(
-    payload: DeletePackagesRequest,
-  ): Observable<ApiResponse<null>> {
+  deletePackages(payload: DeletePackagesRequest): Observable<ApiResponse<null>> {
     return this.http.delete<ApiResponse<null>>(this.url, { body: payload });
   }
 }

@@ -13,9 +13,7 @@ export const EMPTY_PACKAGES_SUMMARY: PackagesSummary = {
  * `additionalData` is typed loosely, so every field is validated: anything missing or
  * not a finite number becomes 0 instead of rendering `undefined` / `NaN` in a card.
  */
-export function readPackagesSummary(
-  meta: PaginationMeta | null | undefined,
-): PackagesSummary {
+export function readPackagesSummary(meta: PaginationMeta | null | undefined): PackagesSummary {
   const data = meta?.additionalData;
   if (!data) return { ...EMPTY_PACKAGES_SUMMARY };
 

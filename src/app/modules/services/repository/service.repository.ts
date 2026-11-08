@@ -13,9 +13,7 @@ import {
   SetServiceStatusRequest,
 } from "../model/service.model";
 
-export const SERVICE_REPOSITORY = new InjectionToken<IServiceRepository>(
-  "SERVICE_REPOSITORY",
-);
+export const SERVICE_REPOSITORY = new InjectionToken<IServiceRepository>("SERVICE_REPOSITORY");
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IServiceRepository {
@@ -32,19 +30,13 @@ export interface IServiceRepository {
   createService(payload: ServicePayload): Observable<ApiResponse<number>>;
 
   /** PUT /services/{id} — same body and rules as create. */
-  updateService(
-    id: number,
-    payload: ServicePayload,
-  ): Observable<ApiResponse<null>>;
+  updateService(id: number, payload: ServicePayload): Observable<ApiResponse<null>>;
 
   /** DELETE /services — bulk, all-or-nothing, body `{ ids }`. */
   deleteServices(payload: DeleteServicesRequest): Observable<ApiResponse<null>>;
 
   /** PATCH /services/{id}/branches/status — activate / deactivate ONE service in several branches. */
-  setStatusInBranches(
-    id: number,
-    payload: SetServiceStatusRequest,
-  ): Observable<ApiResponse<null>>;
+  setStatusInBranches(id: number, payload: SetServiceStatusRequest): Observable<ApiResponse<null>>;
 
   /** POST /services/copy-prices — copy every price of one branch onto another. */
   copyPrices(payload: CopyPricesRequest): Observable<ApiResponse<null>>;

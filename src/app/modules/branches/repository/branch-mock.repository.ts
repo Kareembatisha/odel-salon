@@ -190,10 +190,7 @@ export class BranchMockRepository implements IBranchRepository {
    * leaves it untouched. Responds with a `404` payload when the id
    * does not exist.
    */
-  updateBranch(
-    id: number,
-    payload: BranchPayload,
-  ): Observable<ApiResponse<null>> {
+  updateBranch(id: number, payload: BranchPayload): Observable<ApiResponse<null>> {
     const branch = this.db.branches.find((b) => b.id === id);
 
     if (!branch) {
@@ -288,9 +285,16 @@ export class BranchMockRepository implements IBranchRepository {
       const chairs = branch.regularChairsCount + branch.vipChairsCount;
       if (chairs > 0 || branch.barbersCount > 0) {
         const name = this.language.currentLang() === "ar" ? branch.nameAr : branch.nameEn;
-        const message = chairs > 0
-          ? this.translate.instant("BRANCHES.ERRORS.DELETE_BLOCKED_CHAIRS", { name, count: chairs })
-          : this.translate.instant("BRANCHES.ERRORS.DELETE_BLOCKED_BARBERS", { name, count: branch.barbersCount });
+        const message =
+          chairs > 0
+            ? this.translate.instant("BRANCHES.ERRORS.DELETE_BLOCKED_CHAIRS", {
+                name,
+                count: chairs,
+              })
+            : this.translate.instant("BRANCHES.ERRORS.DELETE_BLOCKED_BARBERS", {
+                name,
+                count: branch.barbersCount,
+              });
 
         return this.fail(message, 409);
       }
@@ -315,8 +319,8 @@ export class BranchMockRepository implements IBranchRepository {
   /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
   private fail(message: string, statusCode: number): Observable<never> {
     this.notify.warning(message);
-    return throwError(
-      () => Object.assign(new Error(message), { status: statusCode }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error(message), { status: statusCode })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 }

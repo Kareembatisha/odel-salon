@@ -1,7 +1,7 @@
-import { Directive, TemplateRef, ViewContainerRef, effect, inject, input } from '@angular/core';
+import { Directive, TemplateRef, ViewContainerRef, effect, inject, input } from "@angular/core";
 
-import { Permission } from '../../core/auth/permissions';
-import { AuthService } from '../../modules/auth/service/auth.service';
+import { Permission } from "@core/auth/permissions";
+import { AuthService } from "../../modules/auth/service/auth.service";
 
 /**
  * Renders its element only when the signed-in user holds the permission.
@@ -10,7 +10,7 @@ import { AuthService } from '../../modules/auth/service/auth.service';
  *
  * UI convenience only — the backend (and the route guard) remain the real boundary.
  */
-@Directive({ selector: '[appCan]', standalone: true })
+@Directive({ selector: "[appCan]", standalone: true })
 export class HasPermissionDirective {
   private readonly auth = inject(AuthService);
   private readonly template = inject(TemplateRef<unknown>);

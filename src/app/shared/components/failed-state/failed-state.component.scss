@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: block; }
+:host {
+  display: block;
+}
 
 .failed {
   display: flex;
@@ -10,7 +12,9 @@
   padding: v.$space-16 v.$space-6;
   text-align: center;
 
-  &--compact { padding: v.$space-8 v.$space-4; }
+  &--compact {
+    padding: v.$space-8 v.$space-4;
+  }
 
   &__icon {
     display: inline-flex;
@@ -24,6 +28,13 @@
     color: v.$danger-text;
     font-size: v.$text-2xl;
   }
-  &__title { font-size: v.$text-xl; font-weight: v.$fw-semibold; }
-  &__text { max-width: 44ch; margin-bottom: v.$space-3; color: v.$text-secondary; }
+  &__title {
+    font-size: v.$text-xl;
+    font-weight: v.$fw-semibold;
+  }
+  &__text {
+    max-width: 44ch;
+    margin-bottom: v.$space-3;
+    color: v.$text-secondary;
+  }
 }

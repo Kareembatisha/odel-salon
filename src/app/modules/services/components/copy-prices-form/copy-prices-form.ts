@@ -14,11 +14,11 @@ import { TranslateModule } from "@ngx-translate/core";
 import { startWith } from "rxjs";
 
 import { LanguageService } from "@core/services/language.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
 import {
   FloatLabelSelect,
   SelectOption,
-} from "../../../../shared/components/float-label-select/float-label-select";
+} from "@shared/components/float-label-select/float-label-select";
 import { ServiceBranchOption, ServicesService } from "../../service/services.service";
 import { localizedName } from "../../utils/service-labels.util";
 
@@ -60,13 +60,19 @@ export class CopyPricesForm implements OnInit {
     targetBranchId: ["", [Validators.required]],
   });
 
-  private readonly value = toSignal(this.form.valueChanges.pipe(startWith(this.form.getRawValue())), {
-    initialValue: this.form.getRawValue(),
-  });
+  private readonly value = toSignal(
+    this.form.valueChanges.pipe(startWith(this.form.getRawValue())),
+    {
+      initialValue: this.form.getRawValue(),
+    },
+  );
 
   private options(): SelectOption[] {
     const lang = this.language.currentLang();
-    return this.branches().map((b) => ({ value: String(b.id), label: localizedName(b.nameAr, b.nameEn, lang) }));
+    return this.branches().map((b) => ({
+      value: String(b.id),
+      label: localizedName(b.nameAr, b.nameEn, lang),
+    }));
   }
 
   protected readonly sourceOptions = computed(() => this.options());
@@ -84,7 +90,11 @@ export class CopyPricesForm implements OnInit {
   });
 
   protected readonly canSubmit = computed(
-    () => !!this.value().sourceBranchId && !!this.value().targetBranchId && !this.sameBranch() && (this.sourceCount() ?? 0) > 0,
+    () =>
+      !!this.value().sourceBranchId &&
+      !!this.value().targetBranchId &&
+      !this.sameBranch() &&
+      (this.sourceCount() ?? 0) > 0,
   );
 
   ngOnInit(): void {
@@ -97,7 +107,9 @@ export class CopyPricesForm implements OnInit {
     });
 
     this.countSource(source);
-    this.form.controls.sourceBranchId.valueChanges.subscribe((id) => this.countSource(id ? Number(id) : null));
+    this.form.controls.sourceBranchId.valueChanges.subscribe((id) =>
+      this.countSource(id ? Number(id) : null),
+    );
   }
 
   private countSource(branchId: number | null): void {
@@ -105,7 +117,8 @@ export class CopyPricesForm implements OnInit {
     if (branchId === null) return;
 
     this.servicesService.loadBranchServices(branchId).subscribe((rows) => {
-      if (Number(this.form.controls.sourceBranchId.value) === branchId) this.sourceCount.set(rows.length);
+      if (Number(this.form.controls.sourceBranchId.value) === branchId)
+        this.sourceCount.set(rows.length);
     });
   }
 
@@ -118,7 +131,10 @@ export class CopyPricesForm implements OnInit {
 
     const v = this.form.getRawValue();
     this.servicesService
-      .copyPrices({ sourceBranchId: Number(v.sourceBranchId), targetBranchId: Number(v.targetBranchId) })
+      .copyPrices({
+        sourceBranchId: Number(v.sourceBranchId),
+        targetBranchId: Number(v.targetBranchId),
+      })
       .subscribe((ok) => {
         if (ok) this.done.emit();
       });

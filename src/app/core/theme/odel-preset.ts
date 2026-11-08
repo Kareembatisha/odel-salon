@@ -1,5 +1,5 @@
-import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
+import { definePreset } from "@primeuix/themes";
+import Aura from "@primeuix/themes/aura";
 
 /**
  * PrimeNG preset — maps PrimeNG's token system onto the Odel design system.
@@ -14,48 +14,51 @@ const primaryScale = Object.fromEntries(
 );
 
 const surfaceScale = Object.fromEntries(
-  [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((s) => [s, `var(--odl-neutral-${s})`]),
+  [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((s) => [
+    s,
+    `var(--odl-neutral-${s})`,
+  ]),
 );
 
 export const OdelPreset = definePreset(Aura, {
   semantic: {
     primary: primaryScale,
     focusRing: {
-      width: '2px',
-      style: 'solid',
-      color: 'var(--odl-focus-ring)',
-      offset: '2px',
-      shadow: 'none',
+      width: "2px",
+      style: "solid",
+      color: "var(--odl-focus-ring)",
+      offset: "2px",
+      shadow: "none",
     },
     colorScheme: {
       light: {
         surface: surfaceScale,
         primary: {
-          color: '{primary.500}',
-          contrastColor: 'var(--odl-on-primary)',
-          hoverColor: '{primary.400}',
-          activeColor: '{primary.600}',
+          color: "{primary.500}",
+          contrastColor: "var(--odl-on-primary)",
+          hoverColor: "{primary.400}",
+          activeColor: "{primary.600}",
         },
         highlight: {
-          background: '{primary.50}',
-          focusBackground: '{primary.100}',
-          color: '{primary.800}',
-          focusColor: '{primary.900}',
+          background: "{primary.50}",
+          focusBackground: "{primary.100}",
+          color: "{primary.800}",
+          focusColor: "{primary.900}",
         },
       },
       dark: {
         surface: surfaceScale,
         primary: {
-          color: '{primary.400}',
-          contrastColor: 'var(--odl-on-primary)',
-          hoverColor: '{primary.300}',
-          activeColor: '{primary.500}',
+          color: "{primary.400}",
+          contrastColor: "var(--odl-on-primary)",
+          hoverColor: "{primary.300}",
+          activeColor: "{primary.500}",
         },
         highlight: {
-          background: 'rgba(209, 170, 85, 0.16)',
-          focusBackground: 'rgba(209, 170, 85, 0.24)',
-          color: '{primary.200}',
-          focusColor: '{primary.100}',
+          background: "rgba(209, 170, 85, 0.16)",
+          focusBackground: "rgba(209, 170, 85, 0.24)",
+          color: "{primary.200}",
+          focusColor: "{primary.100}",
         },
       },
     },

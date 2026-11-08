@@ -14,14 +14,16 @@ $brand-name: "Odel Salon";
 
 // Primary / accent — champagne gold
 $primary: (
-  50:  #fbf6e8,
+  50: #fbf6e8,
   100: #f5ebc9,
   200: #ecd89c,
   300: #dfc072,
   400: #d1aa55,
-  500: #c29c45,   // fills (buttons, active indicators) — pair with ink text
+  500: #c29c45,
+  // fills (buttons, active indicators) — pair with ink text
   600: #a3802f,
-  700: #7f6122,   // gold text on light surfaces (AA on white)
+  700: #7f6122,
+  // gold text on light surfaces (AA on white)
   800: #5c4619,
   900: #3d2e11,
   950: #261c0a,
@@ -29,9 +31,9 @@ $primary: (
 
 // Neutral — warm charcoal (never pure grey, never pure black)
 $neutral: (
-  0:   #ffffff,
-  25:  #fcfbf9,
-  50:  #f7f5f1,
+  0: #ffffff,
+  25: #fcfbf9,
+  50: #f7f5f1,
   100: #eeebe5,
   200: #e0dcd3,
   300: #c8c3b8,
@@ -46,4 +48,4 @@ $neutral: (
 
 // Brand display face (wordmark + page titles). Latin only — Arabic
 // falls back to the Arabic UI face so glyph weight stays consistent.
-$font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+$font-display: "Cormorant Garamond", "Times New Roman", serif;

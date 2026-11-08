@@ -60,8 +60,13 @@
     overflow-wrap: anywhere;
     cursor: pointer;
 
-    &:hover { text-decoration: underline; }
-    &:focus-visible { @include p.focus-ring; border-radius: v.$radius-xs; }
+    &:hover {
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      @include p.focus-ring;
+      border-radius: v.$radius-xs;
+    }
   }
 
   &__alt {
@@ -166,7 +171,10 @@
     min-width: 0;
     cursor: pointer;
 
-    &--disabled { cursor: progress; opacity: 0.6; }
+    &--disabled {
+      cursor: progress;
+      opacity: 0.6;
+    }
   }
 
   &__visibility-text {

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { applyPercentage, exceedsMaxPrice, isValidDuration, isValidPercentage, isValidPrice } from "./service-price.util";
+import {
+  applyPercentage,
+  exceedsMaxPrice,
+  isValidDuration,
+  isValidPercentage,
+  isValidPrice,
+} from "./service-price.util";
 
 describe("service price utils", () => {
   it("rounds to the nearest pound and never goes below 1", () => {

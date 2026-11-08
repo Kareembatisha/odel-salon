@@ -11,9 +11,7 @@ import {
   UpdatePackagePayload,
 } from "../model/package.model";
 
-export const PACKAGE_REPOSITORY = new InjectionToken<IPackageRepository>(
-  "PACKAGE_REPOSITORY",
-);
+export const PACKAGE_REPOSITORY = new InjectionToken<IPackageRepository>("PACKAGE_REPOSITORY");
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IPackageRepository {
@@ -30,10 +28,7 @@ export interface IPackageRepository {
   createPackage(payload: CreatePackagePayload): Observable<ApiResponse<number>>;
 
   /** PUT /packages/{id} — same rules as create, the branch can't change. */
-  updatePackage(
-    id: number,
-    payload: UpdatePackagePayload,
-  ): Observable<ApiResponse<null>>;
+  updatePackage(id: number, payload: UpdatePackagePayload): Observable<ApiResponse<null>>;
 
   /** PATCH /packages/{id}/toggle-status — flips `isActive` (no body). */
   togglePackageStatus(id: number): Observable<ApiResponse<null>>;

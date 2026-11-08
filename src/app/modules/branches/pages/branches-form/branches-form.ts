@@ -1,22 +1,16 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from "@angular/core";
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { TranslateModule } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
 import { BreadcrumbService } from "../../../../layout/main-layout/components/header/breadcrumb.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
-import { FloatLabelInput } from "../../../../shared/components/float-label-input/float-label-input";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
-import { SwitchComponent } from "../../../../shared/components/switch/switch.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
+import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
 import { BranchDetails } from "../../model/branch.model";
 import { dayKey } from "../../utils/branch-hours.util";
 import { BranchesService } from "../../service/branches.service";
@@ -239,9 +233,7 @@ export class BranchesForm {
 
   protected cancel(): void {
     this.router.navigate(
-      this.isEditMode() && this.branchId !== null
-        ? [LIST_ROUTE, this.branchId]
-        : [LIST_ROUTE],
+      this.isEditMode() && this.branchId !== null ? [LIST_ROUTE, this.branchId] : [LIST_ROUTE],
     );
   }
 }

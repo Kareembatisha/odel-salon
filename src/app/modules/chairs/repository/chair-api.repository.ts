@@ -46,10 +46,7 @@ export class ChairApiRepository implements IChairRepository {
   }
 
   /** Rename / change type. `branchId` is not part of the body — a chair can't move branches. */
-  updateChair(
-    id: number,
-    payload: UpdateChairPayload,
-  ): Observable<ApiResponse<null>> {
+  updateChair(id: number, payload: UpdateChairPayload): Observable<ApiResponse<null>> {
     return this.http.put<ApiResponse<null>>(`${this.url}/${id}`, payload);
   }
 

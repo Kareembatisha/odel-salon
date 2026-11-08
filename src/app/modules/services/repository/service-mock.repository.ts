@@ -191,7 +191,9 @@ export class ServiceMockRepository implements IServiceRepository {
     if (problem) return this.invalid(problem);
 
     const deactivating = payload.branches
-      .filter((b) => !b.isActive && service.prices.some((p) => p.branchId === b.branchId && p.isActive))
+      .filter(
+        (b) => !b.isActive && service.prices.some((p) => p.branchId === b.branchId && p.isActive),
+      )
       .map((b) => b.branchId);
     const blocked = this.emptiedBranch(deactivating, (s, active) => (s.id === id ? false : active));
     if (blocked) return this.lastActive(service, blocked);
@@ -224,7 +226,9 @@ export class ServiceMockRepository implements IServiceRepository {
 
     for (const service of services) {
       const branchIds = service.prices.filter((p) => p.isActive).map((p) => p.branchId);
-      const blocked = this.emptiedBranch(branchIds, (s, active) => (payload.ids.includes(s.id) ? false : active));
+      const blocked = this.emptiedBranch(branchIds, (s, active) =>
+        payload.ids.includes(s.id) ? false : active,
+      );
       if (blocked) return this.lastActive(service, blocked);
     }
 
@@ -236,10 +240,7 @@ export class ServiceMockRepository implements IServiceRepository {
    * Set (not toggle) `isActive` of ONE service in several branches, all-or-nothing.
    * 400 when a branch id is missing / duplicated or the service has no price there.
    */
-  setStatusInBranches(
-    id: number,
-    payload: SetServiceStatusRequest,
-  ): Observable<ApiResponse<null>> {
+  setStatusInBranches(id: number, payload: SetServiceStatusRequest): Observable<ApiResponse<null>> {
     const service = this.find(id);
     if (!service) return this.notFound();
 
@@ -302,7 +303,9 @@ export class ServiceMockRepository implements IServiceRepository {
       });
       if (!stillActive) {
         return this.fail(
-          this.translate.instant("SERVICES.ERRORS.COPY_EMPTIES_BRANCH", { branch: this.branchName(target) }),
+          this.translate.instant("SERVICES.ERRORS.COPY_EMPTIES_BRANCH", {
+            branch: this.branchName(target),
+          }),
           409,
         );
       }
@@ -333,7 +336,9 @@ export class ServiceMockRepository implements IServiceRepository {
       return this.invalid({ field: "BranchId", key: "SERVICES.ERRORS.BRANCH_NOT_FOUND" });
     }
 
-    const priced = this.db.services.filter((s) => s.prices.some((p) => p.branchId === payload.branchId));
+    const priced = this.db.services.filter((s) =>
+      s.prices.some((p) => p.branchId === payload.branchId),
+    );
     const targets = payload.serviceIds.length
       ? payload.serviceIds.map((id) => priced.find((s) => s.id === id))
       : priced;
@@ -343,8 +348,8 @@ export class ServiceMockRepository implements IServiceRepository {
       return this.invalid({ field: "BranchId", key: "SERVICES.ERRORS.BRANCH_EMPTY" });
     }
 
-    const rows = (targets as MockService[]).map(
-      (s) => s.prices.find((p) => p.branchId === payload.branchId)!,
+    const rows = (targets as MockService[]).map((s) =>
+      s.prices.find((p) => p.branchId === payload.branchId)!,
     );
     const tooHigh = rows.some((r) =>
       [r.regularPrice, r.vipPrice, r.homePrice].some(
@@ -360,7 +365,8 @@ export class ServiceMockRepository implements IServiceRepository {
       const row = rows[i];
       row.regularPrice = applyPercentage(row.regularPrice, payload.percentage);
       row.vipPrice = applyPercentage(row.vipPrice, payload.percentage);
-      if (row.homePrice !== null) row.homePrice = applyPercentage(row.homePrice, payload.percentage);
+      if (row.homePrice !== null)
+        row.homePrice = applyPercentage(row.homePrice, payload.percentage);
       service.updatedAt = now;
     });
 
@@ -400,7 +406,8 @@ export class ServiceMockRepository implements IServiceRepository {
     ];
     for (const [field, value, prop] of names) {
       if (!value) return { field, key: "SERVICES.ERRORS.NAME_REQUIRED" };
-      if (value.length > SERVICE_NAME_MAX_LENGTH) return { field, key: "SERVICES.ERRORS.NAME_TOO_LONG" };
+      if (value.length > SERVICE_NAME_MAX_LENGTH)
+        return { field, key: "SERVICES.ERRORS.NAME_TOO_LONG" };
       const taken = this.db.services.some(
         (s) => s.id !== ignoreId && s[prop].toLowerCase() === value.toLowerCase(),
       );
@@ -415,9 +422,12 @@ export class ServiceMockRepository implements IServiceRepository {
     if (!everyBranchOnce) return { field: "Branches", key: "SERVICES.ERRORS.BRANCHES_INVALID" };
 
     for (const row of payload.branches) {
-      if (!isValidDuration(row.durationMinutes)) return { field: "DurationMinutes", key: "SERVICES.ERRORS.DURATION_INVALID" };
-      if (!isValidPrice(row.regularPrice)) return { field: "RegularPrice", key: "SERVICES.ERRORS.PRICE_INVALID" };
-      if (!isValidPrice(row.vipPrice)) return { field: "VipPrice", key: "SERVICES.ERRORS.PRICE_INVALID" };
+      if (!isValidDuration(row.durationMinutes))
+        return { field: "DurationMinutes", key: "SERVICES.ERRORS.DURATION_INVALID" };
+      if (!isValidPrice(row.regularPrice))
+        return { field: "RegularPrice", key: "SERVICES.ERRORS.PRICE_INVALID" };
+      if (!isValidPrice(row.vipPrice))
+        return { field: "VipPrice", key: "SERVICES.ERRORS.PRICE_INVALID" };
       if (row.isHomeAvailable && !isValidPrice(row.homePrice)) {
         return { field: "HomePrice", key: "SERVICES.ERRORS.HOME_PRICE_REQUIRED" };
       }
@@ -515,16 +525,16 @@ export class ServiceMockRepository implements IServiceRepository {
   /** 400 — same shape as the interceptor's validation toast: field label + message. */
   private invalid(problem: Problem): Observable<never> {
     this.notify.warning(`VALIDATION_FIELDS.${problem.field}`, problem.key);
-    return throwError(() =>
-      Object.assign(new Error("Validation failed"), { status: 400 }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error("Validation failed"), { status: 400 })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 
   /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
   private fail(message: string, statusCode: number): Observable<never> {
     this.notify.warning(message);
-    return throwError(() =>
-      Object.assign(new Error(message), { status: statusCode }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error(message), { status: statusCode })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 }

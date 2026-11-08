@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import { Observable } from "rxjs";
 
-import { ApiResponse } from '@shared/model/api_response.model';
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   CreateUserRequest,
   DeleteUsersRequest,
@@ -8,7 +8,7 @@ import {
   UserDetails,
   UserListItem,
   UsersQuery,
-} from '../model/user.model';
+} from "../model/user.model";
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IUserRepository {

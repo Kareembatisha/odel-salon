@@ -260,14 +260,12 @@ export class ServicesService {
       pageNumber: number,
       loaded: ServiceListItem[],
     ): Observable<ServiceListItem[]> =>
-      this.repository
-        .getServices({ branchId, pageNumber, pageSize: SERVICES_MAX_PAGE_SIZE })
-        .pipe(
-          switchMap((res) => {
-            const all = [...loaded, ...(res.data ?? [])];
-            return res.meta?.hasNextPage ? fetchPage(pageNumber + 1, all) : of(all);
-          }),
-        );
+      this.repository.getServices({ branchId, pageNumber, pageSize: SERVICES_MAX_PAGE_SIZE }).pipe(
+        switchMap((res) => {
+          const all = [...loaded, ...(res.data ?? [])];
+          return res.meta?.hasNextPage ? fetchPage(pageNumber + 1, all) : of(all);
+        }),
+      );
 
     return fetchPage(1, []).pipe(
       map((rows) => rows.filter((row) => row.pricing.isPriced)),
@@ -298,23 +296,21 @@ export class ServicesService {
         map((res) =>
           [...(res.data ?? [])]
             .sort((a, b) => a.id - b.id)
-            .map(
-              (b): ServiceBranchPricing => ({
-                branchId: b.id,
-                branchNameAr: b.nameAr,
-                branchNameEn: b.nameEn,
-                branchAllowsRegular: b.allowsRegular,
-                branchAllowsVip: b.allowsVip,
-                branchAllowsHome: b.allowsHome,
-                isPriced: false,
-                durationMinutes: null,
-                regularPrice: null,
-                vipPrice: null,
-                isHomeAvailable: false,
-                homePrice: null,
-                isActive: true,
-              }),
-            ),
+            .map((b): ServiceBranchPricing => ({
+              branchId: b.id,
+              branchNameAr: b.nameAr,
+              branchNameEn: b.nameEn,
+              branchAllowsRegular: b.allowsRegular,
+              branchAllowsVip: b.allowsVip,
+              branchAllowsHome: b.allowsHome,
+              isPriced: false,
+              durationMinutes: null,
+              regularPrice: null,
+              vipPrice: null,
+              isHomeAvailable: false,
+              homePrice: null,
+              isActive: true,
+            })),
         ),
         catchError(() => of([])),
       );
@@ -326,29 +322,23 @@ export class ServicesService {
 
   /** Create a service → its new id, or `null` on failure. */
   createService(payload: ServicePayload): Observable<number | null> {
-    return this.mutate(
-      this.repository.createService(payload),
-      "SERVICES.CREATED",
-    ).pipe(map((res) => res?.data ?? null));
+    return this.mutate(this.repository.createService(payload), "SERVICES.CREATED").pipe(
+      map((res) => res?.data ?? null),
+    );
   }
 
   /** Replace names and every branch's prices → `true` on success. */
   updateService(id: number, payload: ServicePayload): Observable<boolean> {
-    return this.mutate(
-      this.repository.updateService(id, payload),
-      "SERVICES.UPDATED",
-    ).pipe(map((res) => res !== null));
+    return this.mutate(this.repository.updateService(id, payload), "SERVICES.UPDATED").pipe(
+      map((res) => res !== null),
+    );
   }
 
   /**
    * Set (not toggle) the active state of ONE service in several branches → `true` on
    * success; reloads the table (and the summary cards).
    */
-  setStatusInBranches(
-    id: number,
-    branchIds: number[],
-    isActive: boolean,
-  ): Observable<boolean> {
+  setStatusInBranches(id: number, branchIds: number[], isActive: boolean): Observable<boolean> {
     const payload: SetServiceStatusRequest = { branchIds, isActive };
 
     return this.mutate(
@@ -366,11 +356,7 @@ export class ServicesService {
    * worked → `true`; a refusal (e.g. the last-active lock) was already explained by the error
    * interceptor, so the result is `false` and the table is reloaded to show what did change.
    */
-  setStatusForServices(
-    ids: number[],
-    branchIds: number[],
-    isActive: boolean,
-  ): Observable<boolean> {
+  setStatusForServices(ids: number[], branchIds: number[], isActive: boolean): Observable<boolean> {
     const payload: SetServiceStatusRequest = { branchIds, isActive };
     this._saving.set(true);
 
@@ -392,11 +378,7 @@ export class ServicesService {
   }
 
   /** The row's Active switch: the same endpoint with only the selected branch. */
-  setStatusInBranch(
-    id: number,
-    branchId: number,
-    isActive: boolean,
-  ): Observable<boolean> {
+  setStatusInBranch(id: number, branchId: number, isActive: boolean): Observable<boolean> {
     return this.setStatusInBranches(id, [branchId], isActive);
   }
 
@@ -404,10 +386,7 @@ export class ServicesService {
   remove(ids: number[]): Observable<boolean> {
     const payload: DeleteServicesRequest = { ids };
 
-    return this.mutate(
-      this.repository.deleteServices(payload),
-      "SERVICES.DELETED",
-    ).pipe(
+    return this.mutate(this.repository.deleteServices(payload), "SERVICES.DELETED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.reloadAfterRemoval(ids.length)),
     );
@@ -415,10 +394,7 @@ export class ServicesService {
 
   /** "Copy prices from another branch" → `true` on success; reloads when the target is the branch on screen. */
   copyPrices(payload: CopyPricesRequest): Observable<boolean> {
-    return this.mutate(
-      this.repository.copyPrices(payload),
-      "SERVICES.PRICES_COPIED",
-    ).pipe(
+    return this.mutate(this.repository.copyPrices(payload), "SERVICES.PRICES_COPIED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && payload.targetBranchId === this._branchId() && this.load()),
     );
@@ -426,10 +402,7 @@ export class ServicesService {
 
   /** "Change prices by %" → `true` on success; reloads when it changed the branch on screen. */
   adjustPrices(payload: AdjustPricesRequest): Observable<boolean> {
-    return this.mutate(
-      this.repository.adjustPrices(payload),
-      "SERVICES.PRICES_ADJUSTED",
-    ).pipe(
+    return this.mutate(this.repository.adjustPrices(payload), "SERVICES.PRICES_ADJUSTED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && payload.branchId === this._branchId() && this.load()),
     );
@@ -455,8 +428,7 @@ export class ServicesService {
 
   /** If the delete emptied the current page, step back one page first so the user isn't stranded. */
   private reloadAfterRemoval(removed: number): void {
-    const pageEmptied =
-      this._services().length <= removed && this._query().pageNumber > 1;
+    const pageEmptied = this._services().length <= removed && this._query().pageNumber > 1;
 
     if (pageEmptied) {
       this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));

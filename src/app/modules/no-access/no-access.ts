@@ -1,15 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Location } from '@angular/common';
-import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { Location } from "@angular/common";
+import { Router } from "@angular/router";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
-import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
 
 /** 403 — shown inside the admin shell when the user lacks a route's permission. */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-no-access',
+  selector: "app-no-access",
   standalone: true,
   imports: [TranslateModule, AppButtonComponent, EmptyStateComponent],
   template: `
@@ -33,6 +33,10 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 export class NoAccess {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
-  protected back(): void { this.location.back(); }
-  protected home(): void { this.router.navigateByUrl('/main'); }
+  protected back(): void {
+    this.location.back();
+  }
+  protected home(): void {
+    this.router.navigateByUrl("/main");
+  }
 }

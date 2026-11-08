@@ -1,13 +1,5 @@
 import { Injectable, computed, inject, signal } from "@angular/core";
-import {
-  Observable,
-  Subscription,
-  catchError,
-  finalize,
-  map,
-  of,
-  tap,
-} from "rxjs";
+import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
@@ -122,10 +114,7 @@ export class PackagesService {
 
   /** Options loaded, but the salon has no branches — nothing can be packaged yet. */
   readonly noBranches = computed(
-    () =>
-      !this._branchesLoading() &&
-      this.branchesLoaded &&
-      this._branches().length === 0,
+    () => !this._branchesLoading() && this.branchesLoaded && this._branches().length === 0,
   );
 
   /**
@@ -248,10 +237,7 @@ export class PackagesService {
 
   /** Create a package → its new id, or `null` on failure; reloads the list. */
   createPackage(payload: CreatePackagePayload): Observable<number | null> {
-    return this.mutate(
-      this.repository.createPackage(payload),
-      "PACKAGES.CREATED",
-    ).pipe(
+    return this.mutate(this.repository.createPackage(payload), "PACKAGES.CREATED").pipe(
       map((res) => res?.data ?? null),
       tap((id) => id !== null && this.load()),
     );
@@ -259,10 +245,7 @@ export class PackagesService {
 
   /** Update names, services and prices → `true` on success; reloads the list. */
   updatePackage(id: number, payload: UpdatePackagePayload): Observable<boolean> {
-    return this.mutate(
-      this.repository.updatePackage(id, payload),
-      "PACKAGES.UPDATED",
-    ).pipe(
+    return this.mutate(this.repository.updatePackage(id, payload), "PACKAGES.UPDATED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.load()),
     );
@@ -273,10 +256,7 @@ export class PackagesService {
    * Re-activating can be refused (a service is no longer active, or no longer home-available).
    */
   toggleStatus(id: number): Observable<boolean> {
-    return this.mutate(
-      this.repository.togglePackageStatus(id),
-      "PACKAGES.STATUS_UPDATED",
-    ).pipe(
+    return this.mutate(this.repository.togglePackageStatus(id), "PACKAGES.STATUS_UPDATED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.load()),
     );
@@ -286,10 +266,7 @@ export class PackagesService {
   remove(ids: number[]): Observable<boolean> {
     const payload: DeletePackagesRequest = { ids };
 
-    return this.mutate(
-      this.repository.deletePackages(payload),
-      "PACKAGES.DELETED",
-    ).pipe(
+    return this.mutate(this.repository.deletePackages(payload), "PACKAGES.DELETED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.reloadAfterRemoval(ids.length)),
     );
@@ -315,8 +292,7 @@ export class PackagesService {
 
   /** If the delete emptied the current page, step back one page first so the user isn't stranded. */
   private reloadAfterRemoval(removed: number): void {
-    const pageEmptied =
-      this._packages().length <= removed && this._query().pageNumber > 1;
+    const pageEmptied = this._packages().length <= removed && this._query().pageNumber > 1;
 
     if (pageEmptied) {
       this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));

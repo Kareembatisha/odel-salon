@@ -1,6 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, forwardRef, input, signal } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  forwardRef,
+  input,
+  signal,
+} from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { TranslateModule } from "@ngx-translate/core";
 
 export interface SelectOption {
   value: string;
@@ -15,10 +22,12 @@ export interface SelectOption {
  *   <app-float-label-select label="PROFILE.COUNTRY_CODE" [options]="codes" formControlName="countryCode" />
  */
 @Component({
-  selector: 'app-float-label-select',
+  selector: "app-float-label-select",
   standalone: true,
   imports: [TranslateModule],
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => FloatLabelSelect), multi: true }],
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => FloatLabelSelect), multi: true },
+  ],
   template: `
     <div class="fls" [class.fls--focused]="focused()" [class.fls--disabled]="disabled()" [class.fls--error]="errorMessage()">
       <label class="fls__label">{{ label() | translate }}</label>
@@ -40,28 +49,38 @@ export interface SelectOption {
       <span class="fls__message" role="alert">{{ errorMessage() | translate }}</span>
     }
   `,
-  styleUrl: './float-label-select.scss',
+  styleUrl: "./float-label-select.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FloatLabelSelect implements ControlValueAccessor {
   label = input.required<string>();
   options = input.required<SelectOption[]>();
-  errorMessage = input<string>('');
+  errorMessage = input<string>("");
 
-  protected readonly value = signal('');
+  protected readonly value = signal("");
   protected readonly focused = signal(false);
   protected readonly disabled = signal(false);
-  protected readonly hasValue = computed(() => this.value() !== '');
+  protected readonly hasValue = computed(() => this.value() !== "");
 
   private _change: (v: string) => void = () => {};
   private _touched: () => void = () => {};
 
-  writeValue(v: string): void { this.value.set(v ?? ''); }
-  registerOnChange(fn: (v: string) => void): void { this._change = fn; }
-  registerOnTouched(fn: () => void): void { this._touched = fn; }
-  setDisabledState(d: boolean): void { this.disabled.set(d); }
+  writeValue(v: string): void {
+    this.value.set(v ?? "");
+  }
+  registerOnChange(fn: (v: string) => void): void {
+    this._change = fn;
+  }
+  registerOnTouched(fn: () => void): void {
+    this._touched = fn;
+  }
+  setDisabledState(d: boolean): void {
+    this.disabled.set(d);
+  }
 
-  protected touched(): void { this._touched(); }
+  protected touched(): void {
+    this._touched();
+  }
   protected onChange(e: Event): void {
     const v = (e.target as HTMLSelectElement).value;
     this.value.set(v);

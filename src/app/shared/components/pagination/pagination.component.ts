@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from "@angular/core";
+import { TranslateModule } from "@ngx-translate/core";
 
 /**
  * Pagination — range text + page buttons for lists that aren't a table (e.g. card grids).
@@ -7,7 +7,7 @@ import { TranslateModule } from '@ngx-translate/core';
  * Hidden when there are no records.
  */
 @Component({
-  selector: 'app-pagination',
+  selector: "app-pagination",
   standalone: true,
   imports: [TranslateModule],
   template: `
@@ -37,7 +37,7 @@ import { TranslateModule } from '@ngx-translate/core';
       </footer>
     }
   `,
-  styleUrl: './pagination.component.scss',
+  styleUrl: "./pagination.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaginationComponent {
@@ -47,8 +47,12 @@ export class PaginationComponent {
 
   pageChange = output<number>();
 
-  protected totalPages = computed(() => Math.max(1, Math.ceil(this.totalRecords() / this.pageSize())));
-  protected rangeStart = computed(() => (this.totalRecords() === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1));
+  protected totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalRecords() / this.pageSize())),
+  );
+  protected rangeStart = computed(() =>
+    this.totalRecords() === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1,
+  );
   protected rangeEnd = computed(() => Math.min(this.page() * this.pageSize(), this.totalRecords()));
 
   protected visiblePages = computed(() => {

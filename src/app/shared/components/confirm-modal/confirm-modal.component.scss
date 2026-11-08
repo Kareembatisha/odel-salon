@@ -32,11 +32,24 @@
     height: 52px;
     border-radius: v.$radius-full;
     font-size: v.$text-xl;
-    &--danger { background: v.$danger-bg; color: v.$danger-text; }
-    &--primary { background: v.$primary-soft; color: v.$primary-text; }
+    &--danger {
+      background: v.$danger-bg;
+      color: v.$danger-text;
+    }
+    &--primary {
+      background: v.$primary-soft;
+      color: v.$primary-text;
+    }
   }
-  &__title { margin-top: v.$space-4; font-size: v.$text-xl; font-weight: v.$fw-semibold; }
-  &__message { margin-top: v.$space-2; color: v.$text-secondary; }
+  &__title {
+    margin-top: v.$space-4;
+    font-size: v.$text-xl;
+    font-weight: v.$fw-semibold;
+  }
+  &__message {
+    margin-top: v.$space-2;
+    color: v.$text-secondary;
+  }
   &__actions {
     display: flex;
     justify-content: center;
@@ -46,5 +59,14 @@
   }
 }
 
-@keyframes fade { from { opacity: 0; } }
-@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}

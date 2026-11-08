@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.angular/
+package-lock.json
+src/assets/**/*.svg
+docs/
+# HTML templates are not auto-formatted yet: reformatting changes text-node whitespace
+# (e.g. around interpolations). Revisit once browser QA (Step 05) can verify.
+src/**/*.html

@@ -10,7 +10,7 @@ import {
 import { TranslateModule } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
 import { ServiceBranchOption, ServicesService } from "../../service/services.service";
 import { localizedName } from "../../utils/service-labels.util";
 
@@ -45,13 +45,18 @@ export class BulkStatusForm {
 
   protected readonly options = computed(() => {
     const lang = this.language.currentLang();
-    return this.branches().map((b) => ({ id: b.id, label: localizedName(b.nameAr, b.nameEn, lang) }));
+    return this.branches().map((b) => ({
+      id: b.id,
+      label: localizedName(b.nameAr, b.nameEn, lang),
+    }));
   });
 
   protected readonly allChosen = computed(
     () => this.branches().length > 0 && this.chosen().length === this.branches().length,
   );
-  protected readonly canSubmit = computed(() => this.chosen().length > 0 && this.serviceIds().length > 0);
+  protected readonly canSubmit = computed(
+    () => this.chosen().length > 0 && this.serviceIds().length > 0,
+  );
 
   protected toggle(id: number): void {
     this.chosen.update((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));

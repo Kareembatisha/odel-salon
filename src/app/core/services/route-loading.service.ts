@@ -1,14 +1,14 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal } from "@angular/core";
 
 /**
  * RouteLoadingService
  * Central signal-based store for navigation loading state.
  * Wire in layout components via Router.events.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class RouteLoadingService {
   readonly isLoading = signal(false);
-  readonly progress  = signal(0);
+  readonly progress = signal(0);
 
   private _timer: ReturnType<typeof setInterval> | null = null;
 

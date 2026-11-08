@@ -14,14 +14,14 @@ import { TranslateModule } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
 import { BreadcrumbService } from "../../../../layout/main-layout/components/header/breadcrumb.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
-import { FloatLabelInput } from "../../../../shared/components/float-label-input/float-label-input";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
-import { StatusBadgeComponent } from "../../../../shared/components/status-badge/status-badge.component";
-import { SwitchComponent } from "../../../../shared/components/switch/switch.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
+import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
 import { ServiceBranchPricing, ServiceDetails } from "../../model/service.model";
 import { ServicesService } from "../../service/services.service";
 import { branchesArray, createServiceForm } from "../../utils/service-form.factory";
@@ -125,7 +125,9 @@ export class ServicesForm {
   protected readonly subtitleKey = computed(() =>
     this.isEditMode() ? "SERVICES.FORM.EDIT_SUBTITLE" : "SERVICES.FORM.CREATE_SUBTITLE",
   );
-  protected readonly noBranches = computed(() => !this.loading() && !this.failed() && this.branchInfo().length === 0);
+  protected readonly noBranches = computed(
+    () => !this.loading() && !this.failed() && this.branchInfo().length === 0,
+  );
 
   protected readonly form = createServiceForm(this.fb);
 
@@ -205,7 +207,11 @@ export class ServicesForm {
   protected uses(index: number, kind: "Regular" | "Vip" | "Home"): boolean {
     const b = this.branchInfo()[index];
     if (!b) return true;
-    return kind === "Regular" ? b.branchAllowsRegular : kind === "Vip" ? b.branchAllowsVip : b.branchAllowsHome;
+    return kind === "Regular"
+      ? b.branchAllowsRegular
+      : kind === "Vip"
+        ? b.branchAllowsVip
+        : b.branchAllowsHome;
   }
 
   protected isHome(index: number): boolean {

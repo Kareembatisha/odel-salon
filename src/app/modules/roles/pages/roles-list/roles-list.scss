@@ -1,6 +1,12 @@
 @use "styles/variables" as v;
 
-.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: v.$space-3; min-height: 42px; }
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-3;
+  min-height: 42px;
+}
 
 .bulk {
   display: flex;
@@ -11,14 +17,36 @@
   background: v.$primary-soft;
   border: 1px solid v.$primary-soft-border;
   border-radius: v.$radius-md;
-  &__count { color: v.$primary-text; font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+  &__count {
+    color: v.$primary-text;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-semibold;
+  }
 }
 
-.role { display: inline-flex; align-items: center; gap: v.$space-3; min-width: 0; max-width: 100%; }
-.role__icon {
-  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
-  width: 32px; height: 32px; border-radius: v.$radius-md;
-  background: v.$primary-soft; color: v.$primary-text; font-size: v.$text-base;
+.role {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-3;
+  min-width: 0;
+  max-width: 100%;
 }
-.strong { font-weight: v.$fw-semibold; }
-.row-actions { display: inline-flex; gap: v.$space-1; }
+.role__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: v.$radius-md;
+  background: v.$primary-soft;
+  color: v.$primary-text;
+  font-size: v.$text-base;
+}
+.strong {
+  font-weight: v.$fw-semibold;
+}
+.row-actions {
+  display: inline-flex;
+  gap: v.$space-1;
+}

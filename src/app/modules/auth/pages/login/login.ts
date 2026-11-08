@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { TranslateModule } from "@ngx-translate/core";
 
-import { FloatLabelInput } from "../../../../shared/components/float-label-input/float-label-input";
+import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
 import { AuthService } from "../../service/auth.service";
 import { sanitizeReturnUrl } from "../../utils/return-url.util";
 
@@ -11,11 +11,7 @@ import { sanitizeReturnUrl } from "../../utils/return-url.util";
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "app-login",
   standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    TranslateModule,
-    FloatLabelInput,
-  ],
+  imports: [ReactiveFormsModule, TranslateModule, FloatLabelInput],
   templateUrl: "./login.html",
   styleUrl: "./login.scss",
 })
@@ -34,9 +30,7 @@ export class Login {
    * passed through sanitizeReturnUrl() before use — see return-url.util.ts
    * for why the raw query param is never trusted directly.
    */
-  private readonly returnUrl = this.route.snapshot.queryParamMap.get(
-    "returnUrl",
-  );
+  private readonly returnUrl = this.route.snapshot.queryParamMap.get("returnUrl");
 
   protected readonly form = this.fb.nonNullable.group({
     email: ["", [Validators.required, Validators.email]],

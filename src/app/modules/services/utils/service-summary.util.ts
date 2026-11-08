@@ -15,9 +15,7 @@ export const EMPTY_SERVICES_SUMMARY: ServicesSummary = {
  * `additionalData` is typed loosely, so every field is validated: anything missing or
  * not a finite number becomes 0 instead of rendering `undefined` / `NaN` in a card.
  */
-export function readServicesSummary(
-  meta: PaginationMeta | null | undefined,
-): ServicesSummary {
+export function readServicesSummary(meta: PaginationMeta | null | undefined): ServicesSummary {
   const data = meta?.additionalData;
   if (!data) return { ...EMPTY_SERVICES_SUMMARY };
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
 export interface FilterOption {
   value: string;
@@ -8,7 +8,7 @@ export interface FilterOption {
 
 /** Compact native select for list toolbars (the first option is normally "All"). */
 @Component({
-  selector: 'app-filter-select',
+  selector: "app-filter-select",
   standalone: true,
   template: `
     <label class="fs">
@@ -21,12 +21,12 @@ export interface FilterOption {
       <i class="pi pi-angle-down" aria-hidden="true"></i>
     </label>
   `,
-  styleUrl: './filter-select.component.scss',
+  styleUrl: "./filter-select.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FilterSelectComponent {
   label = input.required<string>();
   options = input.required<FilterOption[]>();
-  value = input<string>('');
+  value = input<string>("");
   changed = output<string>();
 }

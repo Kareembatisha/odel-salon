@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: block; }
+:host {
+  display: block;
+}
 
 .empty {
   display: flex;
@@ -10,7 +12,9 @@
   padding: v.$space-16 v.$space-6;
   text-align: center;
 
-  &--compact { padding: v.$space-8 v.$space-4; }
+  &--compact {
+    padding: v.$space-8 v.$space-4;
+  }
 
   &__icon {
     display: inline-flex;
@@ -25,7 +29,19 @@
     font-size: v.$text-2xl;
   }
 
-  &__title { font-size: v.$text-xl; font-weight: v.$fw-semibold; color: v.$text; }
-  &__text { max-width: 44ch; color: v.$text-secondary; }
-  &__actions { margin-top: v.$space-3; &:empty { display: none; } }
+  &__title {
+    font-size: v.$text-xl;
+    font-weight: v.$fw-semibold;
+    color: v.$text;
+  }
+  &__text {
+    max-width: 44ch;
+    color: v.$text-secondary;
+  }
+  &__actions {
+    margin-top: v.$space-3;
+    &:empty {
+      display: none;
+    }
+  }
 }

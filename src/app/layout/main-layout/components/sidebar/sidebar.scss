@@ -8,7 +8,9 @@
   height: 100%;
   transition: width v.$transition-slow;
 }
-:host(:has(.sb--collapsed)) { width: v.$sidebar-rail-width; }
+:host(:has(.sb--collapsed)) {
+  width: v.$sidebar-rail-width;
+}
 
 .sb {
   position: relative;
@@ -32,9 +34,18 @@
     flex-shrink: 0;
     border-bottom: 1px solid v.$sidebar-border;
   }
-  &--collapsed &__brand { justify-content: center; padding-inline: 0; }
+  &--collapsed &__brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
 
-  &__mark { display: block; width: 36px; height: 36px; border-radius: v.$radius-md; flex-shrink: 0; }
+  &__mark {
+    display: block;
+    width: 36px;
+    height: 36px;
+    border-radius: v.$radius-md;
+    flex-shrink: 0;
+  }
 
   &__wordmark {
     font-family: v.$font-display;
@@ -56,7 +67,11 @@
     gap: v.$space-4;
   }
 
-  &__section { display: flex; flex-direction: column; gap: v.$space-1; }
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-1;
+  }
   &__section--bottom {
     padding: v.$space-3 v.$space-3 v.$space-4;
     border-top: 1px solid v.$sidebar-border;
@@ -70,9 +85,20 @@
     font-weight: v.$fw-medium;
     letter-spacing: v.$ls-wide;
   }
-  &__rule { margin: v.$space-1 v.$space-3; border: 0; border-top: 1px solid v.$sidebar-border; }
+  &__rule {
+    margin: v.$space-1 v.$space-3;
+    border: 0;
+    border-top: 1px solid v.$sidebar-border;
+  }
 
-  &__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  &__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
 
   // ── Item ────────────────────────────
   &__item {
@@ -92,11 +118,21 @@
     font-weight: v.$fw-medium;
     text-align: start;
     cursor: pointer;
-    transition: background v.$transition-normal, color v.$transition-normal;
+    transition:
+      background v.$transition-normal,
+      color v.$transition-normal;
 
-    i:first-child { width: 20px; font-size: v.$text-lg; text-align: center; flex-shrink: 0; }
+    i:first-child {
+      width: 20px;
+      font-size: v.$text-lg;
+      text-align: center;
+      flex-shrink: 0;
+    }
 
-    &:hover { background: v.$sidebar-hover; color: v.$sidebar-text-strong; }
+    &:hover {
+      background: v.$sidebar-hover;
+      color: v.$sidebar-text-strong;
+    }
 
     &--active {
       background: v.$sidebar-active-bg;
@@ -115,11 +151,26 @@
       }
     }
   }
-  &--collapsed &__item { justify-content: center; padding-inline: 0; }
+  &--collapsed &__item {
+    justify-content: center;
+    padding-inline: 0;
+  }
 
-  &__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  &__text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-  &__chevron { font-size: v.$text-sm; transition: transform v.$transition-normal; &--open { transform: rotate(180deg); } }
+  &__chevron {
+    font-size: v.$text-sm;
+    transition: transform v.$transition-normal;
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
 
   // ── Sub items (settings) ────────────
   &__sub {
@@ -146,18 +197,31 @@
     font-size: v.$text-sm + 0px;
     text-align: start;
     cursor: pointer;
-    transition: background v.$transition-normal, color v.$transition-normal;
-    &:hover { background: v.$sidebar-hover; color: v.$sidebar-text-strong; }
-    &--active { color: v.$sidebar-active-text; font-weight: v.$fw-semibold; background: v.$sidebar-active-bg; }
+    transition:
+      background v.$transition-normal,
+      color v.$transition-normal;
+    &:hover {
+      background: v.$sidebar-hover;
+      color: v.$sidebar-text-strong;
+    }
+    &--active {
+      color: v.$sidebar-active-text;
+      font-weight: v.$fw-semibold;
+      background: v.$sidebar-active-bg;
+    }
   }
 }
 
 // ── Off-canvas (≤ $bp-lg) ───────────────────────────
-.backdrop { display: none; }
+.backdrop {
+  display: none;
+}
 
 @media (max-width: v.$bp-lg) {
   :host,
-  :host(:has(.sb--collapsed)) { width: 0; }
+  :host(:has(.sb--collapsed)) {
+    width: 0;
+  }
 
   .sb {
     position: fixed;
@@ -169,9 +233,17 @@
     box-shadow: none;
     z-index: v.$z-overlay + 1;
 
-    &--mobile-open { transform: translateX(0); box-shadow: v.$shadow-lg; }
+    &--mobile-open {
+      transform: translateX(0);
+      box-shadow: v.$shadow-lg;
+    }
   }
-  :host-context([dir="rtl"]) .sb { transform: translateX(100%); &--mobile-open { transform: translateX(0); } }
+  :host-context([dir="rtl"]) .sb {
+    transform: translateX(100%);
+    &--mobile-open {
+      transform: translateX(0);
+    }
+  }
 
   .backdrop {
     display: block;
@@ -182,6 +254,9 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity v.$transition-slow;
-    &--visible { opacity: 1; pointer-events: auto; }
+    &--visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 }

@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { AppButtonComponent } from '../../shared/components/app-button/app-button.component';
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
 
 /** 404 — works signed in or out; inside the admin shell it fits the content area instead of a full screen. */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-not-found',
+  selector: "app-not-found",
   standalone: true,
   imports: [TranslateModule, AppButtonComponent],
   template: `
@@ -18,12 +18,14 @@ import { AppButtonComponent } from '../../shared/components/app-button/app-butto
       <app-button variant="primary" size="lg" (clicked)="home()">{{ 'NOT_FOUND.BACK_HOME' | translate }}</app-button>
     </main>
   `,
-  styleUrl: './not-found.scss',
-  host: { '[class.nf-host--shell]': 'inShell' },
+  styleUrl: "./not-found.scss",
+  host: { "[class.nf-host--shell]": "inShell" },
 })
 export class NotFound {
   private readonly router = inject(Router);
   /** True when rendered inside the admin shell (route data), false for the standalone root 404. */
-  protected readonly inShell = !!inject(ActivatedRoute).snapshot.data['inShell'];
-  protected home(): void { this.router.navigateByUrl('/main'); }
+  protected readonly inShell = !!inject(ActivatedRoute).snapshot.data["inShell"];
+  protected home(): void {
+    this.router.navigateByUrl("/main");
+  }
 }

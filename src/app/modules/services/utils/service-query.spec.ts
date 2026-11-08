@@ -15,10 +15,21 @@ describe("buildServicesParams", () => {
   });
 
   it("sends false filters (false is a real filter) and ignores null", () => {
-    const p = buildServicesParams({ branchId: 1, pageNumber: 1, pageSize: 20, isActive: false, isHomeAvailable: false });
+    const p = buildServicesParams({
+      branchId: 1,
+      pageNumber: 1,
+      pageSize: 20,
+      isActive: false,
+      isHomeAvailable: false,
+    });
     expect(p.get("isActive")).toBe("false");
     expect(p.get("isHomeAvailable")).toBe("false");
-    const q = buildServicesParams({ branchId: 1, pageNumber: 1, pageSize: 20, isHomeAvailable: null as unknown as undefined });
+    const q = buildServicesParams({
+      branchId: 1,
+      pageNumber: 1,
+      pageSize: 20,
+      isHomeAvailable: null as unknown as undefined,
+    });
     expect(q.has("isHomeAvailable")).toBe(false);
   });
 });

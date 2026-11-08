@@ -1,13 +1,5 @@
 import { Injectable, inject, signal } from "@angular/core";
-import {
-  Observable,
-  Subscription,
-  catchError,
-  finalize,
-  map,
-  of,
-  tap,
-} from "rxjs";
+import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
@@ -138,9 +130,7 @@ export class BranchesService {
    * shrinks the result set could strand the user on a page that no
    * longer exists.
    */
-  setFilters(
-    filters: Partial<Pick<BranchesQuery, "search" | "isVisible">>,
-  ): void {
+  setFilters(filters: Partial<Pick<BranchesQuery, "search" | "isVisible">>): void {
     this._query.update((q) => ({ ...q, ...filters, pageNumber: 1 }));
     this.load();
   }
@@ -164,9 +154,7 @@ export class BranchesService {
    */
   loadOptions(): Observable<Array<Pick<BranchListItem, "id" | "nameAr" | "nameEn">>> {
     return this.repository.getBranches({ pageNumber: 1, pageSize: 100 }).pipe(
-      map((res) =>
-        (res.data ?? []).map((b) => ({ id: b.id, nameAr: b.nameAr, nameEn: b.nameEn })),
-      ),
+      map((res) => (res.data ?? []).map((b) => ({ id: b.id, nameAr: b.nameAr, nameEn: b.nameEn }))),
       catchError(() => of([])),
     );
   }
@@ -200,26 +188,21 @@ export class BranchesService {
    * entry, and the caller navigates away after a successful save.
    */
   createBranch(payload: BranchPayload): Observable<number | null> {
-    return this.mutate(
-      this.repository.createBranch(payload),
-      "BRANCHES.CREATED",
-    ).pipe(map((res) => res?.data ?? null));
+    return this.mutate(this.repository.createBranch(payload), "BRANCHES.CREATED").pipe(
+      map((res) => res?.data ?? null),
+    );
   }
 
   /** Update a branch → `true` on success. Same list-refresh contract as {@link createBranch}. */
   updateBranch(id: number, payload: BranchPayload): Observable<boolean> {
-    return this.mutate(
-      this.repository.updateBranch(id, payload),
-      "BRANCHES.UPDATED",
-    ).pipe(map((res) => res !== null));
+    return this.mutate(this.repository.updateBranch(id, payload), "BRANCHES.UPDATED").pipe(
+      map((res) => res !== null),
+    );
   }
 
   /** Show / hide a branch in the app → `true` on success; reloads the list. */
   toggleStatus(id: number): Observable<boolean> {
-    return this.mutate(
-      this.repository.toggleBranchStatus(id),
-      "BRANCHES.STATUS_UPDATED",
-    ).pipe(
+    return this.mutate(this.repository.toggleBranchStatus(id), "BRANCHES.STATUS_UPDATED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.load()),
     );
@@ -229,10 +212,7 @@ export class BranchesService {
   remove(ids: number[]): Observable<boolean> {
     const payload: DeleteBranchesRequest = { ids };
 
-    return this.mutate(
-      this.repository.deleteBranches(payload),
-      "BRANCHES.DELETED",
-    ).pipe(
+    return this.mutate(this.repository.deleteBranches(payload), "BRANCHES.DELETED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.reloadAfterRemoval(ids.length)),
     );
@@ -243,8 +223,7 @@ export class BranchesService {
    * first — otherwise the user lands on a page that no longer exists.
    */
   private reloadAfterRemoval(removed: number): void {
-    const pageEmptied =
-      this._branches().length <= removed && this._query().pageNumber > 1;
+    const pageEmptied = this._branches().length <= removed && this._query().pageNumber > 1;
 
     if (pageEmptied) {
       this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));

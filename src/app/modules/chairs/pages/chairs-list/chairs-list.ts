@@ -12,22 +12,22 @@ import { PERMISSIONS } from "@core/auth/permissions";
 import { LanguageService } from "@core/services/language.service";
 import { AuthService } from "../../../auth/service/auth.service";
 import { BranchesService } from "../../../branches/service/branches.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
-import { DrawerComponent } from "../../../../shared/components/drawer/drawer.component";
-import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
 import {
   FilterOption,
   FilterSelectComponent,
-} from "../../../../shared/components/filter-select/filter-select.component";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { PaginationComponent } from "../../../../shared/components/pagination/pagination.component";
-import { SearchInputComponent } from "../../../../shared/components/search-input/search-input.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
-import { StatCardComponent } from "../../../../shared/components/stat-card/stat-card.component";
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { PaginationComponent } from "@shared/components/pagination/pagination.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatCardComponent } from "@shared/components/stat-card/stat-card.component";
 import { ChairCard } from "../../components/chair-card/chair-card";
-import { ChairForm } from "../../components/chair-form";
+import { ChairForm } from "../../components/chair-form/chair-form";
 import {
   ChairBranchOption,
   ChairDetails,
@@ -100,7 +100,9 @@ export class ChairsList implements OnInit {
    */
   protected readonly canCreate = computed(() => this.auth.hasPermission(PERMISSIONS.Chair.Create));
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Chair.Edit));
-  protected readonly canToggle = computed(() => this.auth.hasPermission(PERMISSIONS.Chair.ToggleStatus));
+  protected readonly canToggle = computed(() =>
+    this.auth.hasPermission(PERMISSIONS.Chair.ToggleStatus),
+  );
   protected readonly canDelete = computed(() => this.auth.hasPermission(PERMISSIONS.Chair.Delete));
 
   /**
@@ -145,10 +147,7 @@ export class ChairsList implements OnInit {
   protected readonly isFiltered = computed(() => {
     const q = this.query();
     return (
-      !!q.search ||
-      q.branchId !== undefined ||
-      q.type !== undefined ||
-      q.isActive !== undefined
+      !!q.search || q.branchId !== undefined || q.type !== undefined || q.isActive !== undefined
     );
   });
 
@@ -219,7 +218,9 @@ export class ChairsList implements OnInit {
   }
 
   protected onTypeFilter(value: string): void {
-    this.chairsService.setFilters({ type: value === "" ? undefined : (Number(value) as ChairType) });
+    this.chairsService.setFilters({
+      type: value === "" ? undefined : (Number(value) as ChairType),
+    });
   }
 
   protected onStatusFilter(value: string): void {

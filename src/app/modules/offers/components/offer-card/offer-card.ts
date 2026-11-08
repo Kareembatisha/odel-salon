@@ -10,8 +10,8 @@ import {
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { StatusBadgeComponent } from "../../../../shared/components/status-badge/status-badge.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
 import { savingsAmount } from "../../../services/utils/service-option.util";
 import { formatPrice } from "../../../services/utils/service-price.util";
 import { localizedName } from "../../../packages/utils/package-labels.util";
@@ -114,14 +114,23 @@ export class OfferCard {
 
   /** Per-offer names: a grid of identical "Stop offer" / "Edit" buttons is meaningless to a screen reader. */
   protected readonly toggleLabel = computed(() =>
-    this.translate.instant(this.isStopped() ? "OFFERS.CARD.RESUME_LABEL" : "OFFERS.CARD.STOP_LABEL", { name: this.name() }),
+    this.translate.instant(
+      this.isStopped() ? "OFFERS.CARD.RESUME_LABEL" : "OFFERS.CARD.STOP_LABEL",
+      { name: this.name() },
+    ),
   );
-  protected readonly editLabel = computed(() => this.translate.instant("OFFERS.CARD.EDIT_LABEL", { name: this.name() }));
-  protected readonly deleteLabel = computed(() => this.translate.instant("OFFERS.CARD.DELETE_LABEL", { name: this.name() }));
+  protected readonly editLabel = computed(() =>
+    this.translate.instant("OFFERS.CARD.EDIT_LABEL", { name: this.name() }),
+  );
+  protected readonly deleteLabel = computed(() =>
+    this.translate.instant("OFFERS.CARD.DELETE_LABEL", { name: this.name() }),
+  );
 
   protected readonly isStopped = computed(() => isOfferStopped(this.offer()));
   /** Stopped / ended offers read as "off" at a glance. */
-  protected readonly isMuted = computed(() => this.offer().status !== 0 && this.offer().status !== 1);
+  protected readonly isMuted = computed(
+    () => this.offer().status !== 0 && this.offer().status !== 1,
+  );
 
   /** Regular and VIP always have a price; home is "In branch only" when `homePrice` is null. */
   protected readonly lines = computed<PriceLine[]>(() => {
@@ -130,7 +139,11 @@ export class OfferCard {
     const currency = this.translate.instant("SERVICES.CURRENCY");
     const fmt = (value: number | null) => formatPrice(value, lang, currency);
 
-    const line = (key: PriceLine["key"], price: number | null, original: number | null): PriceLine => ({
+    const line = (
+      key: PriceLine["key"],
+      price: number | null,
+      original: number | null,
+    ): PriceLine => ({
       key,
       price: price === null ? null : fmt(price),
       original: savingsAmount(original, price) > 0 ? fmt(original) : null,

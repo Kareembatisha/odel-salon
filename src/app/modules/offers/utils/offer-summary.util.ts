@@ -2,7 +2,12 @@ import { PaginationMeta } from "@shared/model/api_response.model";
 import { OffersSummary } from "../model/offer.model";
 import { OfferTab } from "./offer-status.util";
 
-export const EMPTY_OFFERS_SUMMARY: OffersSummary = { all: 0, active: 0, scheduled: 0, endedOrFull: 0 };
+export const EMPTY_OFFERS_SUMMARY: OffersSummary = {
+  all: 0,
+  active: 0,
+  scheduled: 0,
+  endedOrFull: 0,
+};
 
 /**
  * Reads the tab counts from `GET /offers` → `meta.additionalData` (whole branch, ignores

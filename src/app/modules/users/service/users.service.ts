@@ -1,19 +1,19 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, finalize, map, of, tap } from 'rxjs';
+import { Injectable, inject, signal } from "@angular/core";
+import { Observable, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from '@env/environment';
-import { NotificationService } from '@core/services/notification.service';
-import { PaginationMeta } from '@shared/model/api_response.model';
+import { environment } from "@env/environment";
+import { NotificationService } from "@core/services/notification.service";
+import { PaginationMeta } from "@shared/model/api_response.model";
 import {
   CreateUserRequest,
   UpdateUserRequest,
   UserDetails,
   UserListItem,
   UsersQuery,
-} from '../model/user.model';
-import { UserApiRepository } from '../repository/user-api.repository';
-import { UserMockRepository } from '../repository/user-mock.repository';
-import { IUserRepository } from '../repository/user.repository';
+} from "../model/user.model";
+import { UserApiRepository } from "../repository/user-api.repository";
+import { UserMockRepository } from "../repository/user-mock.repository";
+import { IUserRepository } from "../repository/user.repository";
 
 const PAGE_SIZE = 10;
 
@@ -22,7 +22,7 @@ const PAGE_SIZE = 10;
  * and user mutations. Mutations resolve to true/false; the error interceptor has
  * already told the user what went wrong, so callers only decide what to do next.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class UsersService {
   private readonly notify = inject(NotificationService);
 
@@ -65,7 +65,7 @@ export class UsersService {
   }
 
   /** Any filter change goes back to page 1. */
-  setFilters(filters: Partial<Pick<UsersQuery, 'search' | 'roleId' | 'status'>>): void {
+  setFilters(filters: Partial<Pick<UsersQuery, "search" | "roleId" | "status">>): void {
     this._query.update((q) => ({ ...q, ...filters, pageNumber: 1 }));
     this.load();
   }
@@ -85,19 +85,19 @@ export class UsersService {
 
   // ── Mutations ────────────────────────────────────────
   create(payload: CreateUserRequest): Observable<boolean> {
-    return this.mutate(this.repository.createUser(payload), 'USERS.CREATED');
+    return this.mutate(this.repository.createUser(payload), "USERS.CREATED");
   }
 
   update(id: number, payload: UpdateUserRequest): Observable<boolean> {
-    return this.mutate(this.repository.updateUser(id, payload), 'USERS.UPDATED');
+    return this.mutate(this.repository.updateUser(id, payload), "USERS.UPDATED");
   }
 
   toggleStatus(id: number): Observable<boolean> {
-    return this.mutate(this.repository.toggleStatus(id), 'USERS.STATUS_UPDATED');
+    return this.mutate(this.repository.toggleStatus(id), "USERS.STATUS_UPDATED");
   }
 
   remove(ids: number[]): Observable<boolean> {
-    return this.mutate(this.repository.deleteUsers({ ids }), 'USERS.DELETED');
+    return this.mutate(this.repository.deleteUsers({ ids }), "USERS.DELETED");
   }
 
   /**

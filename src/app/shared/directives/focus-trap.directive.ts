@@ -1,13 +1,22 @@
-import { Directive, ElementRef, HostListener, OnDestroy, afterNextRender, inject, input, output } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  afterNextRender,
+  inject,
+  input,
+  output,
+} from "@angular/core";
 
 const FOCUSABLE = [
-  'a[href]',
-  'button:not([disabled])',
+  "a[href]",
+  "button:not([disabled])",
   'input:not([disabled]):not([type="hidden"])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
+  "select:not([disabled])",
+  "textarea:not([disabled])",
   '[tabindex]:not([tabindex="-1"])',
-].join(',');
+].join(",");
 
 /** Open traps, oldest first. Only the topmost one reacts to Tab / Escape. */
 const openTraps: FocusTrapDirective[] = [];
@@ -26,18 +35,20 @@ const openTraps: FocusTrapDirective[] = [];
  *   <aside appFocusTrap appFocusTrapInitial="input, select" (appFocusTrapEscape)="close()">…</aside>
  */
 @Directive({
-  selector: '[appFocusTrap]',
+  selector: "[appFocusTrap]",
   standalone: true,
-  host: { tabindex: '-1' },
+  host: { tabindex: "-1" },
 })
 export class FocusTrapDirective implements OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
 
   /** CSS selector of the preferred element to focus first. */
-  readonly initial = input<string>('', { alias: 'appFocusTrapInitial' });
-  readonly escaped = output<void>({ alias: 'appFocusTrapEscape' });
+  readonly initial = input<string>("", { alias: "appFocusTrapInitial" });
+  readonly escaped = output<void>({ alias: "appFocusTrapEscape" });
 
-  private readonly opener = (typeof document !== 'undefined' ? document.activeElement : null) as HTMLElement | null;
+  private readonly opener = (typeof document !== "undefined"
+    ? document.activeElement
+    : null) as HTMLElement | null;
 
   constructor() {
     openTraps.push(this);
@@ -51,17 +62,17 @@ export class FocusTrapDirective implements OnDestroy {
     setTimeout(() => this.restoreFocus());
   }
 
-  @HostListener('document:keydown', ['$event'])
+  @HostListener("document:keydown", ["$event"])
   protected onKeydown(event: KeyboardEvent): void {
     if (openTraps[openTraps.length - 1] !== this) return;
 
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
       this.escaped.emit();
       return;
     }
-    if (event.key !== 'Tab') return;
+    if (event.key !== "Tab") return;
 
     const items = this.focusable();
     if (!items.length) {
@@ -101,7 +112,7 @@ export class FocusTrapDirective implements OnDestroy {
     const target =
       this.opener && this.opener.isConnected && this.opener !== document.body
         ? this.opener
-        : document.getElementById('main-content');
+        : document.getElementById("main-content");
     target?.focus({ preventScroll: true });
   }
 }

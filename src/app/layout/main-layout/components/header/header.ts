@@ -1,22 +1,29 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  signal,
+} from "@angular/core";
+import { Router, RouterLink } from "@angular/router";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { AuthService } from '../../../../modules/auth/service/auth.service';
-import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { SidebarService } from '../sidebar/sidebar.service';
-import { BreadcrumbService } from './breadcrumb.service';
-import { LanguageSwitcher } from '../language-switcher/language-switcher';
-import { ThemeSwitcher } from '../theme-switcher/theme-switcher';
+import { AuthService } from "../../../../modules/auth/service/auth.service";
+import { AvatarComponent } from "@shared/components/avatar/avatar.component";
+import { SidebarService } from "../sidebar/sidebar.service";
+import { BreadcrumbService } from "./breadcrumb.service";
+import { LanguageSwitcher } from "../language-switcher/language-switcher";
+import { ThemeSwitcher } from "../theme-switcher/theme-switcher";
 
 /** Top bar: sidebar toggle, breadcrumbs, language, theme, notifications, profile menu. */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-header',
+  selector: "app-header",
   standalone: true,
   imports: [RouterLink, TranslateModule, LanguageSwitcher, ThemeSwitcher, AvatarComponent],
-  templateUrl: './header.html',
-  styleUrl: './header.scss',
+  templateUrl: "./header.html",
+  styleUrl: "./header.scss",
 })
 export class Header {
   private readonly el = inject(ElementRef);
@@ -46,15 +53,15 @@ export class Header {
 
   protected logout(): void {
     this.menuOpen.set(false);
-    this.auth.logout().subscribe(() => this.router.navigate(['/login']));
+    this.auth.logout().subscribe(() => this.router.navigate(["/login"]));
   }
 
-  @HostListener('document:click', ['$event'])
+  @HostListener("document:click", ["$event"])
   protected onDocumentClick(event: MouseEvent): void {
     if (!this.el.nativeElement.contains(event.target)) this.menuOpen.set(false);
   }
 
-  @HostListener('document:keydown.escape')
+  @HostListener("document:keydown.escape")
   protected onEscape(): void {
     this.menuOpen.set(false);
   }

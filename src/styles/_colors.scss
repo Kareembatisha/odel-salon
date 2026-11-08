@@ -27,13 +27,13 @@ $text-placeholder: var(--odl-text-placeholder);
 $text-disabled: var(--odl-text-disabled);
 
 // ── Brand / primary ───────────────────────────────────────
-$primary: var(--odl-primary);              // fills
+$primary: var(--odl-primary); // fills
 $primary-hover: var(--odl-primary-hover);
 $primary-active: var(--odl-primary-active);
-$on-primary: var(--odl-on-primary);        // text/icons placed ON a primary fill
-$primary-soft: var(--odl-primary-soft);    // tinted backgrounds (active chip)
+$on-primary: var(--odl-on-primary); // text/icons placed ON a primary fill
+$primary-soft: var(--odl-primary-soft); // tinted backgrounds (active chip)
 $primary-soft-border: var(--odl-primary-soft-border);
-$primary-text: var(--odl-primary-text);    // brand-colored TEXT / icons on a surface
+$primary-text: var(--odl-primary-text); // brand-colored TEXT / icons on a surface
 $focus-ring: var(--odl-focus-ring);
 
 // ── Feedback ──────────────────────────────────────────────

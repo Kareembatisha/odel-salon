@@ -1,7 +1,7 @@
-import { InjectionToken } from '@angular/core';
-import { Observable } from 'rxjs';
+import { InjectionToken } from "@angular/core";
+import { Observable } from "rxjs";
 
-import { ApiResponse } from '@shared/model/api_response.model';
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   BarberDetails,
   BarberListItem,
@@ -9,9 +9,9 @@ import {
   CreateBarberPayload,
   DeleteBarbersRequest,
   UpdateBarberPayload,
-} from '../model/barber.model';
+} from "../model/barber.model";
 
-export const BARBER_REPOSITORY = new InjectionToken<IBarberRepository>('BARBER_REPOSITORY');
+export const BARBER_REPOSITORY = new InjectionToken<IBarberRepository>("BARBER_REPOSITORY");
 
 /** Contract shared by the HTTP and mock repositories (pure data access). */
 export interface IBarberRepository {

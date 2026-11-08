@@ -1,32 +1,46 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
-import { PERMISSIONS } from '@core/auth/permissions';
-import { LanguageService } from '@core/services/language.service';
-import { AuthService } from '../../../auth/service/auth.service';
-import { BranchesService } from '../../../branches/service/branches.service';
-import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
-import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
-import { DataTableCardDirective, DataTableColumnDirective, DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
-import { FailedStateComponent } from '../../../../shared/components/failed-state/failed-state.component';
-import { FilterOption, FilterSelectComponent } from '../../../../shared/components/filter-select/filter-select.component';
-import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
-import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
-import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
-import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { SwitchComponent } from '../../../../shared/components/switch/switch.component';
-import { BarberForm } from '../../components/barber-form';
+import { PERMISSIONS } from "@core/auth/permissions";
+import { LanguageService } from "@core/services/language.service";
+import { AuthService } from "../../../auth/service/auth.service";
+import { BranchesService } from "../../../branches/service/branches.service";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { AvatarComponent } from "@shared/components/avatar/avatar.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import {
+  DataTableCardDirective,
+  DataTableColumnDirective,
+  DataTableComponent,
+} from "@shared/components/data-table/data-table.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
+import {
+  FilterOption,
+  FilterSelectComponent,
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
+import { BarberForm } from "../../components/barber-form/barber-form";
 import {
   BarberBranchOption,
   BarberDetails,
   BarberListItem,
   CreateBarberPayload,
   UpdateBarberPayload,
-} from '../../model/barber.model';
-import { BarbersService } from '../../service/barbers.service';
-import { localizedBranchName, localizedName } from '../../utils/barber-labels.util';
+} from "../../model/barber.model";
+import { BarbersService } from "../../service/barbers.service";
+import { localizedBranchName, localizedName } from "../../utils/barber-labels.util";
 
 /**
  * Barbers screen — a Users-style table with server-side search, branch and status
@@ -38,15 +52,28 @@ import { localizedBranchName, localizedName } from '../../utils/barber-labels.ut
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-barbers-list',
+  selector: "app-barbers-list",
   standalone: true,
   imports: [
-    TranslateModule, PageHeaderComponent, AppButtonComponent, SearchInputComponent, FilterSelectComponent,
-    DataTableComponent, DataTableColumnDirective, DataTableCardDirective, StatusBadgeComponent, AvatarComponent, SwitchComponent,
-    DrawerComponent, ConfirmModalComponent, FailedStateComponent, SkeletonComponent, BarberForm,
+    TranslateModule,
+    PageHeaderComponent,
+    AppButtonComponent,
+    SearchInputComponent,
+    FilterSelectComponent,
+    DataTableComponent,
+    DataTableColumnDirective,
+    DataTableCardDirective,
+    StatusBadgeComponent,
+    AvatarComponent,
+    SwitchComponent,
+    DrawerComponent,
+    ConfirmModalComponent,
+    FailedStateComponent,
+    SkeletonComponent,
+    BarberForm,
   ],
-  templateUrl: './barbers-list.html',
-  styleUrl: './barbers-list.scss',
+  templateUrl: "./barbers-list.html",
+  styleUrl: "./barbers-list.scss",
 })
 export class BarbersList implements OnInit {
   private readonly barbers = inject(BarbersService);
@@ -69,13 +96,16 @@ export class BarbersList implements OnInit {
   // ── Filters ──────────────────────────────────────────
   protected readonly branchList = signal<BarberBranchOption[]>([]);
   protected readonly branchFilterOptions = computed<FilterOption[]>(() => [
-    { value: '', label: this.translate.instant('BARBERS.FILTER.ALL_BRANCHES') },
-    ...this.branchList().map((b) => ({ value: String(b.id), label: localizedName(b, this.language.currentLang()) })),
+    { value: "", label: this.translate.instant("BARBERS.FILTER.ALL_BRANCHES") },
+    ...this.branchList().map((b) => ({
+      value: String(b.id),
+      label: localizedName(b, this.language.currentLang()),
+    })),
   ]);
   protected readonly statusFilterOptions = computed<FilterOption[]>(() => [
-    { value: '', label: this.translate.instant('BARBERS.FILTER.ALL_STATUSES') },
-    { value: 'true', label: this.translate.instant('BARBERS.STATUS.ACTIVE') },
-    { value: 'false', label: this.translate.instant('BARBERS.STATUS.SUSPENDED') },
+    { value: "", label: this.translate.instant("BARBERS.FILTER.ALL_STATUSES") },
+    { value: "true", label: this.translate.instant("BARBERS.STATUS.ACTIVE") },
+    { value: "false", label: this.translate.instant("BARBERS.STATUS.SUSPENDED") },
   ]);
 
   /** Any filter or search applied — decides between the "nothing yet" and "no matches" empty states. */
@@ -88,7 +118,7 @@ export class BarbersList implements OnInit {
 
   // ── Drawer (create / edit) ───────────────────────────
   protected readonly drawerOpen = signal(false);
-  protected readonly drawerMode = signal<'create' | 'edit'>('create');
+  protected readonly drawerMode = signal<"create" | "edit">("create");
   protected readonly editDetails = signal<BarberDetails | null>(null);
   protected readonly drawerLoading = signal(false);
   /** Bumped on every open so a late details response can't reopen a drawer the user already closed. */
@@ -98,10 +128,10 @@ export class BarbersList implements OnInit {
   protected readonly pendingDelete = signal<BarberListItem[]>([]);
   protected readonly deleteMessage = computed(() => {
     const items = this.pendingDelete();
-    if (!items.length) return '';
+    if (!items.length) return "";
     return items.length === 1
-      ? this.translate.instant('BARBERS.DELETE.MESSAGE_ONE', { name: items[0].fullName })
-      : this.translate.instant('BARBERS.DELETE.MESSAGE_MANY', { count: items.length });
+      ? this.translate.instant("BARBERS.DELETE.MESSAGE_ONE", { name: items[0].fullName })
+      : this.translate.instant("BARBERS.DELETE.MESSAGE_MANY", { count: items.length });
   });
 
   ngOnInit(): void {
@@ -124,12 +154,12 @@ export class BarbersList implements OnInit {
 
   protected onBranchFilter(value: string): void {
     this.selection.set([]);
-    this.barbers.setFilters({ branchId: value === '' ? undefined : Number(value) });
+    this.barbers.setFilters({ branchId: value === "" ? undefined : Number(value) });
   }
 
   protected onStatusFilter(value: string): void {
     this.selection.set([]);
-    this.barbers.setFilters({ isActive: value === '' ? undefined : value === 'true' });
+    this.barbers.setFilters({ isActive: value === "" ? undefined : value === "true" });
   }
 
   protected onPage(page: number): void {
@@ -144,7 +174,7 @@ export class BarbersList implements OnInit {
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
     this.drawerToken++;
-    this.drawerMode.set('create');
+    this.drawerMode.set("create");
     this.editDetails.set(null);
     this.drawerLoading.set(false);
     this.drawerOpen.set(true);
@@ -153,7 +183,7 @@ export class BarbersList implements OnInit {
   protected openEdit(barber: BarberListItem): void {
     if (!this.canEdit()) return;
     const token = ++this.drawerToken;
-    this.drawerMode.set('edit');
+    this.drawerMode.set("edit");
     this.editDetails.set(null);
     this.drawerLoading.set(true);
     this.drawerOpen.set(true);
@@ -176,10 +206,12 @@ export class BarbersList implements OnInit {
       if (result !== null && result !== false) this.closeDrawer();
     };
 
-    if (this.drawerMode() === 'create') {
+    if (this.drawerMode() === "create") {
       this.barbers.createBarber(payload as CreateBarberPayload).subscribe(done);
     } else {
-      this.barbers.updateBarber(this.editDetails()!.id, payload as UpdateBarberPayload).subscribe(done);
+      this.barbers
+        .updateBarber(this.editDetails()!.id, payload as UpdateBarberPayload)
+        .subscribe(done);
     }
   }
 

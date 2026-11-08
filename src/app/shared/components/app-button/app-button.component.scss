@@ -21,7 +21,10 @@
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-  transition: background v.$transition-normal, border-color v.$transition-normal, color v.$transition-normal,
+  transition:
+    background v.$transition-normal,
+    border-color v.$transition-normal,
+    color v.$transition-normal,
     transform v.$transition-fast;
 
   &:active:not(:disabled) {
@@ -36,15 +39,31 @@
   }
 }
 
-.btn--sm { height: v.$btn-height-sm; padding-inline: v.$space-3; font-size: v.$text-sm; }
-.btn--md { height: v.$btn-height-md; padding-inline: v.$space-4; font-size: v.$text-base; }
-.btn--lg { height: v.$btn-height-lg; padding-inline: v.$space-6; font-size: v.$text-lg; }
+.btn--sm {
+  height: v.$btn-height-sm;
+  padding-inline: v.$space-3;
+  font-size: v.$text-sm;
+}
+.btn--md {
+  height: v.$btn-height-md;
+  padding-inline: v.$space-4;
+  font-size: v.$text-base;
+}
+.btn--lg {
+  height: v.$btn-height-lg;
+  padding-inline: v.$space-6;
+  font-size: v.$text-lg;
+}
 
 .btn--primary {
   background: v.$primary;
   color: v.$on-primary;
-  &:hover:not(:disabled) { background: v.$primary-hover; }
-  &:active:not(:disabled) { background: v.$primary-active; }
+  &:hover:not(:disabled) {
+    background: v.$primary-hover;
+  }
+  &:active:not(:disabled) {
+    background: v.$primary-active;
+  }
 }
 
 .btn--secondary,
@@ -52,29 +71,41 @@
   background: v.$surface;
   border-color: v.$border-strong;
   color: v.$text;
-  &:hover:not(:disabled) { background: v.$surface-hover; border-color: v.$text-muted; }
+  &:hover:not(:disabled) {
+    background: v.$surface-hover;
+    border-color: v.$text-muted;
+  }
 }
 
 .btn--outline {
   background: transparent;
   border-color: v.$primary;
   color: v.$primary-text;
-  &:hover:not(:disabled) { background: v.$primary-soft; }
+  &:hover:not(:disabled) {
+    background: v.$primary-soft;
+  }
 }
 
 .btn--ghost {
   background: transparent;
   color: v.$text-secondary;
-  &:hover:not(:disabled) { background: v.$surface-hover; color: v.$text; }
+  &:hover:not(:disabled) {
+    background: v.$surface-hover;
+    color: v.$text;
+  }
 }
 
 .btn--danger {
   background: v.$danger;
   color: v.$on-danger;
-  &:hover:not(:disabled) { background: color-mix(in srgb, var(--odl-danger) 86%, black); }
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--odl-danger) 86%, black);
+  }
 }
 
-.btn__icon { font-size: 0.95em; }
+.btn__icon {
+  font-size: 0.95em;
+}
 
 .btn__spinner {
   width: 16px;
@@ -86,5 +117,7 @@
 }
 
 @keyframes btn-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

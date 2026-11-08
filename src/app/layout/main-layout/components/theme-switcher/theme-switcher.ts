@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { ThemeService } from '../../../../core/services/theme.service';
+import { ThemeService } from "@core/services/theme.service";
 
 /** Header button that flips light/dark. Exposes its state to assistive tech via aria-pressed. */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-theme-switcher',
+  selector: "app-theme-switcher",
   standalone: true,
   imports: [TranslateModule],
   template: `
@@ -21,7 +21,7 @@ import { ThemeService } from '../../../../core/services/theme.service';
       <i [class]="theme.isDark() ? 'pi pi-sun' : 'pi pi-moon'" aria-hidden="true"></i>
     </button>
   `,
-  styleUrl: './theme-switcher.scss',
+  styleUrl: "./theme-switcher.scss",
 })
 export class ThemeSwitcher {
   protected readonly theme = inject(ThemeService);

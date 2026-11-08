@@ -145,10 +145,7 @@ export class ChairMockRepository implements IChairRepository {
   }
 
   /** Rename / change type. Changing the type of the last active chair of an offered type is a 409. */
-  updateChair(
-    id: number,
-    payload: UpdateChairPayload,
-  ): Observable<ApiResponse<null>> {
+  updateChair(id: number, payload: UpdateChairPayload): Observable<ApiResponse<null>> {
     const chair = this.db.chairs.find((c) => c.id === id);
     if (!chair) return this.notFound();
 
@@ -230,8 +227,7 @@ export class ChairMockRepository implements IChairRepository {
       const branch = this.db.branches.find((b) => b.id === chair.branchId);
       if (!branch?.isVisible) continue;
 
-      const offered =
-        chair.type === ChairType.Vip ? branch.allowsVip : branch.allowsRegular;
+      const offered = chair.type === ChairType.Vip ? branch.allowsVip : branch.allowsRegular;
       if (!offered) continue;
 
       const remaining = this.db.chairs.filter(
@@ -248,19 +244,13 @@ export class ChairMockRepository implements IChairRepository {
   }
 
   /** i18n key of the first problem with `name`, or `null` when it is valid. */
-  private nameError(
-    name: string,
-    branchId: number,
-    ignoreId?: number,
-  ): string | null {
+  private nameError(name: string, branchId: number, ignoreId?: number): string | null {
     if (!name) return "CHAIRS.ERRORS.NAME_REQUIRED";
     if (name.length > CHAIR_NAME_MAX_LENGTH) return "CHAIRS.ERRORS.NAME_TOO_LONG";
 
     const taken = this.db.chairs.some(
       (c) =>
-        c.branchId === branchId &&
-        c.id !== ignoreId &&
-        c.name.toLowerCase() === name.toLowerCase(),
+        c.branchId === branchId && c.id !== ignoreId && c.name.toLowerCase() === name.toLowerCase(),
     );
     return taken ? "CHAIRS.ERRORS.NAME_TAKEN" : null;
   }
@@ -276,9 +266,7 @@ export class ChairMockRepository implements IChairRepository {
   }
 
   private summary(branchId?: number): ChairsSummary {
-    const scope = this.db.chairs.filter(
-      (c) => branchId === undefined || c.branchId === branchId,
-    );
+    const scope = this.db.chairs.filter((c) => branchId === undefined || c.branchId === branchId);
     return {
       regularActive: scope.filter((c) => c.isActive && c.type === ChairType.Regular).length,
       vipActive: scope.filter((c) => c.isActive && c.type === ChairType.Vip).length,
@@ -302,11 +290,7 @@ export class ChairMockRepository implements IChairRepository {
   // Responses
   // ----------------------------------------------------------
 
-  private reply<T>(
-    data: T,
-    message: string,
-    statusCode = 200,
-  ): Observable<ApiResponse<T>> {
+  private reply<T>(data: T, message: string, statusCode = 200): Observable<ApiResponse<T>> {
     return of<ApiResponse<T>>({
       status: true,
       statusCode,
@@ -334,16 +318,16 @@ export class ChairMockRepository implements IChairRepository {
   /** 400 — same shape as the interceptor's validation toast: field label + message. */
   private invalid(field: string, messageKey: string): Observable<never> {
     this.notify.warning(`VALIDATION_FIELDS.${field}`, messageKey);
-    return throwError(() =>
-      Object.assign(new Error("Validation failed"), { status: 400 }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error("Validation failed"), { status: 400 })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 
   /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
   private fail(message: string, statusCode: number): Observable<never> {
     this.notify.warning(message);
-    return throwError(() =>
-      Object.assign(new Error(message), { status: statusCode }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error(message), { status: statusCode })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 }

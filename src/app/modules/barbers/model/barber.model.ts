@@ -94,14 +94,10 @@ export const BARBERS_MAX_PAGE_SIZE = 100;
 export const BARBER_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
 /** Accepted photo MIME types (JPG / PNG / WEBP). */
-export const BARBER_IMAGE_TYPES: readonly string[] = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-];
+export const BARBER_IMAGE_TYPES: readonly string[] = ["image/jpeg", "image/png", "image/webp"];
 
 /** `accept` attribute for the photo file input. */
-export const BARBER_IMAGE_ACCEPT = BARBER_IMAGE_TYPES.join(',');
+export const BARBER_IMAGE_ACCEPT = BARBER_IMAGE_TYPES.join(",");
 
 /** Egyptian mobile in the format the API stores: `+201` + 9 digits. */
 export const BARBER_PHONE_PATTERN = /^\+201\d{9}$/;

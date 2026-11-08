@@ -183,12 +183,7 @@ export class MockDb {
     {
       id: 3,
       name: "Receptionist",
-      permissions: [
-        "Booking.View",
-        "Booking.Cancel",
-        "Session.View",
-        "Availability.View",
-      ],
+      permissions: ["Booking.View", "Booking.Cancel", "Session.View", "Availability.View"],
     },
   ];
 
@@ -200,43 +195,15 @@ export class MockDb {
     this.user(1, "Omar Khaled", "admin@odel.com", 1, true, "1029005195"),
     this.user(2, "Layla Hassan", "manager@odel.com", 2, true, "1006677889"),
     this.user(3, "Karim Adel", "karim.adel@odel.com", 2, true, "1112223344"),
-    this.user(
-      4,
-      "Nour Elsayed",
-      "nour.elsayed@odel.com",
-      3,
-      true,
-      "1223334455",
-    ),
-    this.user(
-      5,
-      "Youssef Nabil",
-      "youssef.nabil@odel.com",
-      3,
-      false,
-      "1550001122",
-    ),
+    this.user(4, "Nour Elsayed", "nour.elsayed@odel.com", 3, true, "1223334455"),
+    this.user(5, "Youssef Nabil", "youssef.nabil@odel.com", 3, false, "1550001122"),
     this.user(6, "Mona Fathy", "mona.fathy@odel.com", 3, true, "1017788990"),
-    this.user(
-      7,
-      "Hady Mahmoud",
-      "hady.mahmoud@odel.com",
-      2,
-      false,
-      "1099887766",
-    ),
+    this.user(7, "Hady Mahmoud", "hady.mahmoud@odel.com", 2, false, "1099887766"),
     this.user(8, "Salma Ragab", "salma.ragab@odel.com", 3, true, "1144556677"),
     this.user(9, "Adham Saeed", "adham.saeed@odel.com", 3, true, "1233221100"),
     this.user(10, "Dina Wagdy", "dina.wagdy@odel.com", 2, true, "1066554433"),
     this.user(11, "Tarek Fawzy", "tarek.fawzy@odel.com", 3, true, "1188776655"),
-    this.user(
-      12,
-      "Rana Mostafa",
-      "rana.mostafa@odel.com",
-      3,
-      false,
-      "1011223355",
-    ),
+    this.user(12, "Rana Mostafa", "rana.mostafa@odel.com", 3, false, "1011223355"),
   ];
 
   // ----------------------------------------------------------
@@ -460,17 +427,61 @@ export class MockDb {
   private static readonly SUSPENDED_BARBERS = new Set(["1:4", "2:5", "5:7", "5:8", "9:2", "13:1"]);
 
   private static readonly BARBER_NAMES = [
-    "Ahmed Fathy", "Mahmoud Saber", "Hassan Gamal", "Mostafa Ezzat", "Ali Hegazy",
-    "Tamer Nabil", "Sherif Lotfy", "Walid Samir", "Yehia Adly", "Karim Mostafa",
-    "Omar Adel", "Ziad Ramy", "Hossam Anwar", "Ibrahim Zaki", "Khaled Mounir",
-    "Amr Diab Younes", "Mohamed Salah Eldin", "Ramy Sabry", "Adel Fouad", "Nader Hamdy",
-    "Fady Boules", "Mina Samuel", "George Wahba", "Peter Ishak", "Sameh Hosny",
-    "Bassem Yousry", "Essam Kamel", "Gaber Atef", "Hany Shaker", "Ismail Radwan",
-    "Magdy Tawfik", "Nabil Sherbiny", "Osama Refaat", "Reda Mekawy", "Saad Zaghloul",
-    "Taha Mansour", "Usama Badr", "Wael Gomaa", "Yasser Hamed", "Zakaria Awad",
-    "Anas Farouk", "Badr Abdelaziz", "Fawzy Helmy", "Galal Moussa", "Hatem Ragheb",
-    "Ihab Soliman", "Jamal Nasser", "Kamal Darwish", "Labib Shawky", "Maher Galal",
-    "Nasser Eid", "Raouf Talaat", "Sayed Barakat", "Talaat Younis", "Wagdy Rizk",
+    "Ahmed Fathy",
+    "Mahmoud Saber",
+    "Hassan Gamal",
+    "Mostafa Ezzat",
+    "Ali Hegazy",
+    "Tamer Nabil",
+    "Sherif Lotfy",
+    "Walid Samir",
+    "Yehia Adly",
+    "Karim Mostafa",
+    "Omar Adel",
+    "Ziad Ramy",
+    "Hossam Anwar",
+    "Ibrahim Zaki",
+    "Khaled Mounir",
+    "Amr Diab Younes",
+    "Mohamed Salah Eldin",
+    "Ramy Sabry",
+    "Adel Fouad",
+    "Nader Hamdy",
+    "Fady Boules",
+    "Mina Samuel",
+    "George Wahba",
+    "Peter Ishak",
+    "Sameh Hosny",
+    "Bassem Yousry",
+    "Essam Kamel",
+    "Gaber Atef",
+    "Hany Shaker",
+    "Ismail Radwan",
+    "Magdy Tawfik",
+    "Nabil Sherbiny",
+    "Osama Refaat",
+    "Reda Mekawy",
+    "Saad Zaghloul",
+    "Taha Mansour",
+    "Usama Badr",
+    "Wael Gomaa",
+    "Yasser Hamed",
+    "Zakaria Awad",
+    "Anas Farouk",
+    "Badr Abdelaziz",
+    "Fawzy Helmy",
+    "Galal Moussa",
+    "Hatem Ragheb",
+    "Ihab Soliman",
+    "Jamal Nasser",
+    "Kamal Darwish",
+    "Labib Shawky",
+    "Maher Galal",
+    "Nasser Eid",
+    "Raouf Talaat",
+    "Sayed Barakat",
+    "Talaat Younis",
+    "Wagdy Rizk",
   ];
 
   /** Phones of seeded barbers that match the API contract's examples. */
@@ -497,19 +508,32 @@ export class MockDb {
 
   /** Price multiplier per branch id (missing = 1). */
   private static readonly BRANCH_PRICE_FACTOR: Record<number, number> = {
-    1: 1.2, 2: 1.1, 4: 1.05, 5: 1.25, 6: 1.15, 7: 1.1, 8: 0.9,
-    9: 1.1, 12: 0.8, 13: 0.85, 14: 1.3,
+    1: 1.2,
+    2: 1.1,
+    4: 1.05,
+    5: 1.25,
+    6: 1.15,
+    7: 1.1,
+    8: 0.9,
+    9: 1.1,
+    12: 0.8,
+    13: 0.85,
+    14: 1.3,
   };
 
   /** `serviceId:branchId` pairs with NO price row ("unpriced"). */
   private static readonly UNPRICED_SERVICES = new Set([
-    "4:8", "4:12", "4:13", "4:14", "10:14", "6:12", "6:13",
+    "4:8",
+    "4:12",
+    "4:13",
+    "4:14",
+    "10:14",
+    "6:12",
+    "6:13",
   ]);
 
   /** `serviceId:branchId` pairs that are priced but inactive. */
-  private static readonly INACTIVE_SERVICES = new Set([
-    "6:2", "8:5", "3:9", "5:11", "9:3", "7:6",
-  ]);
+  private static readonly INACTIVE_SERVICES = new Set(["6:2", "8:5", "3:9", "5:11", "9:3", "7:6"]);
 
   private seedServices(): MockService[] {
     const now = new Date().toISOString();
@@ -544,16 +568,15 @@ export class MockDb {
   }
 
   /** `[nameAr, nameEn, serviceIds, regular discount, vip discount, home discount]` (1 − discount = price ÷ total). */
-  private static readonly PACKAGE_SEED: Array<
-    [string, string, number[], number, number, number]
-  > = [
-    ["الجنتل الكلاسيكي", "Classic Groom", [1, 2, 3], 0.9, 0.85, 0.9],
-    ["الجنتلمان", "Gentleman", [1, 3, 5], 0.88, 0.85, 0.88],
-    ["العناية المنزلية", "Home Refresh", [1, 5, 9], 0.9, 0.88, 0.85],
-    ["باقة العريس", "Groom Deluxe", [1, 2, 9, 5], 0.85, 0.8, 0.85],
-    ["باقة الأطفال", "Kids Duo", [10, 3], 0.9, 0.9, 0.9],
-    ["اللون والعناية", "Colour & Care", [4, 3], 0.92, 0.9, 0.9],
-  ];
+  private static readonly PACKAGE_SEED: Array<[string, string, number[], number, number, number]> =
+    [
+      ["الجنتل الكلاسيكي", "Classic Groom", [1, 2, 3], 0.9, 0.85, 0.9],
+      ["الجنتلمان", "Gentleman", [1, 3, 5], 0.88, 0.85, 0.88],
+      ["العناية المنزلية", "Home Refresh", [1, 5, 9], 0.9, 0.88, 0.85],
+      ["باقة العريس", "Groom Deluxe", [1, 2, 9, 5], 0.85, 0.8, 0.85],
+      ["باقة الأطفال", "Kids Duo", [10, 3], 0.9, 0.9, 0.9],
+      ["اللون والعناية", "Colour & Care", [4, 3], 0.92, 0.9, 0.9],
+    ];
 
   /** `branchId:template position (1-based)` of seeded packages that start inactive. */
   private static readonly INACTIVE_PACKAGES = new Set(["1:3", "2:2", "5:4", "9:1"]);
@@ -564,37 +587,45 @@ export class MockDb {
     let id = 1;
 
     for (const branch of this.branches) {
-      MockDb.PACKAGE_SEED.forEach(
-        ([nameAr, nameEn, serviceIds, regular, vip, home], index) => {
-          const rows = serviceIds.map((serviceId) =>
-            this.services
-              .find((s) => s.id === serviceId)
-              ?.prices.find((p) => p.branchId === branch.id),
-          );
-          if (rows.some((row) => !row || !row.isActive)) return;
+      MockDb.PACKAGE_SEED.forEach(([nameAr, nameEn, serviceIds, regular, vip, home], index) => {
+        const rows = serviceIds.map((serviceId) =>
+          this.services
+            .find((s) => s.id === serviceId)
+            ?.prices.find((p) => p.branchId === branch.id),
+        );
+        if (rows.some((row) => !row || !row.isActive)) return;
 
-          const priced = rows as ServiceBranchPayload[];
-          const total = (pick: (p: ServiceBranchPayload) => number) =>
-            priced.reduce((sum, p) => sum + pick(p), 0);
-          const price = (value: number, discount: number) =>
-            Math.round((value * discount) / 5) * 5;
-          const allHome = priced.every((p) => p.isHomeAvailable);
+        const priced = rows as ServiceBranchPayload[];
+        const total = (pick: (p: ServiceBranchPayload) => number) =>
+          priced.reduce((sum, p) => sum + pick(p), 0);
+        const price = (value: number, discount: number) => Math.round((value * discount) / 5) * 5;
+        const allHome = priced.every((p) => p.isHomeAvailable);
 
-          packages.push({
-            id: id++,
-            branchId: branch.id,
-            nameAr,
-            nameEn,
-            serviceIds: [...serviceIds],
-            regularPrice: price(total((p) => p.regularPrice), regular),
-            vipPrice: price(total((p) => p.vipPrice), vip),
-            homePrice: allHome ? price(total((p) => p.homePrice ?? 0), home) : null,
-            isActive: !MockDb.INACTIVE_PACKAGES.has(`${branch.id}:${index + 1}`),
-            createdAt: now,
-            updatedAt: null,
-          });
-        },
-      );
+        packages.push({
+          id: id++,
+          branchId: branch.id,
+          nameAr,
+          nameEn,
+          serviceIds: [...serviceIds],
+          regularPrice: price(
+            total((p) => p.regularPrice),
+            regular,
+          ),
+          vipPrice: price(
+            total((p) => p.vipPrice),
+            vip,
+          ),
+          homePrice: allHome
+            ? price(
+                total((p) => p.homePrice ?? 0),
+                home,
+              )
+            : null,
+          isActive: !MockDb.INACTIVE_PACKAGES.has(`${branch.id}:${index + 1}`),
+          createdAt: now,
+          updatedAt: null,
+        });
+      });
     }
 
     this.nextPackageId = id;
@@ -606,7 +637,19 @@ export class MockDb {
    *   end (days from today, null = no end), max bookings (null = no limit), stopped, banner hue (null = none)]`
    */
   private static readonly OFFER_SEED: Array<
-    [string, string, number[], number, number, number, number, number | null, number | null, boolean, number | null]
+    [
+      string,
+      string,
+      number[],
+      number,
+      number,
+      number,
+      number,
+      number | null,
+      number | null,
+      boolean,
+      number | null,
+    ]
   > = [
     ["عرض نهاية الأسبوع", "Weekend Offer", [1, 2, 3], 0.78, 0.78, 0.8, -5, 10, 50, false, 30],
     ["توهج الصيف", "Summer Glow", [1, 3, 5], 0.85, 0.82, 0.85, -30, null, null, false, 200],
@@ -633,7 +676,19 @@ export class MockDb {
     let id = 1;
 
     for (const branch of this.branches) {
-      for (const [nameAr, nameEn, serviceIds, regular, vip, home, start, end, max, stopped, hue] of MockDb.OFFER_SEED) {
+      for (const [
+        nameAr,
+        nameEn,
+        serviceIds,
+        regular,
+        vip,
+        home,
+        start,
+        end,
+        max,
+        stopped,
+        hue,
+      ] of MockDb.OFFER_SEED) {
         const rows = serviceIds.map((serviceId) =>
           this.services
             .find((s) => s.id === serviceId)
@@ -644,8 +699,7 @@ export class MockDb {
         const priced = rows as ServiceBranchPayload[];
         const total = (pick: (p: ServiceBranchPayload) => number) =>
           priced.reduce((sum, p) => sum + pick(p), 0);
-        const price = (value: number, discount: number) =>
-          Math.round((value * discount) / 5) * 5;
+        const price = (value: number, discount: number) => Math.round((value * discount) / 5) * 5;
         const allHome = priced.every((p) => p.isHomeAvailable);
 
         offers.push({
@@ -655,9 +709,20 @@ export class MockDb {
           nameEn,
           imageUrl: hue === null ? null : this.banner(hue),
           serviceIds: [...serviceIds],
-          regularPrice: price(total((p) => p.regularPrice), regular),
-          vipPrice: price(total((p) => p.vipPrice), vip),
-          homePrice: allHome ? price(total((p) => p.homePrice ?? 0), home) : null,
+          regularPrice: price(
+            total((p) => p.regularPrice),
+            regular,
+          ),
+          vipPrice: price(
+            total((p) => p.vipPrice),
+            vip,
+          ),
+          homePrice: allHome
+            ? price(
+                total((p) => p.homePrice ?? 0),
+                home,
+              )
+            : null,
           startDate: addDays(today, start),
           endDate: end === null ? null : addDays(today, end),
           maxBookings: max,
@@ -735,7 +800,6 @@ export class MockDb {
     this.nextChairId = id;
     return chairs;
   }
-
 
   /**
    * Build a {@link MockUser} with the shared defaults applied

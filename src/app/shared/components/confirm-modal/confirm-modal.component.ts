@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
-import { FocusTrapDirective } from '../../directives/focus-trap.directive';
-import { AppButtonComponent } from '../app-button/app-button.component';
+import { FocusTrapDirective } from "../../directives/focus-trap.directive";
+import { AppButtonComponent } from "../app-button/app-button.component";
 
-export type ConfirmModalVariant = 'danger' | 'primary';
+export type ConfirmModalVariant = "danger" | "primary";
 
 /**
  * Generic confirm/cancel dialog (delete, cancel booking, discard changes…).
@@ -12,20 +12,20 @@ export type ConfirmModalVariant = 'danger' | 'primary';
  * (cancel) action on open, and returns focus to the opener on close.
  */
 @Component({
-  selector: 'app-confirm-modal',
+  selector: "app-confirm-modal",
   standalone: true,
   imports: [AppButtonComponent, FocusTrapDirective],
-  templateUrl: './confirm-modal.component.html',
-  styleUrl: './confirm-modal.component.scss',
+  templateUrl: "./confirm-modal.component.html",
+  styleUrl: "./confirm-modal.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmModalComponent {
   isOpen = input<boolean>(false);
-  title = input<string>('');
-  message = input<string>('');
-  confirmLabel = input<string>('Confirm');
-  cancelLabel = input<string>('Cancel');
-  variant = input<ConfirmModalVariant>('danger');
+  title = input<string>("");
+  message = input<string>("");
+  confirmLabel = input<string>("Confirm");
+  cancelLabel = input<string>("Cancel");
+  variant = input<ConfirmModalVariant>("danger");
   /** Disable + spin the confirm button while a request is in flight. */
   busy = input<boolean>(false);
 

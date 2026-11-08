@@ -12,16 +12,16 @@ $font-ui: var(--odl-font-ui);
 $font-display: var(--odl-font-display);
 
 // Type scale (px, 4px-grid friendly). Minimum UI text is 12px.
-$text-xs: 12px;    // badges, captions
-$text-sm: 13px;    // helper text, table meta
-$text-base: 14px;  // body, table cells, inputs
-$text-md: 15px;    // card titles
-$text-lg: 16px;    // emphasized body, buttons (lg)
-$text-xl: 18px;    // section headings
-$text-2xl: 22px;   // page subtitles, stat values
-$text-3xl: 28px;   // page titles (display face)
-$text-4xl: 34px;   // auth title
-$text-5xl: 44px;   // hero
+$text-xs: 12px; // badges, captions
+$text-sm: 13px; // helper text, table meta
+$text-base: 14px; // body, table cells, inputs
+$text-md: 15px; // card titles
+$text-lg: 16px; // emphasized body, buttons (lg)
+$text-xl: 18px; // section headings
+$text-2xl: 22px; // page subtitles, stat values
+$text-3xl: 28px; // page titles (display face)
+$text-4xl: 34px; // auth title
+$text-5xl: 44px; // hero
 $text-6xl: 56px;
 
 $fw-regular: 400;

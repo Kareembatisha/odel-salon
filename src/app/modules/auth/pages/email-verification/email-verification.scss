@@ -3,7 +3,9 @@
 
 @include a.common;
 
-.envelope-wrap { position: relative; }
+.envelope-wrap {
+  position: relative;
+}
 .check-badge {
   position: absolute;
   inset-block-end: -2px;
@@ -19,10 +21,20 @@
   font-size: v.$text-xs;
   border: 2px solid v.$surface;
 }
-.card-header { text-align: center; }
-.email-value { color: v.$text; word-break: break-all; }
+.card-header {
+  text-align: center;
+}
+.email-value {
+  color: v.$text;
+  word-break: break-all;
+}
 
-.otp-row { display: flex; justify-content: center; gap: v.$space-3; direction: ltr; }
+.otp-row {
+  display: flex;
+  justify-content: center;
+  gap: v.$space-3;
+  direction: ltr;
+}
 .otp-box {
   width: 64px;
   height: 68px;
@@ -34,11 +46,35 @@
   font-size: v.$text-4xl;
   font-weight: v.$fw-semibold;
   text-align: center;
-  transition: border-color v.$transition-normal, box-shadow v.$transition-normal;
-  &:focus { outline: 0; border-color: v.$primary; box-shadow: 0 0 0 3px v.tint(v.$primary, 24%); }
-  &--error { border-color: v.$danger; }
-  @media (max-width: v.$bp-sm) { width: 54px; height: 60px; }
+  transition:
+    border-color v.$transition-normal,
+    box-shadow v.$transition-normal;
+  &:focus {
+    outline: 0;
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 24%);
+  }
+  &--error {
+    border-color: v.$danger;
+  }
+  @media (max-width: v.$bp-sm) {
+    width: 54px;
+    height: 60px;
+  }
 }
-.otp-error { display: flex; align-items: center; justify-content: center; gap: v.$space-1; color: v.$danger-text; font-size: v.$text-sm; }
-.resend-text { text-align: center; color: v.$text-secondary; font-size: v.$text-sm; }
-.card-footer { gap: v.$space-4; }
+.otp-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-1;
+  color: v.$danger-text;
+  font-size: v.$text-sm;
+}
+.resend-text {
+  text-align: center;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+}
+.card-footer {
+  gap: v.$space-4;
+}

@@ -17,25 +17,25 @@ import { forkJoin } from "rxjs";
 import { PERMISSIONS } from "@core/auth/permissions";
 import { LanguageService } from "@core/services/language.service";
 import { AuthService } from "../../../auth/service/auth.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
-import { DrawerComponent } from "../../../../shared/components/drawer/drawer.component";
-import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
 import {
   FilterOption,
   FilterSelectComponent,
-} from "../../../../shared/components/filter-select/filter-select.component";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { PaginationComponent } from "../../../../shared/components/pagination/pagination.component";
-import { SearchInputComponent } from "../../../../shared/components/search-input/search-input.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
-import { TabItem, TabsComponent } from "../../../../shared/components/tabs/tabs.component";
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { PaginationComponent } from "@shared/components/pagination/pagination.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { TabItem, TabsComponent } from "@shared/components/tabs/tabs.component";
 import { localizedName } from "../../../packages/utils/package-labels.util";
 import { ServiceOption } from "../../../services/model/service.model";
 import { ServicesService } from "../../../services/service/services.service";
 import { OfferCard } from "../../components/offer-card/offer-card";
-import { OfferForm } from "../../components/offer-form";
+import { OfferForm } from "../../components/offer-form/offer-form";
 import {
   CreateOfferPayload,
   OfferDetails,
@@ -298,7 +298,8 @@ export class OffersList implements OnInit {
       () =>
         setTimeout(() => {
           const active = document.activeElement;
-          if (active && active !== document.body && this.host.nativeElement.contains(active)) return;
+          if (active && active !== document.body && this.host.nativeElement.contains(active))
+            return;
           this.host.nativeElement.querySelector<HTMLElement>(`#${this.panelId}`)?.focus();
         }),
       { injector: this.injector },
@@ -312,25 +313,21 @@ export class OffersList implements OnInit {
 
   protected onSubmitted(payload: CreateOfferPayload | UpdateOfferPayload): void {
     if (this.drawerMode() === "create") {
-      this.offersService
-        .createOffer(payload as CreateOfferPayload)
-        .subscribe((id) => {
-          if (id === null) return;
-          this.keepFocusAfterReload();
-          this.closeDrawer();
-        });
+      this.offersService.createOffer(payload as CreateOfferPayload).subscribe((id) => {
+        if (id === null) return;
+        this.keepFocusAfterReload();
+        this.closeDrawer();
+      });
       return;
     }
 
     const id = this.editDetails()?.id;
     if (id === undefined) return;
-    this.offersService
-      .updateOffer(id, payload as UpdateOfferPayload)
-      .subscribe((ok) => {
-        if (!ok) return;
-        this.keepFocusAfterReload();
-        this.closeDrawer();
-      });
+    this.offersService.updateOffer(id, payload as UpdateOfferPayload).subscribe((ok) => {
+      if (!ok) return;
+      this.keepFocusAfterReload();
+      this.closeDrawer();
+    });
   }
 
   // ── Stop / Resume ────────────────────────────────────

@@ -1,18 +1,11 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  output,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from "@angular/core";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { StatusBadgeComponent } from "../../../../shared/components/status-badge/status-badge.component";
-import { SwitchComponent } from "../../../../shared/components/switch/switch.component";
-import { activeBadgeVariant } from "../../../../shared/utils/status-badge.util";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { SwitchComponent } from "@shared/components/switch/switch.component";
+import { activeBadgeVariant } from "@shared/utils/status-badge.util";
 import { savingsAmount } from "../../../services/utils/service-option.util";
 import { formatDuration, formatPrice } from "../../../services/utils/service-price.util";
 import { PackageListItem } from "../../model/package.model";
@@ -41,12 +34,7 @@ interface PriceLine {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: "app-package-card",
   standalone: true,
-  imports: [
-    TranslateModule,
-    AppButtonComponent,
-    StatusBadgeComponent,
-    SwitchComponent,
-  ],
+  imports: [TranslateModule, AppButtonComponent, StatusBadgeComponent, SwitchComponent],
   templateUrl: "./package-card.html",
   styleUrl: "./package-card.scss",
 })

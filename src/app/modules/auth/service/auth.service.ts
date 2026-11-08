@@ -201,9 +201,7 @@ export class AuthService {
   }
 
   /** POST /auth/password/verify */
-  verifyPasswordCode(
-    payload: VerifyPasswordCodeRequest,
-  ): Observable<string | null> {
+  verifyPasswordCode(payload: VerifyPasswordCodeRequest): Observable<string | null> {
     this.beginRequest();
     return this.repository.verifyPasswordCode(payload).pipe(
       tap((res) => {
@@ -345,10 +343,7 @@ export class AuthService {
       );
   }
 
-  private persistTokens(
-    accessToken: string,
-    refreshToken?: string | null,
-  ): void {
+  private persistTokens(accessToken: string, refreshToken?: string | null): void {
     localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
     // Backend doesn't always rotate the refresh token (returns null) --
     // only overwrite the stored one when a new value is actually given.
@@ -357,11 +352,7 @@ export class AuthService {
     }
   }
 
-  private persistSession(
-    user: AuthUser,
-    role: string,
-    permissions: string[],
-  ): void {
+  private persistSession(user: AuthUser, role: string, permissions: string[]): void {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     this.persistRoleAndPermissions(role, permissions);
   }

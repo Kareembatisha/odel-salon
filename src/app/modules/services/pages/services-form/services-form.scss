@@ -16,10 +16,16 @@
   font-weight: v.$fw-semibold;
   text-decoration: none;
 
-  &:hover { color: v.$text; }
-  i { font-size: v.$text-xs; }
+  &:hover {
+    color: v.$text;
+  }
+  i {
+    font-size: v.$text-xs;
+  }
 }
-:host-context([dir="rtl"]) .back i { transform: scaleX(-1); }
+:host-context([dir="rtl"]) .back i {
+  transform: scaleX(-1);
+}
 
 .service-form {
   display: flex;
@@ -27,7 +33,9 @@
   gap: v.$space-5;
 }
 
-.form-section { min-width: 0; }
+.form-section {
+  min-width: 0;
+}
 
 // ── Section header ───────────────────────────────────────
 .section-header {
@@ -36,7 +44,9 @@
   gap: v.$space-3;
   margin-bottom: v.$space-5;
 
-  &--flat { margin-bottom: v.$space-4; }
+  &--flat {
+    margin-bottom: v.$space-4;
+  }
 }
 
 .section-icon {
@@ -54,8 +64,18 @@
 .section-heading {
   min-width: 0;
 
-  h2 { margin: 0; font-size: v.$text-lg; font-weight: v.$fw-semibold; line-height: 1.5; }
-  p { margin: v.$space-1 0 0; color: v.$text-secondary; font-size: v.$text-sm; line-height: 1.6; }
+  h2 {
+    margin: 0;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+    line-height: 1.5;
+  }
+  p {
+    margin: v.$space-1 0 0;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    line-height: 1.6;
+  }
 }
 
 .form-grid {
@@ -91,11 +111,17 @@
   flex-direction: column;
   gap: v.$space-4;
   min-width: 0;
-  transition: border-color v.$transition-fast, opacity v.$transition-fast;
+  transition:
+    border-color v.$transition-fast,
+    opacity v.$transition-fast;
 
-  &--invalid { border-color: v.$danger-text; }
+  &--invalid {
+    border-color: v.$danger-text;
+  }
   // An inactive branch row stays fully editable, just visually quieter.
-  &--off .fields { opacity: 0.85; }
+  &--off .fields {
+    opacity: 0.85;
+  }
 
   &__head {
     display: flex;
@@ -112,11 +138,24 @@
     min-width: 0;
     flex-wrap: wrap;
 
-    h3 { margin: 0; font-size: v.$text-md; font-weight: v.$fw-semibold; overflow-wrap: anywhere; }
+    h3 {
+      margin: 0;
+      font-size: v.$text-md;
+      font-weight: v.$fw-semibold;
+      overflow-wrap: anywhere;
+    }
   }
 
-  &__active { display: inline-flex; align-items: center; gap: v.$space-2; }
-  &__state { color: v.$text-secondary; font-size: v.$text-xs; font-weight: v.$fw-medium; }
+  &__active {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+  }
+  &__state {
+    color: v.$text-secondary;
+    font-size: v.$text-xs;
+    font-weight: v.$fw-medium;
+  }
 
   &__note {
     display: flex;
@@ -130,7 +169,12 @@
     font-size: v.$text-sm;
   }
 
-  &__foot { display: flex; justify-content: flex-end; border-top: 1px solid v.$border; padding-top: v.$space-3; }
+  &__foot {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid v.$border;
+    padding-top: v.$space-3;
+  }
 }
 
 .fields {
@@ -139,16 +183,23 @@
   gap: v.$space-3;
   align-items: start;
 
-  &__duration { grid-column: 1 / -1; }
+  &__duration {
+    grid-column: 1 / -1;
+  }
 }
 
 .field,
-.home { position: relative; min-width: 0; }
+.home {
+  position: relative;
+  min-width: 0;
+}
 
 // A price the branch doesn't use yet: still required by the API, so editable but quieter.
 .field--idle {
   opacity: 0.7;
-  &:focus-within { opacity: 1; }
+  &:focus-within {
+    opacity: 1;
+  }
 }
 
 .field__tag {
@@ -165,13 +216,24 @@
   align-items: center;
   gap: v.$space-3;
 
-  &__toggle { display: inline-flex; align-items: center; gap: v.$space-3; min-width: 0; }
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-3;
+    min-width: 0;
+  }
   &__label {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    strong { font-size: v.$text-sm; font-weight: v.$fw-semibold; }
-    small { color: v.$text-muted; font-size: v.$text-xs; }
+    strong {
+      font-size: v.$text-sm;
+      font-weight: v.$fw-semibold;
+    }
+    small {
+      color: v.$text-muted;
+      font-size: v.$text-xs;
+    }
   }
 }
 
@@ -184,22 +246,41 @@
 }
 
 // ── Loading skeleton ─────────────────────────────────────
-.skeletons { display: flex; flex-direction: column; gap: v.$space-5; }
-.sk-card { display: flex; flex-direction: column; gap: v.$space-4; }
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+}
+.sk-card {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+}
 .sk-grid,
-.sk-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: v.$space-4; }
+.sk-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: v.$space-4;
+}
 
 // ── Responsive ───────────────────────────────────────────
 @media (max-width: v.$bp-xl) {
   .branch-grid,
-  .sk-cards { grid-template-columns: 1fr; }
+  .sk-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: v.$bp-sm) {
   .form-grid,
   .sk-grid,
   .fields,
-  .home { grid-template-columns: 1fr; }
+  .home {
+    grid-template-columns: 1fr;
+  }
 
-  .form-actions { flex-direction: column-reverse; align-items: stretch; }
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 }

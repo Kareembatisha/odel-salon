@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
-import { FocusTrapDirective } from '../../directives/focus-trap.directive';
+import { FocusTrapDirective } from "../../directives/focus-trap.directive";
 
 /**
  * Drawer — side panel for create/edit forms. Opens from the inline-end edge
@@ -12,7 +12,7 @@ import { FocusTrapDirective } from '../../directives/focus-trap.directive';
  *   </app-drawer>
  */
 @Component({
-  selector: 'app-drawer',
+  selector: "app-drawer",
   standalone: true,
   imports: [FocusTrapDirective],
   template: `
@@ -40,13 +40,13 @@ import { FocusTrapDirective } from '../../directives/focus-trap.directive';
       </aside>
     }
   `,
-  styleUrl: './drawer.component.scss',
+  styleUrl: "./drawer.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DrawerComponent {
   open = input<boolean>(false);
   title = input.required<string>();
-  subtitle = input<string>('');
-  closeLabel = input<string>('Close');
+  subtitle = input<string>("");
+  closeLabel = input<string>("Close");
   closed = output<void>();
 }

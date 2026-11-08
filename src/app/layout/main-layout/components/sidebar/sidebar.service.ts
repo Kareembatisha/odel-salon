@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from "@angular/core";
 
 /**
  * SidebarService
@@ -26,7 +26,7 @@ import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 const TABLET_COLLAPSE_MIN = 901;
 const TABLET_COLLAPSE_MAX = 1280;
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class SidebarService {
   private readonly _collapsed = signal(false);
   readonly collapsed = this._collapsed.asReadonly();
@@ -38,7 +38,7 @@ export class SidebarService {
   readonly mobileOpen = this._mobileOpen.asReadonly();
 
   constructor() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const categoryOf = (width: number): "tablet" | "wide" | "other" => {
       if (width >= TABLET_COLLAPSE_MIN && width <= TABLET_COLLAPSE_MAX) return "tablet";
@@ -67,9 +67,9 @@ export class SidebarService {
 
     applyForWidth(window.innerWidth);
     const onResize = () => applyForWidth(window.innerWidth);
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
 
-    inject(DestroyRef).onDestroy(() => window.removeEventListener('resize', onResize));
+    inject(DestroyRef).onDestroy(() => window.removeEventListener("resize", onResize));
   }
 
   toggle(): void {

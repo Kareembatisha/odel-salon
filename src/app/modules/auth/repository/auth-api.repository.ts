@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from "@angular/common/http";
+import { Injectable, inject } from "@angular/core";
+import { Observable } from "rxjs";
 
-import { environment } from '@env/environment';
-import { ApiResponse } from '@shared/model/api_response.model';
+import { environment } from "@env/environment";
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   ChangePasswordRequest,
   ForgotPasswordRequest,
@@ -16,8 +16,8 @@ import {
   ResetPasswordRequest,
   VerifyPasswordCodeRequest,
   VerifyPasswordCodeResponseData,
-} from '../model/auth.model';
-import { IAuthRepository } from './auth.repository';
+} from "../model/auth.model";
+import { IAuthRepository } from "./auth.repository";
 
 /**
  * AuthApiRepository
@@ -26,7 +26,7 @@ import { IAuthRepository } from './auth.repository';
  * exactly as described in the Authentication API contract — no logic,
  * no error handling, no state. Just HTTP methods in, observables out.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AuthApiRepository implements IAuthRepository {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/auth`;
@@ -40,7 +40,10 @@ export class AuthApiRepository implements IAuthRepository {
   }
 
   refreshToken(payload: RefreshTokenRequest): Observable<ApiResponse<RefreshTokenResponseData>> {
-    return this.http.post<ApiResponse<RefreshTokenResponseData>>(`${this.baseUrl}/refresh-token`, payload);
+    return this.http.post<ApiResponse<RefreshTokenResponseData>>(
+      `${this.baseUrl}/refresh-token`,
+      payload,
+    );
   }
 
   /** PATCH /auth/password/change — requires the Bearer token (attached by tokenInterceptor). */
@@ -48,12 +51,22 @@ export class AuthApiRepository implements IAuthRepository {
     return this.http.patch<ApiResponse<null>>(`${this.baseUrl}/password/change`, payload);
   }
 
-  forgotPassword(payload: ForgotPasswordRequest): Observable<ApiResponse<ForgotPasswordResponseData>> {
-    return this.http.post<ApiResponse<ForgotPasswordResponseData>>(`${this.baseUrl}/password/forgot`, payload);
+  forgotPassword(
+    payload: ForgotPasswordRequest,
+  ): Observable<ApiResponse<ForgotPasswordResponseData>> {
+    return this.http.post<ApiResponse<ForgotPasswordResponseData>>(
+      `${this.baseUrl}/password/forgot`,
+      payload,
+    );
   }
 
-  verifyPasswordCode(payload: VerifyPasswordCodeRequest): Observable<ApiResponse<VerifyPasswordCodeResponseData>> {
-    return this.http.post<ApiResponse<VerifyPasswordCodeResponseData>>(`${this.baseUrl}/password/verify`, payload);
+  verifyPasswordCode(
+    payload: VerifyPasswordCodeRequest,
+  ): Observable<ApiResponse<VerifyPasswordCodeResponseData>> {
+    return this.http.post<ApiResponse<VerifyPasswordCodeResponseData>>(
+      `${this.baseUrl}/password/verify`,
+      payload,
+    );
   }
 
   resetPassword(payload: ResetPasswordRequest): Observable<ApiResponse<null>> {

@@ -83,10 +83,7 @@ export class BranchApiRepository implements IBranchRepository {
    * mock repository's `Object.assign` semantics. `isVisible` is
    * intentionally excluded — it is toggled through its own endpoint.
    */
-  updateBranch(
-    id: number,
-    payload: BranchPayload,
-  ): Observable<ApiResponse<null>> {
+  updateBranch(id: number, payload: BranchPayload): Observable<ApiResponse<null>> {
     return this.http.put<ApiResponse<null>>(`${this.url}/${id}`, payload);
   }
 

@@ -13,22 +13,22 @@ import { forkJoin } from "rxjs";
 import { PERMISSIONS } from "@core/auth/permissions";
 import { LanguageService } from "@core/services/language.service";
 import { AuthService } from "../../../auth/service/auth.service";
-import { AppButtonComponent } from "../../../../shared/components/app-button/app-button.component";
-import { ConfirmModalComponent } from "../../../../shared/components/confirm-modal/confirm-modal.component";
-import { DrawerComponent } from "../../../../shared/components/drawer/drawer.component";
-import { EmptyStateComponent } from "../../../../shared/components/empty-state/empty-state.component";
-import { FailedStateComponent } from "../../../../shared/components/failed-state/failed-state.component";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { EmptyStateComponent } from "@shared/components/empty-state/empty-state.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
 import {
   FilterOption,
   FilterSelectComponent,
-} from "../../../../shared/components/filter-select/filter-select.component";
-import { PageHeaderComponent } from "../../../../shared/components/page-header/page-header.component";
-import { PaginationComponent } from "../../../../shared/components/pagination/pagination.component";
-import { SearchInputComponent } from "../../../../shared/components/search-input/search-input.component";
-import { SkeletonComponent } from "../../../../shared/components/skeleton/skeleton.component";
-import { StatCardComponent } from "../../../../shared/components/stat-card/stat-card.component";
+} from "@shared/components/filter-select/filter-select.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { PaginationComponent } from "@shared/components/pagination/pagination.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
+import { StatCardComponent } from "@shared/components/stat-card/stat-card.component";
 import { PackageCard } from "../../components/package-card/package-card";
-import { PackageForm } from "../../components/package-form";
+import { PackageForm } from "../../components/package-form/package-form";
 import {
   CreatePackagePayload,
   PackageDetails,
@@ -107,9 +107,13 @@ export class PackagesList implements OnInit {
    * Lazy on purpose (same as ChairsList): reading PERMISSIONS in a field initializer comes back
    * undefined in combined test runs, so every flag is a `computed`.
    */
-  protected readonly canCreate = computed(() => this.auth.hasPermission(PERMISSIONS.Package.Create));
+  protected readonly canCreate = computed(() =>
+    this.auth.hasPermission(PERMISSIONS.Package.Create),
+  );
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Package.Edit));
-  protected readonly canDelete = computed(() => this.auth.hasPermission(PERMISSIONS.Package.Delete));
+  protected readonly canDelete = computed(() =>
+    this.auth.hasPermission(PERMISSIONS.Package.Delete),
+  );
 
   /**
    * Skeleton cards only while there is nothing to show yet. A reload with cards on screen

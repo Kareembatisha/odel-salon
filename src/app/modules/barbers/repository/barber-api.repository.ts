@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from "@angular/common/http";
+import { Injectable, inject } from "@angular/core";
+import { Observable } from "rxjs";
 
-import { environment } from '@env/environment';
-import { ApiResponse } from '@shared/model/api_response.model';
+import { environment } from "@env/environment";
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   BarberDetails,
   BarberListItem,
@@ -11,10 +11,10 @@ import {
   CreateBarberPayload,
   DeleteBarbersRequest,
   UpdateBarberPayload,
-} from '../model/barber.model';
-import { buildCreateBarberFormData, buildUpdateBarberFormData } from '../utils/barber-form-data';
-import { buildBarbersParams } from '../utils/barber-query';
-import { IBarberRepository } from './barber.repository';
+} from "../model/barber.model";
+import { buildCreateBarberFormData, buildUpdateBarberFormData } from "../utils/barber-form-data";
+import { buildBarbersParams } from "../utils/barber-query";
+import { IBarberRepository } from "./barber.repository";
 
 /**
  * HTTP implementation of {@link IBarberRepository}.
@@ -28,7 +28,7 @@ import { IBarberRepository } from './barber.repository';
  * Content-Type header is deliberately NOT set: the browser adds it together
  * with the multipart boundary.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class BarberApiRepository implements IBarberRepository {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiUrl}/barbers`;
@@ -51,7 +51,10 @@ export class BarberApiRepository implements IBarberRepository {
 
   /** Edit / replace or remove the photo / transfer to another branch (may answer `409`). */
   updateBarber(id: number, payload: UpdateBarberPayload): Observable<ApiResponse<null>> {
-    return this.http.put<ApiResponse<null>>(`${this.url}/${id}`, buildUpdateBarberFormData(payload));
+    return this.http.put<ApiResponse<null>>(
+      `${this.url}/${id}`,
+      buildUpdateBarberFormData(payload),
+    );
   }
 
   /** Flip `isActive` (no body). Suspending the last active barber of a visible branch answers `409`. */

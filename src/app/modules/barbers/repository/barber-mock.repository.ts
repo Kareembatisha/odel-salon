@@ -260,7 +260,8 @@ export class BarberMockRepository implements IBarberRepository {
     }
 
     if (!phone) return { field: "Phone", key: "BARBERS.ERRORS.PHONE_REQUIRED" };
-    if (!isValidEgyptianMobile(phone)) return { field: "Phone", key: "BARBERS.ERRORS.PHONE_INVALID" };
+    if (!isValidEgyptianMobile(phone))
+      return { field: "Phone", key: "BARBERS.ERRORS.PHONE_INVALID" };
     if (this.db.barbers.some((b) => b.id !== ignoreId && b.phone === phone)) {
       return { field: "Phone", key: "BARBERS.ERRORS.PHONE_TAKEN" };
     }
@@ -329,16 +330,16 @@ export class BarberMockRepository implements IBarberRepository {
   /** 400 — same shape as the interceptor's validation toast: field label + message. */
   private invalid(field: string, messageKey: string): Observable<never> {
     this.notify.warning(`VALIDATION_FIELDS.${field}`, messageKey);
-    return throwError(() =>
-      Object.assign(new Error("Validation failed"), { status: 400 }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error("Validation failed"), { status: 400 })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 
   /** Mock repositories skip the HTTP interceptors, so show the toast the interceptor would. */
   private fail(message: string, statusCode: number): Observable<never> {
     this.notify.warning(message);
-    return throwError(() =>
-      Object.assign(new Error(message), { status: statusCode }),
-    ).pipe(delay(MOCK_DELAY_MS)) as Observable<never>;
+    return throwError(() => Object.assign(new Error(message), { status: statusCode })).pipe(
+      delay(MOCK_DELAY_MS),
+    ) as Observable<never>;
   }
 }

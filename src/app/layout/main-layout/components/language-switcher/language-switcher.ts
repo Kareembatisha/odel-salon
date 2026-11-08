@@ -7,7 +7,7 @@ import {
   signal,
 } from "@angular/core";
 import { TranslateModule } from "@ngx-translate/core";
-import { LanguageService, AppLang } from "../../../../core/services/language.service";
+import { LanguageService, AppLang } from "@core/services/language.service";
 
 interface LangOption {
   code: AppLang;
@@ -43,8 +43,7 @@ export class LanguageSwitcher {
   ];
 
   protected readonly currentOption = () =>
-    this.options.find((o) => o.code === this.languageService.currentLang()) ??
-    this.options[0];
+    this.options.find((o) => o.code === this.languageService.currentLang()) ?? this.options[0];
 
   protected toggle(): void {
     this.isOpen.update((v) => !v);

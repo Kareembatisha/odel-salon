@@ -1,17 +1,17 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { catchError, finalize, of } from 'rxjs';
+import { Injectable, inject, signal } from "@angular/core";
+import { catchError, finalize, of } from "rxjs";
 
-import { environment } from '@env/environment';
-import { DashboardSummary } from '../model/dashboard.model';
-import { DashboardApiRepository } from '../repository/dashboard-api.repository';
-import { DashboardMockRepository } from '../repository/dashboard-mock.repository';
-import { IDashboardRepository } from '../repository/dashboard.repository';
+import { environment } from "@env/environment";
+import { DashboardSummary } from "../model/dashboard.model";
+import { DashboardApiRepository } from "../repository/dashboard-api.repository";
+import { DashboardMockRepository } from "../repository/dashboard-mock.repository";
+import { IDashboardRepository } from "../repository/dashboard.repository";
 
 /**
  * DashboardService — business/UI state for the dashboard page (signals).
  * Same shape every feature service follows: `loading`, `hasError`, data signal, `load()`.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DashboardService {
   private readonly repository: IDashboardRepository = environment.useMock
     ? inject(DashboardMockRepository)

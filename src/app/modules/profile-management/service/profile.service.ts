@@ -1,13 +1,13 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, finalize, map, of, tap } from 'rxjs';
+import { Injectable, inject, signal } from "@angular/core";
+import { Observable, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from '@env/environment';
-import { NotificationService } from '@core/services/notification.service';
-import { AuthService } from '../../auth/service/auth.service';
-import { UpdateProfileRequest, UserProfile } from '../model/profile.model';
-import { ProfileApiRepository } from '../repository/profile-api.repository';
-import { ProfileMockRepository } from '../repository/profile-mock.repository';
-import { IProfileRepository } from '../repository/profile.repository';
+import { environment } from "@env/environment";
+import { NotificationService } from "@core/services/notification.service";
+import { AuthService } from "../../auth/service/auth.service";
+import { UpdateProfileRequest, UserProfile } from "../model/profile.model";
+import { ProfileApiRepository } from "../repository/profile-api.repository";
+import { ProfileMockRepository } from "../repository/profile-mock.repository";
+import { IProfileRepository } from "../repository/profile.repository";
 
 /**
  * ProfileService — state + business logic for the signed-in user's profile.
@@ -17,7 +17,7 @@ import { IProfileRepository } from '../repository/profile.repository';
  * pushes fullName / email / imageUrl into AuthService.currentUser — that is
  * what makes the header name and avatar change instantly, with no reload.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ProfileService {
   private readonly auth = inject(AuthService);
   private readonly notify = inject(NotificationService);
@@ -59,7 +59,7 @@ export class ProfileService {
   update(payload: UpdateProfileRequest): Observable<boolean> {
     this._saving.set(true);
     return this.repository.updateProfile(payload).pipe(
-      tap((res) => this.notify.success(res.message ?? 'PROFILE.PROFILE_UPDATED')),
+      tap((res) => this.notify.success(res.message ?? "PROFILE.PROFILE_UPDATED")),
       tap(() => this.load()),
       map(() => true),
       // The error interceptor already showed the backend's message / field errors.

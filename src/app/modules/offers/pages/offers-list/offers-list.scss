@@ -1,6 +1,12 @@
 @use "styles/variables" as v;
 
-.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: v.$space-3; min-height: 42px; }
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-3;
+  min-height: 42px;
+}
 
 // Responsive card grid: banners need a little more width than a package card.
 .grid {
@@ -16,14 +22,39 @@
   padding: 0;
   overflow: hidden;
 
-  &__banner { aspect-ratio: 16 / 9; width: 100%; background: v.$surface-sunken; }
-  &__body { display: flex; flex-direction: column; gap: v.$space-3; padding: v.$space-4; }
-  &__head { display: flex; align-items: flex-start; justify-content: space-between; gap: v.$space-3; }
-  &__chips { display: flex; flex-wrap: wrap; gap: v.$space-2; }
+  &__banner {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    background: v.$surface-sunken;
+  }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-3;
+    padding: v.$space-4;
+  }
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$space-3;
+  }
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: v.$space-2;
+  }
 }
 
 // Placeholder rows while the drawer loads the offer and the branch's services.
-.drawer-loading { display: flex; flex-direction: column; gap: v.$space-4; padding: v.$space-6; }
+.drawer-loading {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+  padding: v.$space-6;
+}
 
 // The panel takes programmatic focus (after a card leaves the list) — no ring for a non-interactive target.
-.panel:focus { outline: none; }
+.panel:focus {
+  outline: none;
+}

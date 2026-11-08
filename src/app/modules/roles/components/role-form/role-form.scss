@@ -1,0 +1,27 @@
+.rf {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.rf__body {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+.rf__hint {
+  display: flex;
+  gap: 8px;
+  color: var(--odl-text-secondary);
+  font-size: 13px;
+}
+.rf__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--odl-border);
+}

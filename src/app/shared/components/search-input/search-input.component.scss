@@ -1,6 +1,11 @@
 @use "styles/variables" as v;
 
-:host { display: block; min-width: 220px; flex: 1 1 260px; max-width: 360px; }
+:host {
+  display: block;
+  min-width: 220px;
+  flex: 1 1 260px;
+  max-width: 360px;
+}
 
 .si {
   display: flex;
@@ -12,9 +17,14 @@
   border: 1px solid v.$border-strong;
   border-radius: v.$radius-md;
   color: v.$text-muted;
-  transition: border-color v.$transition-normal, box-shadow v.$transition-normal;
+  transition:
+    border-color v.$transition-normal,
+    box-shadow v.$transition-normal;
 
-  &:focus-within { border-color: v.$primary; box-shadow: 0 0 0 3px v.tint(v.$primary, 22%); }
+  &:focus-within {
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+  }
 
   input {
     flex: 1;
@@ -25,8 +35,12 @@
     color: v.$text;
     font: inherit;
     font-size: v.$text-base;
-    &::placeholder { color: v.$text-placeholder; }
-    &::-webkit-search-cancel-button { display: none; }
+    &::placeholder {
+      color: v.$text-placeholder;
+    }
+    &::-webkit-search-cancel-button {
+      display: none;
+    }
   }
 
   &__clear {
@@ -37,6 +51,9 @@
     border-radius: v.$radius-full;
     color: v.$text-muted;
     cursor: pointer;
-    &:hover { color: v.$text; background: v.$surface-hover; }
+    &:hover {
+      color: v.$text;
+      background: v.$surface-hover;
+    }
   }
 }

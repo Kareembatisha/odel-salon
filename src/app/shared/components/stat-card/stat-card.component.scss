@@ -1,7 +1,10 @@
 @use "styles/variables" as v;
 @use "styles/patterns" as p;
 
-:host { display: block; min-width: 0; }
+:host {
+  display: block;
+  min-width: 0;
+}
 
 .stat {
   @include p.card(v.$space-5);
@@ -58,25 +61,56 @@
     gap: v.$space-1;
     font-weight: v.$fw-semibold;
     color: v.$text-secondary;
-    &--up { color: v.$success-text; }
-    &--down { color: v.$danger-text; }
-    i { font-size: 0.8em; }
+    &--up {
+      color: v.$success-text;
+    }
+    &--down {
+      color: v.$danger-text;
+    }
+    i {
+      font-size: 0.8em;
+    }
   }
 
-  &__hint { color: v.$text-muted; }
+  &__hint {
+    color: v.$text-muted;
+  }
 
   @media (max-width: v.$bp-sm) {
     padding: v.$space-4;
-    &__value { font-size: 28px; }
-    &__icon { width: 32px; height: 32px; }
+    &__value {
+      font-size: 28px;
+    }
+    &__icon {
+      width: 32px;
+      height: 32px;
+    }
   }
 
-  &--success &__icon { background: v.$success-bg; color: v.$success-text; }
-  &--info &__icon    { background: v.$info-bg;    color: v.$info-text; }
-  &--warning &__icon { background: v.$warning-bg; color: v.$warning-text; }
-  &--danger &__icon  { background: v.$danger-bg;  color: v.$danger-text; }
-  &--neutral &__icon { background: v.$surface-hover; color: v.$text-secondary; }
+  &--success &__icon {
+    background: v.$success-bg;
+    color: v.$success-text;
+  }
+  &--info &__icon {
+    background: v.$info-bg;
+    color: v.$info-text;
+  }
+  &--warning &__icon {
+    background: v.$warning-bg;
+    color: v.$warning-text;
+  }
+  &--danger &__icon {
+    background: v.$danger-bg;
+    color: v.$danger-text;
+  }
+  &--neutral &__icon {
+    background: v.$surface-hover;
+    color: v.$text-secondary;
+  }
 }
 
 // Arabic has no display serif — keep the number weight consistent.
-:host-context([dir="rtl"]) .stat__value { font-size: 34px; font-weight: v.$fw-bold; }
+:host-context([dir="rtl"]) .stat__value {
+  font-size: 34px;
+  font-weight: v.$fw-bold;
+}

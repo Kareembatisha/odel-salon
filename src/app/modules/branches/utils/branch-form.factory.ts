@@ -20,10 +20,7 @@ export const BRANCH_DAYS = [
 ];
 
 // Create one working day
-export function createWorkingHourGroup(
-  fb: FormBuilder,
-  day: BranchDayOfWeek,
-): FormGroup {
+export function createWorkingHourGroup(fb: FormBuilder, day: BranchDayOfWeek): FormGroup {
   return fb.group(
     {
       dayOfWeek: [day],
@@ -53,10 +50,7 @@ export function createBranchForm(fb: FormBuilder): FormGroup {
 
       address: ["", [Validators.required, Validators.maxLength(250)]],
 
-      phone: [
-        "",
-        [Validators.required, Validators.pattern(/^\+201[0125][0-9]{8}$/)],
-      ],
+      phone: ["", [Validators.required, Validators.pattern(/^\+201[0125][0-9]{8}$/)]],
 
       mapUrl: ["", [optionalUrlValidator()]],
     }),

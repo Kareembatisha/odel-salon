@@ -12,7 +12,9 @@
   text-align: center;
 
   // Inside the shell the content area is (viewport − header) tall; a full 100vh would add a scrollbar.
-  :host(.nf-host--shell) & { min-height: calc(100vh - #{v.$header-height}); }
+  :host(.nf-host--shell) & {
+    min-height: calc(100vh - #{v.$header-height});
+  }
 
   &__code {
     font-family: v.$font-display;
@@ -21,6 +23,13 @@
     line-height: 1;
     color: v.$primary-text;
   }
-  &__title { font-size: v.$text-3xl; font-weight: v.$fw-semibold; }
-  &__text { max-width: 42ch; margin-bottom: v.$space-4; color: v.$text-secondary; }
+  &__title {
+    font-size: v.$text-3xl;
+    font-weight: v.$fw-semibold;
+  }
+  &__text {
+    max-width: 42ch;
+    margin-bottom: v.$space-4;
+    color: v.$text-secondary;
+  }
 }

@@ -42,7 +42,9 @@
   }
 
   // An inactive chair reads as "off" at a glance, before the badge is even read.
-  &--inactive &__name { color: v.$text-secondary; }
+  &--inactive &__name {
+    color: v.$text-secondary;
+  }
 
   &__link {
     display: block;
@@ -57,8 +59,13 @@
     overflow-wrap: anywhere;
     cursor: pointer;
 
-    &:hover { text-decoration: underline; }
-    &:focus-visible { @include p.focus-ring; border-radius: v.$radius-xs; }
+    &:hover {
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      @include p.focus-ring;
+      border-radius: v.$radius-xs;
+    }
   }
 
   // Branch
@@ -72,8 +79,17 @@
     color: v.$text-secondary;
     font-size: v.$text-sm;
 
-    li { display: flex; align-items: flex-start; gap: v.$space-2; min-width: 0; }
-    i { margin-top: v.$space-1; color: v.$text-muted; flex-shrink: 0; }
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: v.$space-2;
+      min-width: 0;
+    }
+    i {
+      margin-top: v.$space-1;
+      color: v.$text-muted;
+      flex-shrink: 0;
+    }
   }
 
   &__text {
@@ -111,7 +127,10 @@
     min-width: 0;
     cursor: pointer;
 
-    &--disabled { cursor: progress; opacity: 0.6; }
+    &--disabled {
+      cursor: progress;
+      opacity: 0.6;
+    }
   }
 
   &__availability-text {

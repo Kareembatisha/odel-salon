@@ -1,10 +1,6 @@
 import { FormArray, FormGroup } from "@angular/forms";
 
-import {
-  BranchDayOfWeek,
-  BranchDetails,
-  BranchPayload,
-} from "../model/branch.model";
+import { BranchDayOfWeek, BranchDetails, BranchPayload } from "../model/branch.model";
 
 // ============================================================
 // Branch form ⇄ API mapping
@@ -89,9 +85,7 @@ export function applyBranchToForm(form: FormGroup, branch: BranchDetails): void 
   const days = (form.get("workingHours") as FormArray<FormGroup>).controls;
 
   branch.workingHours.forEach((day) => {
-    const group = days.find(
-      (control) => control.get("dayOfWeek")?.value === day.dayOfWeek,
-    );
+    const group = days.find((control) => control.get("dayOfWeek")?.value === day.dayOfWeek);
 
     group?.patchValue({
       isOpen: day.isOpen,

@@ -1,13 +1,5 @@
 import { Injectable, computed, inject, signal } from "@angular/core";
-import {
-  Observable,
-  Subscription,
-  catchError,
-  finalize,
-  map,
-  of,
-  tap,
-} from "rxjs";
+import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
@@ -29,9 +21,7 @@ import { BARBER_REPOSITORY } from "../repository/barber.repository";
 const PAGE_SIZE = 10;
 
 /** Filters the list screen can change (everything in the query except paging). */
-export type BarberFilters = Partial<
-  Pick<BarbersQuery, "search" | "branchId" | "isActive">
->;
+export type BarberFilters = Partial<Pick<BarbersQuery, "search" | "branchId" | "isActive">>;
 
 // ============================================================
 // Service
@@ -159,10 +149,7 @@ export class BarbersService {
 
   /** Create a barber → its new id, or `null` on failure; reloads the list. */
   createBarber(payload: CreateBarberPayload): Observable<number | null> {
-    return this.mutate(
-      this.repository.createBarber(payload),
-      "BARBERS.CREATED",
-    ).pipe(
+    return this.mutate(this.repository.createBarber(payload), "BARBERS.CREATED").pipe(
       map((res) => res?.data ?? null),
       tap((id) => id !== null && this.load()),
     );
@@ -170,10 +157,7 @@ export class BarbersService {
 
   /** Edit / replace or remove the photo / transfer branch → `true` on success; reloads the list. */
   updateBarber(id: number, payload: UpdateBarberPayload): Observable<boolean> {
-    return this.mutate(
-      this.repository.updateBarber(id, payload),
-      "BARBERS.UPDATED",
-    ).pipe(
+    return this.mutate(this.repository.updateBarber(id, payload), "BARBERS.UPDATED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.load()),
     );
@@ -213,8 +197,7 @@ export class BarbersService {
 
   /** If the delete emptied the current page, step back one page first so the user isn't stranded. */
   private reloadAfterRemoval(removed: number): void {
-    const pageEmptied =
-      this._barbers().length <= removed && this._query().pageNumber > 1;
+    const pageEmptied = this._barbers().length <= removed && this._query().pageNumber > 1;
 
     if (pageEmptied) {
       this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));

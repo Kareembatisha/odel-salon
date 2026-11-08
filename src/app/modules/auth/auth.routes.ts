@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import { Routes } from "@angular/router";
 
 export const AUTH_ROUTES: Routes = [
   {
@@ -13,29 +13,21 @@ export const AUTH_ROUTES: Routes = [
   {
     path: "forget-password",
     loadComponent: () =>
-      import("./pages/forget-password/forget-password").then(
-        (m) => m.ForgetPassword,
-      ),
+      import("./pages/forget-password/forget-password").then((m) => m.ForgetPassword),
   },
   {
     path: "email-verification",
     loadComponent: () =>
-      import("./pages/email-verification/email-verification").then(
-        (m) => m.EmailVerification,
-      ),
+      import("./pages/email-verification/email-verification").then((m) => m.EmailVerification),
   },
   {
     path: "create-new-password",
     loadComponent: () =>
-      import("./pages/create-new-password/create-new-password").then(
-        (m) => m.CreateNewPassword,
-      ),
+      import("./pages/create-new-password/create-new-password").then((m) => m.CreateNewPassword),
   },
   {
     path: "password-success",
     loadComponent: () =>
-      import("./pages/password-success/password-success").then(
-        (m) => m.PasswordSuccess,
-      ),
+      import("./pages/password-success/password-success").then((m) => m.PasswordSuccess),
   },
 ];

@@ -1,33 +1,52 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from "@angular/core";
+import { Router } from "@angular/router";
+import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
-import { PERMISSIONS } from '@core/auth/permissions';
-import { AuthService } from '../../../auth/service/auth.service';
-import { AppButtonComponent } from '../../../../shared/components/app-button/app-button.component';
-import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal.component';
-import { DataTableColumnDirective, DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
-import { DrawerComponent } from '../../../../shared/components/drawer/drawer.component';
-import { FailedStateComponent } from '../../../../shared/components/failed-state/failed-state.component';
-import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
-import { SearchInputComponent } from '../../../../shared/components/search-input/search-input.component';
-import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
-import { HasPermissionDirective } from '../../../../shared/directives/has-permission.directive';
-import { RoleListItem } from '../../model/role.model';
-import { RolesService } from '../../service/roles.service';
-import { RoleForm } from '../../components/role-form';
+import { PERMISSIONS } from "@core/auth/permissions";
+import { AuthService } from "../../../auth/service/auth.service";
+import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
+import { ConfirmModalComponent } from "@shared/components/confirm-modal/confirm-modal.component";
+import {
+  DataTableColumnDirective,
+  DataTableComponent,
+} from "@shared/components/data-table/data-table.component";
+import { DrawerComponent } from "@shared/components/drawer/drawer.component";
+import { FailedStateComponent } from "@shared/components/failed-state/failed-state.component";
+import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
+import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
+import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
+import { HasPermissionDirective } from "@shared/directives/has-permission.directive";
+import { RoleListItem } from "../../model/role.model";
+import { RolesService } from "../../service/roles.service";
+import { RoleForm } from "../../components/role-form/role-form";
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-roles-list',
+  selector: "app-roles-list",
   standalone: true,
   imports: [
-    TranslateModule, PageHeaderComponent, AppButtonComponent, SearchInputComponent, DataTableComponent,
-    DataTableColumnDirective, StatusBadgeComponent, DrawerComponent, ConfirmModalComponent,
-    FailedStateComponent, HasPermissionDirective, RoleForm,
+    TranslateModule,
+    PageHeaderComponent,
+    AppButtonComponent,
+    SearchInputComponent,
+    DataTableComponent,
+    DataTableColumnDirective,
+    StatusBadgeComponent,
+    DrawerComponent,
+    ConfirmModalComponent,
+    FailedStateComponent,
+    HasPermissionDirective,
+    RoleForm,
   ],
-  templateUrl: './roles-list.html',
-  styleUrl: './roles-list.scss',
+  templateUrl: "./roles-list.html",
+  styleUrl: "./roles-list.scss",
 })
 export class RolesList implements OnInit {
   private readonly roles = inject(RolesService);
@@ -46,7 +65,11 @@ export class RolesList implements OnInit {
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Role.Edit));
 
   /** Your own role can't be deleted from under you. */
-  protected readonly lockedIds = computed(() => this.rows().filter((r) => this.auth.hasRole(r.name)).map((r) => r.id));
+  protected readonly lockedIds = computed(() =>
+    this.rows()
+      .filter((r) => this.auth.hasRole(r.name))
+      .map((r) => r.id),
+  );
 
   protected readonly selection = signal<Array<string | number>>([]);
 
@@ -58,13 +81,13 @@ export class RolesList implements OnInit {
   protected readonly pendingDelete = signal<RoleListItem[]>([]);
   protected readonly deleteMessage = computed(() => {
     const items = this.pendingDelete();
-    if (!items.length) return '';
+    if (!items.length) return "";
     const withUsers = items.filter((r) => r.countUsers > 0);
     const base =
       items.length === 1
-        ? this.translate.instant('ROLES.DELETE.MESSAGE_ONE', { name: items[0].name })
-        : this.translate.instant('ROLES.DELETE.MESSAGE_MANY', { count: items.length });
-    return withUsers.length ? `${base} ${this.translate.instant('ROLES.DELETE.HAS_USERS')}` : base;
+        ? this.translate.instant("ROLES.DELETE.MESSAGE_ONE", { name: items[0].name })
+        : this.translate.instant("ROLES.DELETE.MESSAGE_MANY", { count: items.length });
+    return withUsers.length ? `${base} ${this.translate.instant("ROLES.DELETE.HAS_USERS")}` : base;
   });
 
   ngOnInit(): void {
@@ -89,7 +112,7 @@ export class RolesList implements OnInit {
   }
 
   protected open(role: RoleListItem): void {
-    this.router.navigate(['/main/roles', role.id]);
+    this.router.navigate(["/main/roles", role.id]);
   }
 
   protected askDelete(role: RoleListItem, event: Event): void {

@@ -1,13 +1,5 @@
 import { Injectable, computed, inject, signal } from "@angular/core";
-import {
-  Observable,
-  Subscription,
-  catchError,
-  finalize,
-  map,
-  of,
-  tap,
-} from "rxjs";
+import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
@@ -30,9 +22,7 @@ import { readChairsSummary } from "../utils/chair-summary.util";
 const PAGE_SIZE = 12;
 
 /** Filters the list screen can change (everything in the query except paging). */
-export type ChairFilters = Partial<
-  Pick<ChairsQuery, "search" | "branchId" | "type" | "isActive">
->;
+export type ChairFilters = Partial<Pick<ChairsQuery, "search" | "branchId" | "type" | "isActive">>;
 
 // ============================================================
 // Service
@@ -171,10 +161,7 @@ export class ChairsService {
 
   /** Create a chair → its new id, or `null` on failure; reloads the list. */
   createChair(payload: CreateChairPayload): Observable<number | null> {
-    return this.mutate(
-      this.repository.createChair(payload),
-      "CHAIRS.CREATED",
-    ).pipe(
+    return this.mutate(this.repository.createChair(payload), "CHAIRS.CREATED").pipe(
       map((res) => res?.data ?? null),
       tap((id) => id !== null && this.load()),
     );
@@ -182,10 +169,7 @@ export class ChairsService {
 
   /** Rename / change type → `true` on success; reloads the list. */
   updateChair(id: number, payload: UpdateChairPayload): Observable<boolean> {
-    return this.mutate(
-      this.repository.updateChair(id, payload),
-      "CHAIRS.UPDATED",
-    ).pipe(
+    return this.mutate(this.repository.updateChair(id, payload), "CHAIRS.UPDATED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.load()),
     );
@@ -193,10 +177,7 @@ export class ChairsService {
 
   /** Activate / deactivate → `true` on success; reloads the list (and the summary cards). */
   toggleStatus(id: number): Observable<boolean> {
-    return this.mutate(
-      this.repository.toggleChairStatus(id),
-      "CHAIRS.STATUS_UPDATED",
-    ).pipe(
+    return this.mutate(this.repository.toggleChairStatus(id), "CHAIRS.STATUS_UPDATED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.load()),
     );
@@ -206,10 +187,7 @@ export class ChairsService {
   remove(ids: number[]): Observable<boolean> {
     const payload: DeleteChairsRequest = { ids };
 
-    return this.mutate(
-      this.repository.deleteChairs(payload),
-      "CHAIRS.DELETED",
-    ).pipe(
+    return this.mutate(this.repository.deleteChairs(payload), "CHAIRS.DELETED").pipe(
       map((res) => res !== null),
       tap((ok) => ok && this.reloadAfterRemoval(ids.length)),
     );
@@ -217,8 +195,7 @@ export class ChairsService {
 
   /** If the delete emptied the current page, step back one page first so the user isn't stranded. */
   private reloadAfterRemoval(removed: number): void {
-    const pageEmptied =
-      this._chairs().length <= removed && this._query().pageNumber > 1;
+    const pageEmptied = this._chairs().length <= removed && this._query().pageNumber > 1;
 
     if (pageEmptied) {
       this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));

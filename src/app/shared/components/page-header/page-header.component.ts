@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 /**
  * Title block at the top of every routed page.
@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  *   </app-page-header>
  */
 @Component({
-  selector: 'app-page-header',
+  selector: "app-page-header",
   standalone: true,
   template: `
     <header class="ph">
@@ -20,10 +20,10 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       <div class="ph__actions"><ng-content /></div>
     </header>
   `,
-  styleUrl: './page-header.component.scss',
+  styleUrl: "./page-header.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageHeaderComponent {
   title = input.required<string>();
-  subtitle = input<string>('');
+  subtitle = input<string>("");
 }

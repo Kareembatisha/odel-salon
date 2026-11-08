@@ -1,14 +1,22 @@
-import { ChangeDetectionStrategy, Component, computed, effect, HostListener, inject, signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
-import { TranslateModule } from '@ngx-translate/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  HostListener,
+  inject,
+  signal,
+} from "@angular/core";
+import { NavigationEnd, Router } from "@angular/router";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { filter } from "rxjs";
+import { TranslateModule } from "@ngx-translate/core";
 
-import { AuthService } from '../../../../modules/auth/service/auth.service';
-import { LanguageService } from '../../../../core/services/language.service';
-import { BRAND } from '../../../../core/brand/brand';
-import { NAV_SECTIONS, NavItem, NavSection } from '../../nav.config';
-import { SidebarService } from './sidebar.service';
+import { AuthService } from "../../../../modules/auth/service/auth.service";
+import { LanguageService } from "@core/services/language.service";
+import { BRAND } from "@core/brand/brand";
+import { NAV_SECTIONS, NavItem, NavSection } from "../../nav.config";
+import { SidebarService } from "./sidebar.service";
 
 // Kept in sync with $bp-lg in the layout SCSS — below this width the sidebar is an
 // off-canvas overlay and always renders expanded.
@@ -22,11 +30,11 @@ const MOBILE_BREAKPOINT = 900;
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-sidebar',
+  selector: "app-sidebar",
   standalone: true,
   imports: [TranslateModule],
-  templateUrl: './sidebar.html',
-  styleUrl: './sidebar.scss',
+  templateUrl: "./sidebar.html",
+  styleUrl: "./sidebar.scss",
 })
 export class Sidebar {
   protected readonly sidebar = inject(SidebarService);
@@ -35,9 +43,11 @@ export class Sidebar {
   private readonly auth = inject(AuthService);
   protected readonly brand = BRAND;
 
-  protected readonly isMobile = signal(typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT);
+  protected readonly isMobile = signal(
+    typeof window !== "undefined" && window.innerWidth <= MOBILE_BREAKPOINT,
+  );
 
-  @HostListener('window:resize')
+  @HostListener("window:resize")
   protected onResize(): void {
     this.isMobile.set(window.innerWidth <= MOBILE_BREAKPOINT);
   }
@@ -55,14 +65,20 @@ export class Sidebar {
       ...section,
       items: section.items
         .filter((item) => this.isVisible(item))
-        .map((item) => (item.children ? { ...item, children: item.children.filter((c) => this.isVisible(c)) } : item)),
+        .map((item) =>
+          item.children
+            ? { ...item, children: item.children.filter((c) => this.isVisible(c)) }
+            : item,
+        ),
     })).filter((section) => section.items.length > 0),
   );
 
   protected readonly topSections = computed(() => this.sections().filter((s) => !s.pinnedBottom));
   protected readonly bottomSections = computed(() => this.sections().filter((s) => s.pinnedBottom));
 
-  private readonly flatItems = NAV_SECTIONS.flatMap((s) => s.items.flatMap((i) => (i.children ? i.children : [i])));
+  private readonly flatItems = NAV_SECTIONS.flatMap((s) =>
+    s.items.flatMap((i) => (i.children ? i.children : [i])),
+  );
 
   // Active item derives from the router URL (not clicks) so deep links, refresh,
   // breadcrumbs and back/forward all highlight correctly.
@@ -73,18 +89,20 @@ export class Sidebar {
 
   protected readonly activeItemId = computed<string>(() => {
     this.navEnd();
-    const url = this.router.url.split('#')[0];
+    const url = this.router.url.split("#")[0];
     let best: NavItem | undefined;
     for (const item of this.flatItems) {
       if (!item.route) continue;
       // "/main" is a prefix of every route — only an exact match counts for the dashboard.
       const match =
-        item.route === '/main'
-          ? url === '/main' || url.startsWith('/main?')
-          : url === item.route || url.startsWith(`${item.route}/`) || url.startsWith(`${item.route}?`);
+        item.route === "/main"
+          ? url === "/main" || url.startsWith("/main?")
+          : url === item.route ||
+            url.startsWith(`${item.route}/`) ||
+            url.startsWith(`${item.route}?`);
       if (match && (!best || item.route.length > (best.route?.length ?? 0))) best = item;
     }
-    return best?.id ?? '';
+    return best?.id ?? "";
   });
 
   protected readonly expandedGroups = signal<Record<string, boolean>>({});
@@ -95,7 +113,9 @@ export class Sidebar {
       const active = this.activeItemId();
       for (const item of this.flatItems) {
         if (item.id !== active) continue;
-        const parent = NAV_SECTIONS.flatMap((s) => s.items).find((i) => i.children?.some((c) => c.id === active));
+        const parent = NAV_SECTIONS.flatMap((s) => s.items).find((i) =>
+          i.children?.some((c) => c.id === active),
+        );
         if (parent) this.expandedGroups.update((g) => ({ ...g, [parent.id]: true }));
       }
     });

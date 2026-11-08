@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from "@angular/common/http";
+import { Injectable, inject } from "@angular/core";
+import { Observable } from "rxjs";
 
-import { environment } from '@env/environment';
-import { ApiResponse } from '@shared/model/api_response.model';
+import { environment } from "@env/environment";
+import { ApiResponse } from "@shared/model/api_response.model";
 import {
   CreateUserRequest,
   DeleteUsersRequest,
@@ -11,17 +11,19 @@ import {
   UserDetails,
   UserListItem,
   UsersQuery,
-} from '../model/user.model';
-import { buildUsersParams } from '../utils/user-query';
-import { IUserRepository } from './user.repository';
+} from "../model/user.model";
+import { buildUsersParams } from "../utils/user-query";
+import { IUserRepository } from "./user.repository";
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class UserApiRepository implements IUserRepository {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.apiUrl}/users`;
 
   getUsers(query: UsersQuery): Observable<ApiResponse<UserListItem[]>> {
-    return this.http.get<ApiResponse<UserListItem[]>>(this.url, { params: buildUsersParams(query) });
+    return this.http.get<ApiResponse<UserListItem[]>>(this.url, {
+      params: buildUsersParams(query),
+    });
   }
 
   getUser(id: number): Observable<ApiResponse<UserDetails>> {

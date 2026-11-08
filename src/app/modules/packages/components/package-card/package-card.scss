@@ -31,7 +31,9 @@
     min-width: 0;
   }
 
-  &__titles { min-width: 0; }
+  &__titles {
+    min-width: 0;
+  }
 
   &__name {
     margin: 0;
@@ -44,7 +46,9 @@
   }
 
   // An inactive package reads as "off" at a glance, before the badge is even read.
-  &--inactive &__name { color: v.$text-secondary; }
+  &--inactive &__name {
+    color: v.$text-secondary;
+  }
 
   &__other-name {
     margin: v.$space-1 0 0;
@@ -66,8 +70,13 @@
     overflow-wrap: anywhere;
     cursor: pointer;
 
-    &:hover { text-decoration: underline; }
-    &:focus-visible { @include p.focus-ring; border-radius: v.$radius-xs; }
+    &:hover {
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      @include p.focus-ring;
+      border-radius: v.$radius-xs;
+    }
   }
 
   // Included services
@@ -99,7 +108,9 @@
     color: v.$text-secondary;
     font-size: v.$text-sm;
 
-    i { color: v.$text-muted; }
+    i {
+      color: v.$text-muted;
+    }
   }
 
   // Prices
@@ -119,13 +130,35 @@
     gap: v.$space-1 v.$space-3;
     padding: v.$space-2 0;
 
-    dt { margin: 0; color: v.$text-secondary; font-size: v.$text-sm; }
-    dd { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: v.$space-2; margin: 0; min-width: 0; }
+    dt {
+      margin: 0;
+      color: v.$text-secondary;
+      font-size: v.$text-sm;
+    }
+    dd {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: v.$space-2;
+      margin: 0;
+      min-width: 0;
+    }
   }
 
-  &__price { color: v.$text; font-size: v.$text-base; font-weight: v.$fw-semibold; }
-  &__original { color: v.$text-muted; font-size: v.$text-sm; }
-  &__muted { color: v.$text-muted; font-size: v.$text-sm; }
+  &__price {
+    color: v.$text;
+    font-size: v.$text-base;
+    font-weight: v.$fw-semibold;
+  }
+  &__original {
+    color: v.$text-muted;
+    font-size: v.$text-sm;
+  }
+  &__muted {
+    color: v.$text-muted;
+    font-size: v.$text-sm;
+  }
 
   &__saving {
     padding: 1px v.$space-2;
@@ -155,7 +188,10 @@
     min-width: 0;
     cursor: pointer;
 
-    &--disabled { cursor: progress; opacity: 0.6; }
+    &--disabled {
+      cursor: progress;
+      opacity: 0.6;
+    }
   }
 
   &__availability-text {

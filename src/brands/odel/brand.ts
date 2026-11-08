@@ -22,11 +22,11 @@ export interface BrandConfig {
 }
 
 export const BRAND: BrandConfig = {
-  name: 'Odel Salon',
-  shortName: 'Odel',
-  nameAr: 'أوديل صالون',
-  logoMark: 'assets/brand/logo-mark.svg',
-  themeColor: '#141311',
-  supportEmail: 'support@odel-salon.com',
-  copyrightHolder: 'Odel Salon',
+  name: "Odel Salon",
+  shortName: "Odel",
+  nameAr: "أوديل صالون",
+  logoMark: "assets/brand/logo-mark.svg",
+  themeColor: "#141311",
+  supportEmail: "support@odel-salon.com",
+  copyrightHolder: "Odel Salon",
 };

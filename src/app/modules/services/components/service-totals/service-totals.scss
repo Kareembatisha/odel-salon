@@ -1,6 +1,8 @@
 @use "styles/variables" as v;
 
-:host { display: block; }
+:host {
+  display: block;
+}
 
 .st {
   padding: v.$space-4;
@@ -8,14 +10,27 @@
   border-radius: v.$radius-md;
   background: v.$surface-sunken;
 
-  &__title { margin: 0 0 v.$space-3; color: v.$text; font-size: v.$text-sm; font-weight: v.$fw-semibold; }
+  &__title {
+    margin: 0 0 v.$space-3;
+    color: v.$text;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-semibold;
+  }
   &__list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: v.$space-3;
     margin: 0;
 
-    dt { color: v.$text-muted; font-size: v.$text-xs; }
-    dd { margin: 2px 0 0; color: v.$text; font-size: v.$text-base; font-weight: v.$fw-semibold; }
+    dt {
+      color: v.$text-muted;
+      font-size: v.$text-xs;
+    }
+    dd {
+      margin: 2px 0 0;
+      color: v.$text;
+      font-size: v.$text-base;
+      font-weight: v.$fw-semibold;
+    }
   }
 }
