@@ -212,6 +212,7 @@ export class PackagesList implements OnInit {
 
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
+    if (!this.canCreate()) return;
     const branchId = this.branchId();
     if (branchId === null) return;
 
@@ -284,18 +285,19 @@ export class PackagesList implements OnInit {
    * service is no longer active…) simply stays where it was; the interceptor shows why.
    */
   protected toggle(pkg: PackageListItem): void {
-    if (this.saving()) return;
+    if (!this.canEdit() || this.saving()) return;
     this.packagesService.toggleStatus(pkg.id).subscribe();
   }
 
   // ── Delete ───────────────────────────────────────────
   protected askDelete(pkg: PackageListItem): void {
+    if (!this.canDelete()) return;
     this.pendingDelete.set(pkg);
   }
 
   protected confirmDelete(): void {
     const pkg = this.pendingDelete();
-    if (!pkg) return;
+    if (!pkg || !this.canDelete() || this.saving()) return;
 
     this.packagesService.remove([pkg.id]).subscribe((ok) => ok && this.pendingDelete.set(null));
   }

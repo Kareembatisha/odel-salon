@@ -4,7 +4,7 @@ import { TestBed } from "@angular/core/testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { environment } from "@env/environment";
-import { CreateUserRequest, UpdateUserRequest } from "../model/user.model";
+import { CreateUserPayload, UpdateUserPayload } from "../model/user.model";
 import { UserApiRepository } from "./user-api.repository";
 
 const URL = `${environment.apiUrl}/users`;
@@ -51,7 +51,7 @@ describe("UserApiRepository", () => {
   });
 
   it("GET /users/{id}", () => {
-    repo.getUser(5).subscribe();
+    repo.getUserById(5).subscribe();
 
     const req = http.expectOne(`${URL}/5`);
     expect(req.request.method).toBe("GET");
@@ -59,7 +59,7 @@ describe("UserApiRepository", () => {
   });
 
   it("POST /users with the payload", () => {
-    const payload = { fullName: "Ali" } as CreateUserRequest;
+    const payload = { fullName: "Ali" } as CreateUserPayload;
     repo.createUser(payload).subscribe();
 
     const req = http.expectOne(URL);
@@ -69,7 +69,7 @@ describe("UserApiRepository", () => {
   });
 
   it("PUT /users/{id} with the payload", () => {
-    const payload = { fullName: "Ali B" } as UpdateUserRequest;
+    const payload = { fullName: "Ali B" } as UpdateUserPayload;
     repo.updateUser(5, payload).subscribe();
 
     const req = http.expectOne(`${URL}/5`);
@@ -79,7 +79,7 @@ describe("UserApiRepository", () => {
   });
 
   it("PATCH /users/{id}/toggle-status without a body", () => {
-    repo.toggleStatus(5).subscribe();
+    repo.toggleUserStatus(5).subscribe();
 
     const req = http.expectOne(`${URL}/5/toggle-status`);
     expect(req.request.method).toBe("PATCH");

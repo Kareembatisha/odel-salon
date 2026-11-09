@@ -1,11 +1,8 @@
 import { Injectable, inject, signal } from "@angular/core";
 import { catchError, finalize, of } from "rxjs";
 
-import { environment } from "@env/environment";
 import { DashboardSummary } from "../model/dashboard.model";
-import { DashboardApiRepository } from "../repository/dashboard-api.repository";
-import { DashboardMockRepository } from "../repository/dashboard-mock.repository";
-import { IDashboardRepository } from "../repository/dashboard.repository";
+import { DASHBOARD_REPOSITORY } from "../repository/dashboard.repository";
 
 /**
  * DashboardService — business/UI state for the dashboard page (signals).
@@ -13,9 +10,7 @@ import { IDashboardRepository } from "../repository/dashboard.repository";
  */
 @Injectable({ providedIn: "root" })
 export class DashboardService {
-  private readonly repository: IDashboardRepository = environment.useMock
-    ? inject(DashboardMockRepository)
-    : inject(DashboardApiRepository);
+  private readonly repository = inject(DASHBOARD_REPOSITORY);
 
   private readonly _summary = signal<DashboardSummary | null>(null);
   private readonly _loading = signal(false);

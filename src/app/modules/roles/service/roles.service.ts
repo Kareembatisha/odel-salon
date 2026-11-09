@@ -1,9 +1,9 @@
-import { Injectable, inject, signal } from "@angular/core";
-import { Observable, catchError, finalize, map, of, tap } from "rxjs";
+import { computed, inject, Injectable, signal } from "@angular/core";
+import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from "@env/environment";
 import { NotificationService } from "@core/services/notification.service";
-import { PaginationMeta } from "@shared/model/api_response.model";
+import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
+import { TABLE_PAGE_SIZE } from "@shared/model/pagination.constants";
 import { AuthService } from "../../auth/service/auth.service";
 import {
   RoleDetails,
@@ -11,11 +11,7 @@ import {
   RolesQuery,
   UpdateRolePermissionsRequest,
 } from "../model/role.model";
-import { RoleApiRepository } from "../repository/role-api.repository";
-import { RoleMockRepository } from "../repository/role-mock.repository";
-import { IRoleRepository } from "../repository/role.repository";
-
-const PAGE_SIZE = 10;
+import { ROLE_REPOSITORY } from "../repository/role.repository";
 
 /**
  * RolesService — list state (server-side search + paging) and role mutations.
@@ -27,40 +23,53 @@ export class RolesService {
   private readonly notify = inject(NotificationService);
   private readonly auth = inject(AuthService);
 
-  private readonly repository: IRoleRepository = environment.useMock
-    ? inject(RoleMockRepository)
-    : inject(RoleApiRepository);
+  private readonly repository = inject(ROLE_REPOSITORY);
 
   private readonly _roles = signal<RoleListItem[]>([]);
   private readonly _meta = signal<PaginationMeta | null>(null);
   private readonly _query = signal<RolesQuery>({
     pageNumber: 1,
-    pageSize: PAGE_SIZE,
+    pageSize: TABLE_PAGE_SIZE,
     includePermissions: true,
   });
   private readonly _loading = signal(false);
-  private readonly _saving = signal(false);
+  /** Mutations in flight. A counter (not a boolean) so one finishing can't clear `saving` while another is still running. */
+  private readonly pendingMutations = signal(0);
   private readonly _hasError = signal(false);
+
+  /**
+   * In-flight list request — a newer one cancels it so a slow, stale response can't overwrite
+   * fresh results; the id check stops an obsolete request's `finalize` from clearing `loading`.
+   */
+  private inFlight?: Subscription;
+  private requestId = 0;
 
   readonly roles = this._roles.asReadonly();
   readonly meta = this._meta.asReadonly();
   readonly query = this._query.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly saving = this._saving.asReadonly();
+  readonly saving = computed(() => this.pendingMutations() > 0);
   readonly hasError = this._hasError.asReadonly();
 
   // ── List ─────────────────────────────────────────────
   load(): void {
+    const currentRequest = ++this.requestId;
+
+    this.inFlight?.unsubscribe();
     this._loading.set(true);
     this._hasError.set(false);
-    this.repository
+    this.inFlight = this.repository
       .getRoles(this._query())
       .pipe(
         catchError(() => {
           this._hasError.set(true);
           return of(null);
         }),
-        finalize(() => this._loading.set(false)),
+        finalize(() => {
+          if (currentRequest === this.requestId) {
+            this._loading.set(false);
+          }
+        }),
       )
       .subscribe((res) => {
         if (!res) return;
@@ -89,14 +98,14 @@ export class RolesService {
 
   // ── Detail ───────────────────────────────────────────
   getRole(id: number): Observable<RoleDetails | null> {
-    return this.repository.getRole(id).pipe(
-      map((res) => res.data),
+    return this.repository.getRoleById(id).pipe(
+      map((res) => (res.status ? res.data : null)),
       catchError(() => of(null)),
     );
   }
 
   // ── Mutations ────────────────────────────────────────
-  create(name: string): Observable<boolean> {
+  createRole(name: string): Observable<boolean> {
     return this.mutate(this.repository.createRole({ name: name.trim() }), "ROLES.CREATED");
   }
 
@@ -128,13 +137,19 @@ export class RolesService {
    * Runs a mutation, toasts a localized success message (our own i18n key — the
    * backend's message is English-only text), and reloads the list on success.
    */
-  private mutate(request: Observable<unknown>, successKey: string): Observable<boolean> {
-    this._saving.set(true);
+  private mutate(
+    request: Observable<ApiResponse<unknown>>,
+    successKey: string,
+  ): Observable<boolean> {
+    this.pendingMutations.update((n) => n + 1);
     return request.pipe(
+      map((res) => {
+        if (!res.status) throw new Error(res.message);
+        return true;
+      }),
       tap(() => this.notify.success(successKey)),
-      map(() => true),
       catchError(() => of(false)),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
       tap((ok) => ok && this.load()),
     );
   }

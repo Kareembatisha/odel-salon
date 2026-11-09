@@ -37,6 +37,7 @@ Companion documents: `step-02-architecture-standard.md`, `step-02-module-compari
 - **Blocks:** R-09.
 
 ### D3 — Users / Roles query-parameter casing
+- **RESOLVED (Step 04 addendum): A.** Confirmed against the real API (Swagger curl): `/users` takes `RoleId`, `Status`, `PageNumber`, `PageSize`, `Search`; `/roles` takes `IncludePermissions`, `PageNumber`, `PageSize`, `Search`. PascalCase stays; R-15 is cancelled.
 - **Evidence:** users/roles send `PageNumber`, `PageSize`, `Search`, `RoleId`, `Status`, `IncludePermissions`; everything else is camelCase. `user-query.ts` says "PascalCase names the backend binds", and the README documents PascalCase multipart fields, so this looks deliberate. ASP.NET binding is normally case-insensitive.
 - **Options:** **A.** Keep PascalCase for users/roles and document it as an approved exception. **B.** Switch to camelCase **after** you confirm the Users/Roles API contract accepts it. **C.** Ask the backend developer to confirm, then choose.
 - **Recommendation:** **C**, then **B** if confirmed (one convention, one util shape). Do not change it on a guess.

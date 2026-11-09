@@ -37,7 +37,11 @@ import { readServicesSummary } from "../utils/service-summary.util";
 // Constants
 // ============================================================
 
-/** Default page size of the services table (contract default: 20, max 100). */
+/**
+ * Services keeps its own page size (20) on purpose: it is a table like Users/Roles/Barbers
+ * (`TABLE_PAGE_SIZE`, 10) but a long catalogue that is scanned in bulk. Documented exception to the
+ * page-size standard (Step 02, decision D2). API contract: default 20, max 100.
+ */
 const PAGE_SIZE = 20;
 
 /** A branch as the selector and the price grid need it. */
@@ -96,7 +100,8 @@ export class ServicesService {
   private readonly _loading = signal(false);
   private readonly _branchesLoading = signal(false);
   private readonly _hasError = signal(false);
-  private readonly _saving = signal(false);
+  /** Mutations in flight. A counter (not a boolean) so one finishing can't clear `saving` while another is still running. */
+  private readonly pendingMutations = signal(0);
 
   /** True once the branch options have been requested (successfully or not). */
   private branchesLoaded = false;
@@ -124,7 +129,7 @@ export class ServicesService {
   readonly branchesLoading = this._branchesLoading.asReadonly();
   readonly hasError = this._hasError.asReadonly();
   /** A mutation (create / update / status / delete / copy / adjust) is in flight. */
-  readonly saving = this._saving.asReadonly();
+  readonly saving = computed(() => this.pendingMutations() > 0);
 
   /** The selected branch option, if any. */
   readonly selectedBranch = computed(
@@ -358,7 +363,7 @@ export class ServicesService {
    */
   setStatusForServices(ids: number[], branchIds: number[], isActive: boolean): Observable<boolean> {
     const payload: SetServiceStatusRequest = { branchIds, isActive };
-    this._saving.set(true);
+    this.pendingMutations.update((n) => n + 1);
 
     return forkJoin(
       ids.map((id) =>
@@ -373,7 +378,7 @@ export class ServicesService {
         if (ok) this.notify.success("SERVICES.STATUS_UPDATED");
         this.load();
       }),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
     );
   }
 
@@ -446,7 +451,7 @@ export class ServicesService {
     request: Observable<ApiResponse<T>>,
     successKey: string,
   ): Observable<ApiResponse<T> | null> {
-    this._saving.set(true);
+    this.pendingMutations.update((n) => n + 1);
 
     return request.pipe(
       map((res) => {
@@ -455,7 +460,7 @@ export class ServicesService {
       }),
       tap(() => this.notify.success(successKey)),
       catchError(() => of(null)),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
     );
   }
 }

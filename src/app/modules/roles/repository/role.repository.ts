@@ -1,3 +1,4 @@
+import { InjectionToken } from "@angular/core";
 import { Observable } from "rxjs";
 
 import { ApiResponse } from "@shared/model/api_response.model";
@@ -15,7 +16,7 @@ export interface IRoleRepository {
   /** GET /roles */
   getRoles(query: RolesQuery): Observable<ApiResponse<RoleListItem[]>>;
   /** GET /roles/{id} */
-  getRole(id: number): Observable<ApiResponse<RoleDetails>>;
+  getRoleById(id: number): Observable<ApiResponse<RoleDetails>>;
   /** POST /roles */
   createRole(payload: RoleNameRequest): Observable<ApiResponse<null>>;
   /** PUT /roles/{id} */
@@ -28,3 +29,6 @@ export interface IRoleRepository {
   /** DELETE /roles (body: { ids }) */
   deleteRoles(payload: DeleteRolesRequest): Observable<ApiResponse<null>>;
 }
+
+/** DI token: `app.providers*.ts` decides whether the API or the mock implementation backs it. */
+export const ROLE_REPOSITORY = new InjectionToken<IRoleRepository>("ROLE_REPOSITORY");

@@ -184,8 +184,8 @@ describe("Branches QA — form → payload", () => {
     expect(p.workingHours[1]).toMatchObject({ openTime: "09:00:00", closeTime: "23:30:00" });
   });
 
-  // BR-01 — Validators.required accepts "   ", the mapper then trims it to "" and the API answers 400.
-  it.fails.each(["basicInfo.nameAr", "basicInfo.nameEn", "basicInfo.address"])(
+  // BR-01 — fixed in Step 04: `notBlank` rejects "   " (the mapper trims it to "" and the API answered 400).
+  it.each(["basicInfo.nameAr", "basicInfo.nameEn", "basicInfo.address"])(
     "BR-01: %s rejects a whitespace-only value",
     (path) => {
       const f = form();
@@ -252,8 +252,8 @@ describe("Branches QA — overlapping mutations", () => {
     expect(service.saving()).toBe(false);
   });
 
-  // BR-04 — `saving` is one boolean: the first mutation to finish clears it while another is still in flight.
-  it.fails("BR-04: `saving` stays true until the LAST overlapping mutation finishes", () => {
+  // BR-04 — fixed in Step 04: `saving` is an in-flight counter, not one boolean.
+  it("BR-04: `saving` stays true until the LAST overlapping mutation finishes", () => {
     service.toggleStatus(1).subscribe();
     service.remove([2]).subscribe();
     toggles[0].next(ok());

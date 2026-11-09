@@ -148,6 +148,8 @@ export class BarbersList implements OnInit {
 
   // ── Filtering / paging ───────────────────────────────
   protected onSearch(term: string): void {
+    // Ignore emissions that change nothing (e.g. typing then deleting a trailing space).
+    if ((term || undefined) === this.query().search) return;
     this.selection.set([]);
     this.barbers.setFilters({ search: term || undefined });
   }
@@ -173,6 +175,7 @@ export class BarbersList implements OnInit {
 
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
+    if (!this.canCreate()) return;
     this.drawerToken++;
     this.drawerMode.set("create");
     this.editDetails.set(null);
@@ -201,42 +204,51 @@ export class BarbersList implements OnInit {
   }
 
   protected onSubmitted(payload: CreateBarberPayload | UpdateBarberPayload): void {
+    if (this.saving()) return;
+
     // create → new id | null, update → boolean; both mean "failed" when null / false.
     const done = (result: number | boolean | null) => {
       if (result !== null && result !== false) this.closeDrawer();
     };
 
     if (this.drawerMode() === "create") {
+      if (!this.canCreate()) return;
       this.barbers.createBarber(payload as CreateBarberPayload).subscribe(done);
-    } else {
-      this.barbers
-        .updateBarber(this.editDetails()!.id, payload as UpdateBarberPayload)
-        .subscribe(done);
+      return;
     }
+
+    const details = this.editDetails();
+    if (!details || !this.canEdit()) return;
+    this.barbers.updateBarber(details.id, payload as UpdateBarberPayload).subscribe(done);
   }
 
   // ── Status ───────────────────────────────────────────
   protected toggle(barber: BarberListItem): void {
+    if (!this.canEdit() || this.saving()) return;
     this.barbers.toggleStatus(barber.id).subscribe();
   }
 
   // ── Delete ───────────────────────────────────────────
   protected askDelete(barber: BarberListItem, event: Event): void {
     event.stopPropagation();
+    if (!this.canDelete()) return;
     this.pendingDelete.set([barber]);
   }
 
   protected askBulkDelete(): void {
+    if (!this.canDelete()) return;
     const ids = this.selection();
     this.pendingDelete.set(this.rows().filter((b) => ids.includes(b.id)));
   }
 
   protected confirmDelete(): void {
+    if (!this.canDelete() || this.saving()) return;
     const ids = this.pendingDelete().map((b) => b.id);
     this.barbers.remove(ids).subscribe((ok) => {
       if (ok) {
         this.pendingDelete.set([]);
-        this.selection.set([]);
+        // Only the rows that were just deleted leave the selection.
+        this.selection.update((sel) => sel.filter((id) => !ids.includes(Number(id))));
       }
     });
   }

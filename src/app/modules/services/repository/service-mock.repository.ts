@@ -250,22 +250,24 @@ export class ServiceMockRepository implements IServiceRepository {
     if (new Set(payload.branchIds).size !== payload.branchIds.length) {
       return this.invalid({ field: "BranchIds", key: "SERVICES.ERRORS.BRANCH_IDS_DUPLICATE" });
     }
-    const rows = payload.branchIds.map((branchId) =>
-      service.prices.find((p) => p.branchId === branchId),
-    );
-    if (rows.some((row) => !row)) {
-      return this.invalid({ field: "BranchIds", key: "SERVICES.ERRORS.NOT_PRICED_IN_BRANCH" });
+    const rows: MockService["prices"] = [];
+    for (const branchId of payload.branchIds) {
+      const row = service.prices.find((p) => p.branchId === branchId);
+      if (!row) {
+        return this.invalid({ field: "BranchIds", key: "SERVICES.ERRORS.NOT_PRICED_IN_BRANCH" });
+      }
+      rows.push(row);
     }
 
     if (!payload.isActive) {
       // Branches already inactive are left unchanged, so they can't be "emptied" by this call.
-      const turningOff = rows.filter((r) => r!.isActive).map((r) => r!.branchId);
+      const turningOff = rows.filter((r) => r.isActive).map((r) => r.branchId);
       const blocked = this.emptiedBranch(turningOff, (s, active) => (s.id === id ? false : active));
       if (blocked) return this.lastActive(service, blocked);
     }
 
     const now = new Date().toISOString();
-    rows.forEach((row) => (row!.isActive = payload.isActive));
+    rows.forEach((row) => (row.isActive = payload.isActive));
     service.updatedAt = now;
 
     return this.reply(null, "Service Updated Successfully");
@@ -294,8 +296,8 @@ export class ServiceMockRepository implements IServiceRepository {
     }
 
     // After the copy a visible target must still have an active service.
-    const targetBranch = this.db.branches.find((b) => b.id === target)!;
-    if (targetBranch.isVisible) {
+    const targetBranch = this.db.branches.find((b) => b.id === target);
+    if (targetBranch?.isVisible) {
       const stillActive = this.db.services.some((s) => {
         const from = s.prices.find((p) => p.branchId === source);
         const own = s.prices.find((p) => p.branchId === target);
@@ -313,7 +315,8 @@ export class ServiceMockRepository implements IServiceRepository {
 
     const now = new Date().toISOString();
     for (const service of copied) {
-      const from = service.prices.find((p) => p.branchId === source)!;
+      const from = service.prices.find((p) => p.branchId === source);
+      if (!from) continue; // `copied` only holds services priced in the source branch
       const copy: ServiceBranchPayload = { ...from, branchId: target };
       const index = service.prices.findIndex((p) => p.branchId === target);
       if (index >= 0) service.prices[index] = copy;
@@ -348,9 +351,10 @@ export class ServiceMockRepository implements IServiceRepository {
       return this.invalid({ field: "BranchId", key: "SERVICES.ERRORS.BRANCH_EMPTY" });
     }
 
-    const rows = (targets as MockService[]).map((s) =>
-      s.prices.find((p) => p.branchId === payload.branchId)!,
-    );
+    const rows = (targets as MockService[]).flatMap((s) => {
+      const row = s.prices.find((p) => p.branchId === payload.branchId);
+      return row ? [row] : [];
+    });
     const tooHigh = rows.some((r) =>
       [r.regularPrice, r.vipPrice, r.homePrice].some(
         (price) => price !== null && exceedsMaxPrice(price, payload.percentage),

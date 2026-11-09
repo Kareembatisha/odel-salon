@@ -5,9 +5,9 @@ import { MockDb, MockUser } from "@core/mock/mock-db";
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse } from "@shared/model/api_response.model";
 import {
-  CreateUserRequest,
+  CreateUserPayload,
   DeleteUsersRequest,
-  UpdateUserRequest,
+  UpdateUserPayload,
   UserDetails,
   UserListItem,
   UsersQuery,
@@ -45,7 +45,7 @@ export class UserMockRepository implements IUserRepository {
     );
   }
 
-  getUser(id: number): Observable<ApiResponse<UserDetails>> {
+  getUserById(id: number): Observable<ApiResponse<UserDetails>> {
     const u = this.db.users.find((x) => x.id === id);
     if (!u) return this.fail("User not found");
     return this.reply<UserDetails>({
@@ -59,7 +59,7 @@ export class UserMockRepository implements IUserRepository {
     });
   }
 
-  createUser(p: CreateUserRequest): Observable<ApiResponse<null>> {
+  createUser(p: CreateUserPayload): Observable<ApiResponse<null>> {
     if (this.emailTaken(p.email)) return this.fail("A user with this email already exists");
     if (!this.db.roles.some((r) => r.id === p.roleId)) return this.fail("Role not found");
     this.db.users.unshift({
@@ -75,7 +75,7 @@ export class UserMockRepository implements IUserRepository {
     return this.reply(null, null, "User created successfully", 201);
   }
 
-  updateUser(id: number, p: UpdateUserRequest): Observable<ApiResponse<null>> {
+  updateUser(id: number, p: UpdateUserPayload): Observable<ApiResponse<null>> {
     const u = this.db.users.find((x) => x.id === id);
     if (!u) return this.fail("User not found");
     if (this.emailTaken(p.email, id)) return this.fail("A user with this email already exists");
@@ -89,7 +89,7 @@ export class UserMockRepository implements IUserRepository {
     return this.reply(null, null, "User updated successfully");
   }
 
-  toggleStatus(id: number): Observable<ApiResponse<null>> {
+  toggleUserStatus(id: number): Observable<ApiResponse<null>> {
     const u = this.db.users.find((x) => x.id === id);
     if (!u) return this.fail("User not found");
     u.status = !u.status;

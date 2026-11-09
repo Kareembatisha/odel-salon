@@ -3,6 +3,7 @@ import { Observable, Subscription, catchError, finalize, map, of, tap } from "rx
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
+import { CARD_PAGE_SIZE } from "@shared/model/pagination.constants";
 import { BranchListItem } from "@modules/branches/model/branch.model";
 import { BranchesService } from "@modules/branches/service/branches.service";
 import {
@@ -19,9 +20,6 @@ import { readPackagesSummary } from "../utils/package-summary.util";
 // ============================================================
 // Constants
 // ============================================================
-
-/** Default page size for the packages card grid (same as the Chairs / Branches grid). */
-const PAGE_SIZE = 12;
 
 /** A branch as the selector and the form need it. */
 export type PackageBranchOption = Pick<BranchListItem, "id" | "nameAr" | "nameEn">;
@@ -72,12 +70,13 @@ export class PackagesService {
   private readonly _branchId = signal<number | null>(null);
   private readonly _query = signal<ListQuery>({
     pageNumber: 1,
-    pageSize: PAGE_SIZE,
+    pageSize: CARD_PAGE_SIZE,
   });
   private readonly _loading = signal(false);
   private readonly _branchesLoading = signal(false);
   private readonly _hasError = signal(false);
-  private readonly _saving = signal(false);
+  /** Mutations in flight. A counter (not a boolean) so one finishing can't clear `saving` while another is still running. */
+  private readonly pendingMutations = signal(0);
 
   /** True once the branch options have been requested (successfully or not). */
   private branchesLoaded = false;
@@ -105,7 +104,7 @@ export class PackagesService {
   readonly branchesLoading = this._branchesLoading.asReadonly();
   readonly hasError = this._hasError.asReadonly();
   /** A mutation (create / update / toggle / delete) is in flight. */
-  readonly saving = this._saving.asReadonly();
+  readonly saving = computed(() => this.pendingMutations() > 0);
 
   /** The selected branch option, if any. */
   readonly selectedBranch = computed(
@@ -135,7 +134,7 @@ export class PackagesService {
    * opens — options are not re-requested.
    */
   initialize(): void {
-    this._query.set({ pageNumber: 1, pageSize: PAGE_SIZE });
+    this._query.set({ pageNumber: 1, pageSize: CARD_PAGE_SIZE });
 
     if (this.branchesLoaded) {
       this.ensureBranchAndLoad();
@@ -310,7 +309,7 @@ export class PackagesService {
     request: Observable<ApiResponse<T>>,
     successKey: string,
   ): Observable<ApiResponse<T> | null> {
-    this._saving.set(true);
+    this.pendingMutations.update((n) => n + 1);
 
     return request.pipe(
       map((res) => {
@@ -319,7 +318,7 @@ export class PackagesService {
       }),
       tap(() => this.notify.success(successKey)),
       catchError(() => of(null)),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
     );
   }
 }

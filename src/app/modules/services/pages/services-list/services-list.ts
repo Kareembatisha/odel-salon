@@ -249,6 +249,7 @@ export class ServicesList implements OnInit {
 
   // ── Create / edit (own page) ─────────────────────────
   protected openCreate(): void {
+    if (!this.canCreate()) return;
     void this.router.navigate(["/main/services/new"]);
   }
 
@@ -264,7 +265,7 @@ export class ServicesList implements OnInit {
    */
   protected toggle(row: ServiceListItem, isActive: boolean): void {
     const branchId = this.branchId();
-    if (branchId === null || this.saving() || !row.pricing.isPriced) return;
+    if (!this.canEdit() || branchId === null || this.saving() || !row.pricing.isPriced) return;
     this.servicesService.setStatusInBranch(row.id, branchId, isActive).subscribe();
   }
 
@@ -287,20 +288,24 @@ export class ServicesList implements OnInit {
   // ── Delete ───────────────────────────────────────────
   protected askDelete(row: ServiceListItem, event: Event): void {
     event.stopPropagation();
+    if (!this.canDelete()) return;
     this.pendingDelete.set([row]);
   }
 
   protected askBulkDelete(): void {
+    if (!this.canDelete()) return;
     const ids = this.selection();
     this.pendingDelete.set(this.rows().filter((s) => ids.includes(s.id)));
   }
 
   protected confirmDelete(): void {
+    if (!this.canDelete() || this.saving()) return;
     const ids = this.pendingDelete().map((s) => s.id);
     this.servicesService.remove(ids).subscribe((ok) => {
       if (ok) {
         this.pendingDelete.set([]);
-        this.selection.set([]);
+        // Only the rows that were just deleted leave the selection.
+        this.selection.update((sel) => sel.filter((id) => !ids.includes(Number(id))));
       }
     });
   }

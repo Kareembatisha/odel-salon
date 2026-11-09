@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from "@angular/core";
-import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, output } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
 import { TranslateModule } from "@ngx-translate/core";
 
 import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
 import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 
 /** Name-only form used for both "New role" and "Rename role" inside a drawer. */
 @Component({
@@ -14,7 +15,7 @@ import { FloatLabelInput } from "@shared/components/float-label-input/float-labe
   templateUrl: "./role-form.html",
   styleUrl: "./role-form.scss",
 })
-export class RoleForm {
+export class RoleForm implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   /** Empty for "new role". */
@@ -24,11 +25,11 @@ export class RoleForm {
   cancelled = output<void>();
 
   protected readonly form = this.fb.nonNullable.group({
-    name: ["", [Validators.required, Validators.maxLength(50)]],
+    name: ["", [notBlank, maxTrimmedLength(50)]],
   });
 
-  constructor() {
-    queueMicrotask(() => this.form.controls.name.setValue(this.initialName()));
+  ngOnInit(): void {
+    this.form.controls.name.setValue(this.initialName());
   }
 
   protected nameError(): string {
@@ -40,6 +41,8 @@ export class RoleForm {
   }
 
   protected submit(): void {
+    if (this.saving()) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

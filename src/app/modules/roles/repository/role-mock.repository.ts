@@ -45,7 +45,7 @@ export class RoleMockRepository implements IRoleRepository {
     });
   }
 
-  getRole(id: number): Observable<ApiResponse<RoleDetails>> {
+  getRoleById(id: number): Observable<ApiResponse<RoleDetails>> {
     const role = this.db.roles.find((r) => r.id === id);
     if (!role) return this.fail("Role not found");
     // Matrix = the app's permission catalog, with this role's grants switched on.

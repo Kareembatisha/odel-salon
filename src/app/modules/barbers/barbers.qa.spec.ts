@@ -200,7 +200,7 @@ describe("Barbers QA — BarberForm", () => {
 
   // BA-01 — ChairForm refuses to emit while `saving`; BarberForm does not, so pressing Enter in a
   // field during a running save sends the same request twice.
-  it.fails("BA-01: submit() emits nothing while a save is already running", () => {
+  it("BA-01: submit() emits nothing while a save is already running", () => {
     const { cmp, emitted } = create(true);
     cmp.form.patchValue({ branchId: "2", fullName: "Ali", phone: "+201001234567" });
     cmp.submit();
@@ -208,7 +208,7 @@ describe("Barbers QA — BarberForm", () => {
   });
 
   // BA-02 — same as CH-01: the 100-character limit is checked before trimming.
-  it.fails("BA-02: the 100-character limit applies to the trimmed name", () => {
+  it("BA-02: the 100-character limit applies to the trimmed name", () => {
     const { cmp } = create();
     cmp.form.get("fullName")!.setValue("a".repeat(100) + " ");
     expect(cmp.form.get("fullName")!.errors).toBeNull();
@@ -510,15 +510,16 @@ describe("Barbers QA — service & list page guards", () => {
     expect(service.saving()).toBe(false);
   });
 
-  // BA-04 — same pattern as BR-04 / CH-03.
-  it.fails("BA-04: `saving` stays true until the LAST overlapping mutation finishes", () => {
+  // BA-04 — fixed in Step 04 (in-flight counter instead of one boolean flag).
+  it("BA-04: `saving` stays true until the LAST overlapping mutation finishes", () => {
     configure(["Barber.View"]);
     const service = TestBed.inject(BarbersService);
-    service.toggleStatus(1).subscribe();
-    service.remove([2]).subscribe();
+    service.toggleStatus(1).subscribe(); // stays pending
+    service.remove([2]).subscribe(); // completes immediately
+    expect(service.saving()).toBe(true);
     toggles[0].next(ok(null));
     toggles[0].complete();
-    expect(service.saving()).toBe(true);
+    expect(service.saving()).toBe(false);
   });
 
   it("openEdit already refuses without Barber.Edit", () => {
@@ -529,13 +530,13 @@ describe("Barbers QA — service & list page guards", () => {
   });
 
   // BA-05 — defence in depth (same as CH-04): only openEdit checks its permission.
-  it.fails("BA-05: toggle() sends nothing without Barber.Edit", () => {
+  it("BA-05: toggle() sends nothing without Barber.Edit", () => {
     configure(["Barber.View"]);
     page().toggle(row(1));
     expect(toggled).toEqual([]);
   });
 
-  it.fails("BA-05: a delete confirmed without Barber.Delete sends nothing", () => {
+  it("BA-05: a delete confirmed without Barber.Delete sends nothing", () => {
     configure(["Barber.View"]);
     const p = page();
     p.askDelete(row(1), new Event("click"));
@@ -545,22 +546,19 @@ describe("Barbers QA — service & list page guards", () => {
 
   // BA-06 — ChairsList / BranchesList ignore a search emission that changes nothing; BarbersList
   // reloads (and wipes the row selection) every time, e.g. on Enter in an empty box.
-  it.fails(
-    "BA-06: a search emission that changes nothing does not reload or clear the selection",
-    () => {
-      configure(["Barber.View", "Barber.Delete"]);
-      const p = page();
-      p.selection.set([1, 2]);
-      const before = reloads.count;
-      p.onSearch("");
-      expect(reloads.count).toBe(before);
-      expect(p.selection()).toEqual([1, 2]);
-    },
-  );
+  it("BA-06: a search emission that changes nothing does not reload or clear the selection", () => {
+    configure(["Barber.View", "Barber.Delete"]);
+    const p = page();
+    p.selection.set([1, 2]);
+    const before = reloads.count;
+    p.onSearch("");
+    expect(reloads.count).toBe(before);
+    expect(p.selection()).toEqual([1, 2]);
+  });
 
   // BA-07 — deleting ONE row through its own button clears the whole selection, including rows
   // the user ticked for something else.
-  it.fails("BA-07: deleting one row keeps the other ticked rows selected", () => {
+  it("BA-07: deleting one row keeps the other ticked rows selected", () => {
     configure(["Barber.View", "Barber.Delete"]);
     const p = page();
     p.selection.set([1, 2]);

@@ -238,6 +238,7 @@ export class OffersList implements OnInit {
 
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
+    if (!this.canCreate()) return;
     const branchId = this.branchId();
     if (branchId === null) return;
 
@@ -333,18 +334,19 @@ export class OffersList implements OnInit {
   // ── Stop / Resume ────────────────────────────────────
   /** A refused resume (a service is no longer active…) changes nothing; the interceptor shows why. */
   protected toggle(offer: OfferListItem): void {
-    if (this.saving()) return;
+    if (!this.canToggle() || this.saving()) return;
     this.offersService.toggleStatus(offer.id).subscribe((ok) => ok && this.keepFocusAfterReload());
   }
 
   // ── Delete ───────────────────────────────────────────
   protected askDelete(offer: OfferListItem): void {
+    if (!this.canDelete()) return;
     this.pendingDelete.set(offer);
   }
 
   protected confirmDelete(): void {
     const offer = this.pendingDelete();
-    if (!offer) return;
+    if (!offer || !this.canDelete() || this.saving()) return;
 
     this.offersService.remove([offer.id]).subscribe((ok) => {
       if (!ok) return;

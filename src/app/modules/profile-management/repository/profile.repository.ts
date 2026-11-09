@@ -1,3 +1,4 @@
+import { InjectionToken } from "@angular/core";
 import { Observable } from "rxjs";
 
 import { ApiResponse } from "@shared/model/api_response.model";
@@ -10,3 +11,6 @@ export interface IProfileRepository {
   /** PUT /auth/profile (multipart/form-data) */
   updateProfile(payload: UpdateProfileRequest): Observable<ApiResponse<null>>;
 }
+
+/** DI token: `app.providers*.ts` decides whether the API or the mock implementation backs it. */
+export const PROFILE_REPOSITORY = new InjectionToken<IProfileRepository>("PROFILE_REPOSITORY");

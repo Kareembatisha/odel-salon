@@ -30,11 +30,10 @@ import { SearchInputComponent } from "@shared/components/search-input/search-inp
 import { SkeletonComponent } from "@shared/components/skeleton/skeleton.component";
 import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
 import { SwitchComponent } from "@shared/components/switch/switch.component";
-import { HasPermissionDirective } from "@shared/directives/has-permission.directive";
 import { UserForm } from "../../components/user-form/user-form";
 import {
-  CreateUserRequest,
-  UpdateUserRequest,
+  CreateUserPayload,
+  UpdateUserPayload,
   UserDetails,
   UserListItem,
 } from "../../model/user.model";
@@ -60,7 +59,6 @@ import { UsersService } from "../../service/users.service";
     ConfirmModalComponent,
     FailedStateComponent,
     SkeletonComponent,
-    HasPermissionDirective,
     UserForm,
   ],
   templateUrl: "./users-list.html",
@@ -80,14 +78,16 @@ export class UsersList implements OnInit {
   protected readonly hasError = this.users.hasError;
   protected readonly query = this.users.query;
 
+  protected readonly canCreate = computed(() => this.auth.hasPermission(PERMISSIONS.User.Create));
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.User.Edit));
   protected readonly canDelete = computed(() => this.auth.hasPermission(PERMISSIONS.User.Delete));
 
   /** You can't deactivate or delete your own account from here. */
   protected readonly selfId = computed(() => this.auth.currentUser()?.id);
-  protected readonly lockedIds = computed(() =>
-    this.selfId() !== undefined ? [this.selfId()!] : [],
-  );
+  protected readonly lockedIds = computed(() => {
+    const id = this.selfId();
+    return id === undefined ? [] : [id];
+  });
 
   // ── Filters ──────────────────────────────────────────
   protected readonly roleList = signal<Array<{ id: number; name: string }>>([]);
@@ -108,6 +108,8 @@ export class UsersList implements OnInit {
   protected readonly drawerMode = signal<"create" | "edit">("create");
   protected readonly editDetails = signal<UserDetails | null>(null);
   protected readonly drawerLoading = signal(false);
+  /** Bumped on every open / close so a slow details response can't hijack a newer drawer. */
+  private drawerToken = 0;
 
   // ── Delete confirmation ──────────────────────────────
   protected readonly pendingDelete = signal<UserListItem[]>([]);
@@ -126,6 +128,8 @@ export class UsersList implements OnInit {
 
   // ── Filtering / paging ───────────────────────────────
   protected onSearch(term: string): void {
+    // Ignore emissions that change nothing (e.g. typing then deleting a trailing space).
+    if ((term || undefined) === this.query().search) return;
     this.selection.set([]);
     this.users.setFilters({ search: term || undefined });
   }
@@ -151,6 +155,8 @@ export class UsersList implements OnInit {
 
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
+    if (!this.canCreate()) return;
+    this.drawerToken++;
     this.drawerMode.set("create");
     this.editDetails.set(null);
     this.drawerLoading.set(false);
@@ -159,47 +165,69 @@ export class UsersList implements OnInit {
 
   protected openEdit(user: UserListItem): void {
     if (!this.canEdit()) return;
+    const token = ++this.drawerToken;
     this.drawerMode.set("edit");
     this.editDetails.set(null);
     this.drawerLoading.set(true);
     this.drawerOpen.set(true);
     this.users.getUser(user.id).subscribe((details) => {
+      if (token !== this.drawerToken) return; // closed or replaced meanwhile
       this.drawerLoading.set(false);
       if (details) this.editDetails.set(details);
       else this.drawerOpen.set(false); // interceptor already showed why
     });
   }
 
-  protected onSubmitted(payload: CreateUserRequest | UpdateUserRequest): void {
-    const request =
-      this.drawerMode() === "create"
-        ? this.users.create(payload as CreateUserRequest)
-        : this.users.update(this.editDetails()!.id, payload as UpdateUserRequest);
-    request.subscribe((ok) => ok && this.drawerOpen.set(false));
+  protected closeDrawer(): void {
+    this.drawerToken++;
+    this.drawerOpen.set(false);
+  }
+
+  protected onSubmitted(payload: CreateUserPayload | UpdateUserPayload): void {
+    if (this.saving()) return;
+
+    if (this.drawerMode() === "create") {
+      if (!this.canCreate()) return;
+      this.users
+        .createUser(payload as CreateUserPayload)
+        .subscribe((ok) => ok && this.closeDrawer());
+      return;
+    }
+
+    const details = this.editDetails();
+    if (!details || !this.canEdit()) return;
+    this.users
+      .updateUser(details.id, payload as UpdateUserPayload)
+      .subscribe((ok) => ok && this.closeDrawer());
   }
 
   // ── Status ───────────────────────────────────────────
   protected toggle(user: UserListItem): void {
+    if (!this.canEdit() || this.saving() || this.isSelf(user)) return;
     this.users.toggleStatus(user.id).subscribe();
   }
 
   // ── Delete ───────────────────────────────────────────
   protected askDelete(user: UserListItem, event: Event): void {
     event.stopPropagation();
+    if (!this.canDelete()) return;
     this.pendingDelete.set([user]);
   }
 
   protected askBulkDelete(): void {
+    if (!this.canDelete()) return;
     const ids = this.selection();
     this.pendingDelete.set(this.rows().filter((u) => ids.includes(u.id)));
   }
 
   protected confirmDelete(): void {
+    if (!this.canDelete() || this.saving()) return;
     const ids = this.pendingDelete().map((u) => u.id);
     this.users.remove(ids).subscribe((ok) => {
       if (ok) {
         this.pendingDelete.set([]);
-        this.selection.set([]);
+        // Only the rows that were just deleted leave the selection.
+        this.selection.update((sel) => sel.filter((id) => !ids.includes(Number(id))));
       }
     });
   }

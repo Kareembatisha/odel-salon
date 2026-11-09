@@ -2,6 +2,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 import { BranchDayOfWeek } from "@modules/branches/model/branch.model";
 
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import {
   atLeastOneBookingTypeValidator,
   optionalUrlValidator,
@@ -44,11 +45,11 @@ export function createBranchForm(fb: FormBuilder): FormGroup {
   return fb.group({
     // Basic Information
     basicInfo: fb.group({
-      nameAr: ["", [Validators.required, Validators.maxLength(100)]],
+      nameAr: ["", [notBlank, maxTrimmedLength(100)]],
 
-      nameEn: ["", [Validators.required, Validators.maxLength(100)]],
+      nameEn: ["", [notBlank, maxTrimmedLength(100)]],
 
-      address: ["", [Validators.required, Validators.maxLength(250)]],
+      address: ["", [notBlank, maxTrimmedLength(250)]],
 
       phone: ["", [Validators.required, Validators.pattern(/^\+201[0125][0-9]{8}$/)]],
 

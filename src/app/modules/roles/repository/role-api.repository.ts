@@ -26,7 +26,7 @@ export class RoleApiRepository implements IRoleRepository {
     });
   }
 
-  getRole(id: number): Observable<ApiResponse<RoleDetails>> {
+  getRoleById(id: number): Observable<ApiResponse<RoleDetails>> {
     return this.http.get<ApiResponse<RoleDetails>>(`${this.url}/${id}`);
   }
 

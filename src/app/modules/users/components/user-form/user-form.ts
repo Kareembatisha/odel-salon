@@ -26,7 +26,8 @@ import {
   FloatLabelSelect,
   SelectOption,
 } from "@shared/components/float-label-select/float-label-select";
-import { CreateUserRequest, UpdateUserRequest, UserDetails } from "../../model/user.model";
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
+import { CreateUserPayload, UpdateUserPayload, UserDetails } from "../../model/user.model";
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const a = group.get("password")?.value ?? "";
@@ -66,8 +67,8 @@ export class UserForm implements OnInit {
   roles = input.required<Array<{ id: number; name: string }>>();
   saving = input<boolean>(false);
 
-  /** CreateUserRequest in create mode, UpdateUserRequest in edit mode. */
-  submitted = output<CreateUserRequest | UpdateUserRequest>();
+  /** CreateUserPayload in create mode, UpdateUserPayload in edit mode. */
+  submitted = output<CreateUserPayload | UpdateUserPayload>();
   cancelled = output<void>();
 
   protected readonly changePassword = signal(false);
@@ -77,7 +78,7 @@ export class UserForm implements OnInit {
 
   protected readonly form = this.fb.nonNullable.group(
     {
-      fullName: ["", [Validators.required, Validators.maxLength(100)]],
+      fullName: ["", [notBlank, maxTrimmedLength(100)]],
       email: ["", [Validators.required, Validators.email]],
       countryCode: [DEFAULT_COUNTRY_CODE],
       phoneNumber: ["", [Validators.required, Validators.pattern(/^\d{6,15}$/)]],
@@ -157,6 +158,8 @@ export class UserForm implements OnInit {
   }
 
   protected submit(): void {
+    if (this.saving()) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

@@ -1,10 +1,11 @@
+import { InjectionToken } from "@angular/core";
 import { Observable } from "rxjs";
 
 import { ApiResponse } from "@shared/model/api_response.model";
 import {
-  CreateUserRequest,
+  CreateUserPayload,
   DeleteUsersRequest,
-  UpdateUserRequest,
+  UpdateUserPayload,
   UserDetails,
   UserListItem,
   UsersQuery,
@@ -15,13 +16,16 @@ export interface IUserRepository {
   /** GET /users */
   getUsers(query: UsersQuery): Observable<ApiResponse<UserListItem[]>>;
   /** GET /users/{id} */
-  getUser(id: number): Observable<ApiResponse<UserDetails>>;
+  getUserById(id: number): Observable<ApiResponse<UserDetails>>;
   /** POST /users */
-  createUser(payload: CreateUserRequest): Observable<ApiResponse<null>>;
+  createUser(payload: CreateUserPayload): Observable<ApiResponse<null>>;
   /** PUT /users/{id} */
-  updateUser(id: number, payload: UpdateUserRequest): Observable<ApiResponse<null>>;
+  updateUser(id: number, payload: UpdateUserPayload): Observable<ApiResponse<null>>;
   /** PATCH /users/{id}/toggle-status */
-  toggleStatus(id: number): Observable<ApiResponse<null>>;
+  toggleUserStatus(id: number): Observable<ApiResponse<null>>;
   /** DELETE /users (body: { ids }) */
   deleteUsers(payload: DeleteUsersRequest): Observable<ApiResponse<null>>;
 }
+
+/** DI token: `app.providers*.ts` decides whether the API or the mock implementation backs it. */
+export const USER_REPOSITORY = new InjectionToken<IUserRepository>("USER_REPOSITORY");

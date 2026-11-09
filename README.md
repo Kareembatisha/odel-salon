@@ -78,6 +78,19 @@ The approved standard lives in [`docs/step-02/`](docs/step-02/step-02-architectu
 - **Cross-feature component:** `modules/services/components/service-picker` is also used by Packages and Offers. It stays in the Services module on purpose (decision D9); import it from there and keep it free of Packages/Offers-specific logic.
 - **Shared sibling stylesheet:** `modules/services/components/bulk-form.scss` is shared by the three bulk-tool forms through `styleUrls`.
 
+### Mock data and production builds
+
+Every repository (all 11, including auth) is an injection token. `src/app/app.providers.ts` registers them for development and tests (`environment.useMock` picks mock data or the real API); the production configurations **replace that file** with `src/app/app.providers.prod.ts`, which imports API repositories only, so no mock class, mock data or mock login reaches a production bundle. Keep both files in step when adding a repository.
+
+```bash
+npm run check:providers     # both provider files list the same tokens; prod has no mock references;
+                            # angular.json swaps the file in for every production-like configuration
+npm run build && npm run check:prod-bundle
+npm run build:template-brand && npm run check:prod-bundle
+```
+
+`ng test` builds with the default (production) configuration, so unit tests see `environment.prod.ts` and the production providers; specs that need mock data import the mock repositories directly.
+
 ### Formatting and linting
 
 ```bash

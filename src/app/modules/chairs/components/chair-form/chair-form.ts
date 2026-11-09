@@ -1,19 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   computed,
+  effect,
   inject,
   input,
+  OnInit,
   output,
 } from "@angular/core";
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from "@angular/forms";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
@@ -23,6 +18,7 @@ import {
   FloatLabelSelect,
   SelectOption,
 } from "@shared/components/float-label-select/float-label-select";
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import {
   CHAIR_NAME_MAX_LENGTH,
   ChairBranchOption,
@@ -32,11 +28,6 @@ import {
   UpdateChairPayload,
 } from "../../model/chair.model";
 import { localizedName } from "../../utils/chair-labels.util";
-
-/** A name made only of spaces counts as empty (it would be trimmed to nothing). */
-function notBlank(control: AbstractControl): ValidationErrors | null {
-  return String(control.value ?? "").trim() ? null : { required: true };
-}
 
 /**
  * Create / edit chair form (rendered inside a drawer).
@@ -84,7 +75,7 @@ export class ChairForm implements OnInit {
   /** Select values are strings (native <select>); converted to numbers on submit. */
   protected readonly form = this.fb.nonNullable.group({
     branchId: ["", [Validators.required]],
-    name: ["", [notBlank, Validators.maxLength(CHAIR_NAME_MAX_LENGTH)]],
+    name: ["", [notBlank, maxTrimmedLength(CHAIR_NAME_MAX_LENGTH)]],
     type: [String(ChairType.Regular), [Validators.required]],
   });
 
@@ -117,6 +108,20 @@ export class ChairForm implements OnInit {
       { value: String(ChairType.Vip), label: this.translate.instant("CHAIRS.TYPE.VIP") },
     ];
   });
+
+  constructor() {
+    // The drawer can open before the branch list has loaded: pre-select the filtered branch
+    // as soon as its option arrives, but never over a value the user already picked.
+    effect(() => {
+      const initial = this.initialBranchId();
+      const options = this.branches();
+      const control = this.form.controls.branchId;
+      if (this.mode() !== "create" || control.value !== "" || control.dirty) return;
+      if (initial !== null && options.some((b) => b.id === initial)) {
+        control.setValue(String(initial));
+      }
+    });
+  }
 
   ngOnInit(): void {
     const d = this.details();

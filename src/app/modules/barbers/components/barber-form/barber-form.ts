@@ -22,6 +22,7 @@ import {
   FloatLabelSelect,
   SelectOption,
 } from "@shared/components/float-label-select/float-label-select";
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import {
   BARBER_IMAGE_ACCEPT,
   BARBER_NAME_MAX_LENGTH,
@@ -30,7 +31,7 @@ import {
   CreateBarberPayload,
   UpdateBarberPayload,
 } from "../../model/barber.model";
-import { egyptianMobile, notBlank } from "../../utils/barber-form.validators";
+import { egyptianMobile } from "../../utils/barber-form.validators";
 import {
   createPreviewUrl,
   revokePreviewUrl,
@@ -86,7 +87,7 @@ export class BarberForm implements OnInit {
 
   protected readonly form = this.fb.nonNullable.group({
     branchId: ["", [Validators.required]],
-    fullName: ["", [notBlank, Validators.maxLength(BARBER_NAME_MAX_LENGTH)]],
+    fullName: ["", [notBlank, maxTrimmedLength(BARBER_NAME_MAX_LENGTH)]],
     phone: ["", [notBlank, egyptianMobile]],
   });
 
@@ -199,6 +200,8 @@ export class BarberForm implements OnInit {
   }
 
   protected submit(): void {
+    if (this.saving()) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

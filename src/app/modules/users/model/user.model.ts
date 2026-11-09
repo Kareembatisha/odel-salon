@@ -41,7 +41,7 @@ export interface UsersQuery {
 }
 
 /** POST /users — all fields required. */
-export interface CreateUserRequest {
+export interface CreateUserPayload {
   fullName: string;
   email: string;
   countryCode: string;
@@ -52,7 +52,7 @@ export interface CreateUserRequest {
 }
 
 /** PUT /users/{id} — the password pair is sent only to change the password. */
-export interface UpdateUserRequest {
+export interface UpdateUserPayload {
   fullName: string;
   email: string;
   countryCode: string;

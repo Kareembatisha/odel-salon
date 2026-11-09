@@ -128,7 +128,7 @@ describe("Chairs QA — ChairForm", () => {
 
   // CH-01 — maxlength runs on the raw value but the payload is trimmed: a 50-char name with a
   // trailing space is refused although what would be sent (50 chars) is valid. The mock accepts it.
-  it.fails("CH-01: the 50-character limit is applied to the trimmed name", () => {
+  it("CH-01: the 50-character limit is applied to the trimmed name", () => {
     const { form } = create();
     form.get("name")!.setValue("a".repeat(50) + " ");
     expect(form.get("name")!.errors).toBeNull();
@@ -136,15 +136,12 @@ describe("Chairs QA — ChairForm", () => {
 
   // CH-02 — the drawer can open before the branch list has loaded; the initial branch is only
   // looked up once (ngOnInit), so it is never selected when the options arrive afterwards.
-  it.fails(
-    "CH-02: the filtered branch is pre-selected when the options arrive after the form opened",
-    () => {
-      const { fixture, form } = create({ branches: [], initialBranchId: 2 });
-      fixture.componentRef.setInput("branches", BRANCHES);
-      fixture.detectChanges();
-      expect(form.get("branchId")!.value).toBe("2");
-    },
-  );
+  it("CH-02: the filtered branch is pre-selected when the options arrive after the form opened", () => {
+    const { fixture, form } = create({ branches: [], initialBranchId: 2 });
+    fixture.componentRef.setInput("branches", BRANCHES);
+    fixture.detectChanges();
+    expect(form.get("branchId")!.value).toBe("2");
+  });
 });
 
 describe("Chairs QA — ChairMockRepository business rules", () => {
@@ -409,7 +406,7 @@ describe("Chairs QA — overlapping mutations and handler guards", () => {
   });
 
   // CH-03 — same pattern as BR-04: one boolean flag shared by every mutation.
-  it.fails("CH-03: `saving` stays true until the LAST overlapping mutation finishes", () => {
+  it("CH-03: `saving` stays true until the LAST overlapping mutation finishes", () => {
     configure(["Chair.View"]);
     const service = TestBed.inject(ChairsService);
     service.toggleStatus(1).subscribe();
@@ -417,6 +414,9 @@ describe("Chairs QA — overlapping mutations and handler guards", () => {
     toggles[0].next(ok(null));
     toggles[0].complete();
     expect(service.saving()).toBe(true);
+    deletes[0].next(ok(null));
+    deletes[0].complete();
+    expect(service.saving()).toBe(false);
   });
 
   // CH-04 — defence in depth: the card hides the controls, but the page handlers themselves
@@ -431,7 +431,7 @@ describe("Chairs QA — overlapping mutations and handler guards", () => {
     expect(page.drawerOpen()).toBe(false);
   });
 
-  it.fails("CH-04: toggle() sends nothing without Chair.ToggleStatus", () => {
+  it("CH-04: toggle() sends nothing without Chair.ToggleStatus", () => {
     configure(["Chair.View"]);
     const page = TestBed.createComponent(ChairsList).componentInstance as unknown as {
       toggle(c: ChairListItem): void;
@@ -440,7 +440,7 @@ describe("Chairs QA — overlapping mutations and handler guards", () => {
     expect(toggled).toEqual([]);
   });
 
-  it.fails("CH-04: askDelete() + confirmDelete() send nothing without Chair.Delete", () => {
+  it("CH-04: askDelete() + confirmDelete() send nothing without Chair.Delete", () => {
     configure(["Chair.View"]);
     const page = TestBed.createComponent(ChairsList).componentInstance as unknown as {
       askDelete(c: ChairListItem): void;

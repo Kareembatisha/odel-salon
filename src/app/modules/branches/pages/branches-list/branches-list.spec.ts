@@ -354,7 +354,7 @@ describe("BranchesList", () => {
       await settle();
 
       (el().querySelectorAll(".branch__actions button")[1] as HTMLButtonElement).click();
-      expect(navigate).toHaveBeenCalledWith(["main/branches", 1, "edit"]);
+      expect(navigate).toHaveBeenCalledWith(["/main/branches", 1, "edit"]);
     });
 
     it("clicking the branch name opens its details, even with Branch.View only", async () => {
@@ -363,7 +363,7 @@ describe("BranchesList", () => {
       await settle();
 
       (el().querySelector(".branch__link") as HTMLButtonElement).click();
-      expect(navigate).toHaveBeenCalledWith(["main/branches", 7]);
+      expect(navigate).toHaveBeenCalledWith(["/main/branches", 7]);
     });
 
     it('"Add branch" opens the create page', async () => {
@@ -372,7 +372,7 @@ describe("BranchesList", () => {
       await settle();
 
       (el().querySelector("app-page-header app-button button") as HTMLButtonElement).click();
-      expect(navigate).toHaveBeenCalledWith(["main/branches/new"]);
+      expect(navigate).toHaveBeenCalledWith(["/main/branches/new"]);
     });
   });
 

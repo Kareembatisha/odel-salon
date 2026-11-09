@@ -1,21 +1,17 @@
-import { Injectable, inject, signal } from "@angular/core";
-import { Observable, catchError, finalize, map, of, tap } from "rxjs";
+import { computed, inject, Injectable, signal } from "@angular/core";
+import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from "@env/environment";
 import { NotificationService } from "@core/services/notification.service";
-import { PaginationMeta } from "@shared/model/api_response.model";
+import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
+import { TABLE_PAGE_SIZE } from "@shared/model/pagination.constants";
 import {
-  CreateUserRequest,
-  UpdateUserRequest,
+  CreateUserPayload,
+  UpdateUserPayload,
   UserDetails,
   UserListItem,
   UsersQuery,
 } from "../model/user.model";
-import { UserApiRepository } from "../repository/user-api.repository";
-import { UserMockRepository } from "../repository/user-mock.repository";
-import { IUserRepository } from "../repository/user.repository";
-
-const PAGE_SIZE = 10;
+import { USER_REPOSITORY } from "../repository/user.repository";
 
 /**
  * UsersService — list state (server-side search, role/status filters, paging)
@@ -26,36 +22,49 @@ const PAGE_SIZE = 10;
 export class UsersService {
   private readonly notify = inject(NotificationService);
 
-  private readonly repository: IUserRepository = environment.useMock
-    ? inject(UserMockRepository)
-    : inject(UserApiRepository);
+  private readonly repository = inject(USER_REPOSITORY);
 
   private readonly _users = signal<UserListItem[]>([]);
   private readonly _meta = signal<PaginationMeta | null>(null);
-  private readonly _query = signal<UsersQuery>({ pageNumber: 1, pageSize: PAGE_SIZE });
+  private readonly _query = signal<UsersQuery>({ pageNumber: 1, pageSize: TABLE_PAGE_SIZE });
   private readonly _loading = signal(false);
-  private readonly _saving = signal(false);
+  /** Mutations in flight. A counter (not a boolean) so one finishing can't clear `saving` while another is still running. */
+  private readonly pendingMutations = signal(0);
   private readonly _hasError = signal(false);
+
+  /**
+   * In-flight list request — a newer one cancels it so a slow, stale response can't overwrite
+   * fresh results; the id check stops an obsolete request's `finalize` from clearing `loading`.
+   */
+  private inFlight?: Subscription;
+  private requestId = 0;
 
   readonly users = this._users.asReadonly();
   readonly meta = this._meta.asReadonly();
   readonly query = this._query.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly saving = this._saving.asReadonly();
+  readonly saving = computed(() => this.pendingMutations() > 0);
   readonly hasError = this._hasError.asReadonly();
 
   // ── List ─────────────────────────────────────────────
   load(): void {
+    const currentRequest = ++this.requestId;
+
+    this.inFlight?.unsubscribe();
     this._loading.set(true);
     this._hasError.set(false);
-    this.repository
+    this.inFlight = this.repository
       .getUsers(this._query())
       .pipe(
         catchError(() => {
           this._hasError.set(true);
           return of(null);
         }),
-        finalize(() => this._loading.set(false)),
+        finalize(() => {
+          if (currentRequest === this.requestId) {
+            this._loading.set(false);
+          }
+        }),
       )
       .subscribe((res) => {
         if (!res) return;
@@ -77,23 +86,23 @@ export class UsersService {
 
   // ── Detail ───────────────────────────────────────────
   getUser(id: number): Observable<UserDetails | null> {
-    return this.repository.getUser(id).pipe(
-      map((res) => res.data),
+    return this.repository.getUserById(id).pipe(
+      map((res) => (res.status ? res.data : null)),
       catchError(() => of(null)),
     );
   }
 
   // ── Mutations ────────────────────────────────────────
-  create(payload: CreateUserRequest): Observable<boolean> {
+  createUser(payload: CreateUserPayload): Observable<boolean> {
     return this.mutate(this.repository.createUser(payload), "USERS.CREATED");
   }
 
-  update(id: number, payload: UpdateUserRequest): Observable<boolean> {
+  updateUser(id: number, payload: UpdateUserPayload): Observable<boolean> {
     return this.mutate(this.repository.updateUser(id, payload), "USERS.UPDATED");
   }
 
   toggleStatus(id: number): Observable<boolean> {
-    return this.mutate(this.repository.toggleStatus(id), "USERS.STATUS_UPDATED");
+    return this.mutate(this.repository.toggleUserStatus(id), "USERS.STATUS_UPDATED");
   }
 
   remove(ids: number[]): Observable<boolean> {
@@ -104,13 +113,19 @@ export class UsersService {
    * Runs a mutation, toasts a localized success message (our own i18n key — the
    * backend's message is English-only text), and reloads the list on success.
    */
-  private mutate(request: Observable<unknown>, successKey: string): Observable<boolean> {
-    this._saving.set(true);
+  private mutate(
+    request: Observable<ApiResponse<unknown>>,
+    successKey: string,
+  ): Observable<boolean> {
+    this.pendingMutations.update((n) => n + 1);
     return request.pipe(
+      map((res) => {
+        if (!res.status) throw new Error(res.message);
+        return true;
+      }),
       tap(() => this.notify.success(successKey)),
-      map(() => true),
       catchError(() => of(false)),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
       tap((ok) => ok && this.load()),
     );
   }

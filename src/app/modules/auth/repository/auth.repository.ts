@@ -1,3 +1,4 @@
+import { InjectionToken } from "@angular/core";
 import { Observable } from "rxjs";
 
 import { ApiResponse } from "@shared/model/api_response.model";
@@ -36,3 +37,6 @@ export interface IAuthRepository {
   ): Observable<ApiResponse<VerifyPasswordCodeResponseData>>;
   resetPassword(payload: ResetPasswordRequest): Observable<ApiResponse<null>>;
 }
+
+/** DI token: `app.providers*.ts` decides whether the API or the mock implementation backs it. */
+export const AUTH_REPOSITORY = new InjectionToken<IAuthRepository>("AUTH_REPOSITORY");

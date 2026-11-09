@@ -22,7 +22,6 @@ import { FailedStateComponent } from "@shared/components/failed-state/failed-sta
 import { PageHeaderComponent } from "@shared/components/page-header/page-header.component";
 import { SearchInputComponent } from "@shared/components/search-input/search-input.component";
 import { StatusBadgeComponent } from "@shared/components/status-badge/status-badge.component";
-import { HasPermissionDirective } from "@shared/directives/has-permission.directive";
 import { RoleListItem } from "../../model/role.model";
 import { RolesService } from "../../service/roles.service";
 import { RoleForm } from "../../components/role-form/role-form";
@@ -42,7 +41,6 @@ import { RoleForm } from "../../components/role-form/role-form";
     DrawerComponent,
     ConfirmModalComponent,
     FailedStateComponent,
-    HasPermissionDirective,
     RoleForm,
   ],
   templateUrl: "./roles-list.html",
@@ -61,6 +59,7 @@ export class RolesList implements OnInit {
   protected readonly saving = this.roles.saving;
   protected readonly hasError = this.roles.hasError;
 
+  protected readonly canCreate = computed(() => this.auth.hasPermission(PERMISSIONS.Role.Create));
   protected readonly canDelete = computed(() => this.auth.hasPermission(PERMISSIONS.Role.Delete));
   protected readonly canEdit = computed(() => this.auth.hasPermission(PERMISSIONS.Role.Edit));
 
@@ -95,19 +94,23 @@ export class RolesList implements OnInit {
   }
 
   protected openCreate(): void {
+    if (!this.canCreate()) return;
     this.editing.set(null);
     this.drawerOpen.set(true);
   }
 
   protected openRename(role: RoleListItem, event: Event): void {
     event.stopPropagation();
+    if (!this.canEdit()) return;
     this.editing.set(role);
     this.drawerOpen.set(true);
   }
 
   protected onNameSubmitted(name: string): void {
+    if (this.saving()) return;
     const role = this.editing();
-    const request = role ? this.roles.rename(role.id, name) : this.roles.create(name);
+    if (role ? !this.canEdit() : !this.canCreate()) return;
+    const request = role ? this.roles.rename(role.id, name) : this.roles.createRole(name);
     request.subscribe((ok) => ok && this.drawerOpen.set(false));
   }
 
@@ -117,25 +120,31 @@ export class RolesList implements OnInit {
 
   protected askDelete(role: RoleListItem, event: Event): void {
     event.stopPropagation();
+    if (!this.canDelete()) return;
     this.pendingDelete.set([role]);
   }
 
   protected askBulkDelete(): void {
+    if (!this.canDelete()) return;
     const ids = this.selection();
     this.pendingDelete.set(this.rows().filter((r) => ids.includes(r.id)));
   }
 
   protected confirmDelete(): void {
+    if (!this.canDelete() || this.saving()) return;
     const ids = this.pendingDelete().map((r) => r.id);
     this.roles.remove(ids).subscribe((ok) => {
       if (ok) {
         this.pendingDelete.set([]);
-        this.selection.set([]);
+        // Only the rows that were just deleted leave the selection.
+        this.selection.update((sel) => sel.filter((id) => !ids.includes(Number(id))));
       }
     });
   }
 
   protected onSearch(term: string): void {
+    // Ignore emissions that change nothing (e.g. typing then deleting a trailing space).
+    if ((term || undefined) === this.roles.query().search) return;
     this.selection.set([]);
     this.roles.setSearch(term);
   }

@@ -1,13 +1,10 @@
-import { Injectable, inject, signal } from "@angular/core";
+import { computed, inject, Injectable, signal } from "@angular/core";
 import { Observable, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from "@env/environment";
 import { NotificationService } from "@core/services/notification.service";
 import { AuthService } from "../../auth/service/auth.service";
 import { UpdateProfileRequest, UserProfile } from "../model/profile.model";
-import { ProfileApiRepository } from "../repository/profile-api.repository";
-import { ProfileMockRepository } from "../repository/profile-mock.repository";
-import { IProfileRepository } from "../repository/profile.repository";
+import { PROFILE_REPOSITORY } from "../repository/profile.repository";
 
 /**
  * ProfileService — state + business logic for the signed-in user's profile.
@@ -22,18 +19,17 @@ export class ProfileService {
   private readonly auth = inject(AuthService);
   private readonly notify = inject(NotificationService);
 
-  private readonly repository: IProfileRepository = environment.useMock
-    ? inject(ProfileMockRepository)
-    : inject(ProfileApiRepository);
+  private readonly repository = inject(PROFILE_REPOSITORY);
 
   private readonly _profile = signal<UserProfile | null>(null);
   private readonly _loading = signal(false);
-  private readonly _saving = signal(false);
+  /** Mutations in flight. A counter (not a boolean) so one finishing can't clear `saving` while another is still running. */
+  private readonly pendingMutations = signal(0);
   private readonly _hasError = signal(false);
 
   readonly profile = this._profile.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly saving = this._saving.asReadonly();
+  readonly saving = computed(() => this.pendingMutations() > 0);
   readonly hasError = this._hasError.asReadonly();
 
   /** GET /auth/profile */
@@ -57,14 +53,14 @@ export class ProfileService {
 
   /** PUT /auth/profile, then refetch. Emits true on success. */
   update(payload: UpdateProfileRequest): Observable<boolean> {
-    this._saving.set(true);
+    this.pendingMutations.update((n) => n + 1);
     return this.repository.updateProfile(payload).pipe(
       tap((res) => this.notify.success(res.message ?? "PROFILE.PROFILE_UPDATED")),
       tap(() => this.load()),
       map(() => true),
       // The error interceptor already showed the backend's message / field errors.
       catchError(() => of(false)),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
     );
   }
 

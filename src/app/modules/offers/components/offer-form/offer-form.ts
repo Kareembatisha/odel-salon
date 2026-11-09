@@ -18,7 +18,6 @@ import {
   FormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
-  Validators,
 } from "@angular/forms";
 import { TranslateModule } from "@ngx-translate/core";
 import { startWith } from "rxjs";
@@ -27,6 +26,7 @@ import { NotificationService } from "@core/services/notification.service";
 import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
 import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
 import { createPreviewUrl, revokePreviewUrl } from "@shared/utils/image-preview.util";
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import {
   ServicePicker,
   UnavailableService,
@@ -48,11 +48,6 @@ import { cairoToday, isValidDate } from "../../utils/offer-dates.util";
 import { validateOfferImage } from "../../utils/offer-image.util";
 
 type PriceField = "regularPrice" | "vipPrice" | "homePrice";
-
-/** A name made only of spaces counts as empty (it would be trimmed to nothing). */
-function notBlank(control: AbstractControl): ValidationErrors | null {
-  return String(control.value ?? "").trim() ? null : { required: true };
-}
 
 /** Number typed into a field → `NaN` when empty or not a number (never 0 for ""). */
 function toNumber(value: unknown): number {
@@ -153,8 +148,8 @@ export class OfferForm implements OnInit {
 
   // ── Form ─────────────────────────────────────────────
   protected readonly form = this.fb.nonNullable.group({
-    nameAr: ["", [notBlank, Validators.maxLength(OFFER_NAME_MAX_LENGTH)]],
-    nameEn: ["", [notBlank, Validators.maxLength(OFFER_NAME_MAX_LENGTH)]],
+    nameAr: ["", [notBlank, maxTrimmedLength(OFFER_NAME_MAX_LENGTH)]],
+    nameEn: ["", [notBlank, maxTrimmedLength(OFFER_NAME_MAX_LENGTH)]],
     startDate: ["", [(c: AbstractControl) => this.startRule(c)]],
     endDate: ["", [(c: AbstractControl) => this.endRule(c)]],
     maxBookings: ["", [(c: AbstractControl) => this.maxBookingsRule(c)]],

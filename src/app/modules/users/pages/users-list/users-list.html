@@ -1,8 +1,10 @@
 <div class="odl-page">
   <app-page-header [title]="'USERS.TITLE' | translate" [subtitle]="'USERS.SUBTITLE' | translate">
-    <app-button *appCan="P.User.Create" variant="primary" iconClass="pi pi-user-plus" (clicked)="openCreate()">
-      {{ 'USERS.NEW' | translate }}
-    </app-button>
+    @if (canCreate()) {
+      <app-button variant="primary" iconClass="pi pi-user-plus" (clicked)="openCreate()">
+        {{ 'USERS.NEW' | translate }}
+      </app-button>
+    }
   </app-page-header>
 
   <div class="toolbar">
@@ -123,7 +125,7 @@
   [title]="(drawerMode() === 'create' ? 'USERS.FORM.CREATE_TITLE' : 'USERS.FORM.EDIT_TITLE') | translate"
   [subtitle]="(drawerMode() === 'create' ? 'USERS.FORM.CREATE_SUBTITLE' : 'USERS.FORM.EDIT_SUBTITLE') | translate"
   [closeLabel]="'COMMON.CLOSE' | translate"
-  (closed)="drawerOpen.set(false)"
+  (closed)="closeDrawer()"
 >
   @if (drawerOpen()) {
     @if (drawerLoading()) {
@@ -137,7 +139,7 @@
         [roles]="roleList()"
         [saving]="saving()"
         (submitted)="onSubmitted($event)"
-        (cancelled)="drawerOpen.set(false)"
+        (cancelled)="closeDrawer()"
       />
     }
   }

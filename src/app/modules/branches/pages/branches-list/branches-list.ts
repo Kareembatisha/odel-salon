@@ -119,32 +119,35 @@ export class BranchesList implements OnInit {
   }
 
   protected addBranch(): void {
-    this.router.navigate(["main/branches/new"]);
+    if (!this.canCreate()) return;
+    this.router.navigate(["/main/branches/new"]);
   }
 
   protected viewBranch(branch: BranchListItem): void {
-    this.router.navigate(["main/branches", branch.id]);
+    this.router.navigate(["/main/branches", branch.id]);
   }
 
   protected editBranch(branch: BranchListItem): void {
-    this.router.navigate(["main/branches", branch.id, "edit"]);
+    if (!this.canEdit()) return;
+    this.router.navigate(["/main/branches", branch.id, "edit"]);
   }
 
   /** Flip visibility; the service toasts the result and reloads the list. */
   protected toggleBranchStatus(branch: BranchListItem): void {
-    if (this.saving()) return;
+    if (!this.canEdit() || this.saving()) return;
 
     this.branchesService.toggleStatus(branch.id).subscribe();
   }
 
   protected deleteBranch(branch: BranchListItem): void {
+    if (!this.canDelete()) return;
     this.pendingDelete.set(branch);
   }
 
   protected confirmDelete(): void {
     const branch = this.pendingDelete();
 
-    if (!branch) return;
+    if (!branch || !this.canDelete() || this.saving()) return;
 
     this.branchesService.remove([branch.id]).subscribe((ok) => {
       if (ok) this.pendingDelete.set(null);

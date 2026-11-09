@@ -80,9 +80,10 @@ export class RoleDetails implements OnInit {
   protected readonly totalCount = computed(() =>
     this.matrix().reduce((n, m) => n + m.permissions.length, 0),
   );
-  protected readonly isOwnRole = computed(
-    () => !!this.role() && this.auth.hasRole(this.role()!.name),
-  );
+  protected readonly isOwnRole = computed(() => {
+    const role = this.role();
+    return !!role && this.auth.hasRole(role.name);
+  });
 
   ngOnInit(): void {
     this.load();

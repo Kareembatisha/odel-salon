@@ -1,8 +1,10 @@
 <div class="odl-page">
   <app-page-header [title]="'ROLES.TITLE' | translate" [subtitle]="'ROLES.SUBTITLE' | translate">
-    <app-button *appCan="P.Role.Create" variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
-      {{ 'ROLES.NEW' | translate }}
-    </app-button>
+    @if (canCreate()) {
+      <app-button variant="primary" iconClass="pi pi-plus" (clicked)="openCreate()">
+        {{ 'ROLES.NEW' | translate }}
+      </app-button>
+    }
   </app-page-header>
 
   <div class="toolbar">

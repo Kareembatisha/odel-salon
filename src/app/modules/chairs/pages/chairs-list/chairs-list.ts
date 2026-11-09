@@ -237,6 +237,7 @@ export class ChairsList implements OnInit {
 
   // ── Create / edit ────────────────────────────────────
   protected openCreate(): void {
+    if (!this.canCreate()) return;
     this.drawerToken++;
     this.drawerMode.set("create");
     this.editDetails.set(null);
@@ -284,7 +285,7 @@ export class ChairsList implements OnInit {
   // ── Status ───────────────────────────────────────────
   /** The service toasts the result and reloads (the switch is controlled, so a refused 409 simply stays put). */
   protected toggle(chair: ChairListItem): void {
-    if (this.saving()) return;
+    if (!this.canToggle() || this.saving()) return;
     this.chairsService.toggleStatus(chair.id).subscribe();
   }
 
@@ -304,12 +305,13 @@ export class ChairsList implements OnInit {
 
   // ── Delete ───────────────────────────────────────────
   protected askDelete(chair: ChairListItem): void {
+    if (!this.canDelete()) return;
     this.pendingDelete.set(chair);
   }
 
   protected confirmDelete(): void {
     const chair = this.pendingDelete();
-    if (!chair) return;
+    if (!chair || !this.canDelete() || this.saving()) return;
 
     this.chairsService.remove([chair.id]).subscribe((ok) => ok && this.pendingDelete.set(null));
   }

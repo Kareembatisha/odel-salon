@@ -1,13 +1,6 @@
 import { FormControl } from "@angular/forms";
 import { describe, expect, it } from "vitest";
-import { egyptianMobile, notBlank } from "./barber-form.validators";
-
-describe("notBlank", () => {
-  it.each(["", "   ", null])("rejects %j", (v) =>
-    expect(notBlank(new FormControl(v))).toEqual({ required: true }),
-  );
-  it("accepts text", () => expect(notBlank(new FormControl(" Karim "))).toBeNull());
-});
+import { egyptianMobile } from "./barber-form.validators";
 
 describe("egyptianMobile", () => {
   it.each(["+201001234567", "01001234567", "+20 100 123 4567", "0100-123-4567"])(

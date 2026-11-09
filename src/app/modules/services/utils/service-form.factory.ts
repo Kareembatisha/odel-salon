@@ -1,5 +1,6 @@
-import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormGroup } from "@angular/forms";
 
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import { SERVICE_NAME_MAX_LENGTH } from "../model/service.model";
 import { durationValidator, homePriceValidator, priceValidator } from "./service-form.validators";
 
@@ -22,8 +23,8 @@ export function createBranchPricingGroup(fb: FormBuilder, branchId: number): For
 /** Complete create / edit service form: names + one price group per branch. */
 export function createServiceForm(fb: FormBuilder): FormGroup {
   return fb.group({
-    nameAr: ["", [Validators.required, Validators.maxLength(SERVICE_NAME_MAX_LENGTH)]],
-    nameEn: ["", [Validators.required, Validators.maxLength(SERVICE_NAME_MAX_LENGTH)]],
+    nameAr: ["", [notBlank, maxTrimmedLength(SERVICE_NAME_MAX_LENGTH)]],
+    nameEn: ["", [notBlank, maxTrimmedLength(SERVICE_NAME_MAX_LENGTH)]],
     branches: fb.array<FormGroup>([]),
   });
 }

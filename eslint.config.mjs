@@ -34,8 +34,7 @@ export default tseslint.config(
     ignores: ["src/**/*.spec.ts"],
     plugins: { "@angular-eslint": angular.tsPlugin, "@typescript-eslint": tseslint.plugin },
     rules: {
-      // Reported, not yet failing: existing occurrences are cleaned up in Step 04 (R-11).
-      "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/no-non-null-assertion": "error",
       "@angular-eslint/prefer-on-push-component-change-detection": "error",
       "@angular-eslint/prefer-standalone": "error",
     },

@@ -17,7 +17,6 @@ import {
   FormBuilder,
   ReactiveFormsModule,
   ValidationErrors,
-  Validators,
 } from "@angular/forms";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { startWith } from "rxjs";
@@ -25,6 +24,7 @@ import { startWith } from "rxjs";
 import { LanguageService } from "@core/services/language.service";
 import { AppButtonComponent } from "@shared/components/app-button/app-button.component";
 import { FloatLabelInput } from "@shared/components/float-label-input/float-label-input";
+import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import { ServiceOption } from "../../../services/model/service.model";
 import {
   ServicePicker,
@@ -42,11 +42,6 @@ import {
 } from "../../model/package.model";
 
 type PriceField = "regularPrice" | "vipPrice" | "homePrice";
-
-/** A name made only of spaces counts as empty (it would be trimmed to nothing). */
-function notBlank(control: AbstractControl): ValidationErrors | null {
-  return String(control.value ?? "").trim() ? null : { required: true };
-}
 
 /** Number typed into a text field → `NaN` when empty or not a number (never 0 for ""). */
 function toNumber(value: unknown): number {
@@ -133,8 +128,8 @@ export class PackageForm implements OnInit {
 
   // ── Form ─────────────────────────────────────────────
   protected readonly form = this.fb.nonNullable.group({
-    nameAr: ["", [notBlank, Validators.maxLength(PACKAGE_NAME_MAX_LENGTH)]],
-    nameEn: ["", [notBlank, Validators.maxLength(PACKAGE_NAME_MAX_LENGTH)]],
+    nameAr: ["", [notBlank, maxTrimmedLength(PACKAGE_NAME_MAX_LENGTH)]],
+    nameEn: ["", [notBlank, maxTrimmedLength(PACKAGE_NAME_MAX_LENGTH)]],
     regularPrice: ["", [(c: AbstractControl) => this.priceRule(c, this.totals().regular, true)]],
     vipPrice: ["", [(c: AbstractControl) => this.priceRule(c, this.totals().vip, true)]],
     // Optional: empty = "In branch only". Only checked while home pricing is possible.

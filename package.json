@@ -8,6 +8,8 @@
     "build:template-brand": "ng build --configuration production,brand-template,production-brand-template",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "check:providers": "node scripts/check-providers.mjs",
+    "check:prod-bundle": "node scripts/check-prod-bundle.mjs",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.{ts,scss,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,scss,json}\""

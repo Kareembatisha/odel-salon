@@ -1,8 +1,9 @@
-import { Injectable, inject, signal } from "@angular/core";
+import { computed, inject, Injectable, signal } from "@angular/core";
 import { Observable, Subscription, catchError, finalize, map, of, tap } from "rxjs";
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse, PaginationMeta } from "@shared/model/api_response.model";
+import { CARD_PAGE_SIZE } from "@shared/model/pagination.constants";
 import {
   BranchDetails,
   BranchListItem,
@@ -15,9 +16,6 @@ import { BRANCH_REPOSITORY } from "../repository/branch.repository";
 // ============================================================
 // Constants
 // ============================================================
-
-/** Default page size for the branch list. */
-const PAGE_SIZE = 12;
 
 // ============================================================
 // Service
@@ -52,11 +50,12 @@ export class BranchesService {
   private readonly _meta = signal<PaginationMeta | null>(null);
   private readonly _query = signal<BranchesQuery>({
     pageNumber: 1,
-    pageSize: PAGE_SIZE,
+    pageSize: CARD_PAGE_SIZE,
   });
   private readonly _loading = signal(false);
   private readonly _hasError = signal(false);
-  private readonly _saving = signal(false);
+  /** Mutations in flight. A counter (not a boolean) so one finishing can't clear `saving` while another is still running. */
+  private readonly pendingMutations = signal(0);
 
   /**
    * In-flight list request — a newer one cancels it so a slow, stale
@@ -80,7 +79,7 @@ export class BranchesService {
   readonly loading = this._loading.asReadonly();
   readonly hasError = this._hasError.asReadonly();
   /** A mutation (create / update / toggle / delete) is in flight. */
-  readonly saving = this._saving.asReadonly();
+  readonly saving = computed(() => this.pendingMutations() > 0);
 
   // ----------------------------------------------------------
   // List Commands
@@ -241,7 +240,7 @@ export class BranchesService {
     request: Observable<ApiResponse<T>>,
     successKey: string,
   ): Observable<ApiResponse<T> | null> {
-    this._saving.set(true);
+    this.pendingMutations.update((n) => n + 1);
 
     return request.pipe(
       map((res) => {
@@ -250,7 +249,7 @@ export class BranchesService {
       }),
       tap(() => this.notify.success(successKey)),
       catchError(() => of(null)),
-      finalize(() => this._saving.set(false)),
+      finalize(() => this.pendingMutations.update((n) => n - 1)),
     );
   }
 }

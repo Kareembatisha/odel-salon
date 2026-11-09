@@ -24,18 +24,7 @@ export class GlobalErrorHandler implements ErrorHandler {
   // ErrorHandler is constructed very early in the app's DI graph.
   private readonly injector = inject(Injector);
 
-  // A template error is re-thrown on every change-detection pass, and the toast below
-  // triggers another pass — without this guard that becomes an endless loop (UI lag).
-  private lastMessage = "";
-  private lastAt = 0;
-
   handleError(error: unknown): void {
-    const message = error instanceof Error ? error.message : String(error);
-    const now = Date.now();
-    if (message === this.lastMessage && now - this.lastAt < 2000) return;
-    this.lastMessage = message;
-    this.lastAt = now;
-
     // Always log the real error for devtools/telemetry — never swallow it silently.
     console.error("Unhandled application error:", error);
 

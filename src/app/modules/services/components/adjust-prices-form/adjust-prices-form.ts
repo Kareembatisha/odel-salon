@@ -43,6 +43,8 @@ import {
 
 /** How many services the preview lists before "and N more". */
 const PREVIEW_ROWS = 6;
+/** Shown if a targeted service has no regular / VIP price (the list only offers priced ones). */
+const NO_PRICE: PreviewPrice = { from: "", to: "" };
 
 function percentageValidator(control: AbstractControl): ValidationErrors | null {
   const text = String(control.value ?? "").trim();
@@ -197,8 +199,8 @@ export class AdjustPricesForm implements OnInit {
       .map((r) => ({
         id: r.id,
         name: localizedName(r.nameAr, r.nameEn, lang),
-        regular: price(r.pricing.regularPrice)!,
-        vip: price(r.pricing.vipPrice)!,
+        regular: price(r.pricing.regularPrice) ?? NO_PRICE,
+        vip: price(r.pricing.vipPrice) ?? NO_PRICE,
         home: price(r.pricing.homePrice),
       }));
   });
@@ -248,7 +250,8 @@ export class AdjustPricesForm implements OnInit {
 
   protected submit(): void {
     if (this.saving()) return;
-    if (this.form.invalid || !this.canSubmit()) {
+    const percentage = this.percentage();
+    if (this.form.invalid || !this.canSubmit() || percentage === null) {
       this.form.markAllAsTouched();
       return;
     }
@@ -256,7 +259,7 @@ export class AdjustPricesForm implements OnInit {
     this.servicesService
       .adjustPrices({
         branchId: Number(this.form.controls.branchId.value),
-        percentage: this.percentage()!,
+        percentage,
         serviceIds: this.useSelection() ? this.selectedIds() : [],
       })
       .subscribe((ok) => {

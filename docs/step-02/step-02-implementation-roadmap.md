@@ -46,7 +46,7 @@ Priority: **P0** security/reliability · **P1** standard-defining · **P2** cons
 | R-11 | List-page alignment: no-op search guard in barbers/users/roles; selection cleared only for deleted ids; `drawerToken` in users; remove the 6 non-null assertions in pages/forms | barbers, users, roles, (+ role-details, adjust-prices-form) | 3 list pages + 2 | N2, N3; fixes BA-06, BA-07 | P1 | Low | R-08 | M7 (part), BA-06/07 |
 | R-09 | Named page-size constants per view type (card grid / table) in one shared place | all | `shared/` const + 9 services | A3 | P2 | Low | D2 | I8, A3 |
 | R-16 | Align mutation / request names (`create`→`createUser`, `CreateUserRequest`→`CreateUserPayload`, repository method names) | users, roles, dashboard | services, models, repos, their specs | L3 | P3 | Low–Med (renames) | R-01, D5 | I5, L3 |
-| R-15 | Query-param casing: keep PascalCase **or** switch users/roles to camelCase, per the contract | users, roles | `user-query.ts`, `role-query.ts` (+ specs) | A2 / N13 | P2 | Med (API contract) | **D3** | I5, A2 |
+| R-15 | **CANCELLED — D3 resolved as A (PascalCase confirmed against the real API).** Query-param casing: keep PascalCase **or** switch users/roles to camelCase, per the contract | users, roles | `user-query.ts`, `role-query.ts` (+ specs) | A2 / N13 | P2 | Med (API contract) | **D3** | I5, A2 |
 | R-12 | Normalise route strings in `router.navigate` (`"main/branches/new"` vs `"/main/services"`) | branches (and any relative-string navigations) | `branches-list.ts` etc. | Cosmetic consistency | P3 | Low | — | — (new) |
 
 ### Step 05 — Functional / UI / UX testing

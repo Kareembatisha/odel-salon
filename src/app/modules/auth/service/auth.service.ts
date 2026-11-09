@@ -2,7 +2,6 @@ import { Injectable, computed, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable, catchError, finalize, map, of, tap } from "rxjs";
 
-import { environment } from "@env/environment";
 import { ApiResponse } from "@shared/model/api_response.model";
 import { NotificationService } from "@core/services/notification.service";
 
@@ -14,9 +13,7 @@ import {
   ResetPasswordRequest,
   VerifyPasswordCodeRequest,
 } from "../model/auth.model";
-import { AuthApiRepository } from "../repository/auth-api.repository";
-import { AuthMockRepository } from "../repository/auth-mock.repository";
-import { IAuthRepository } from "../repository/auth.repository";
+import { AUTH_REPOSITORY } from "../repository/auth.repository";
 
 const ACCESS_TOKEN_KEY = "odl_access_token";
 const REFRESH_TOKEN_KEY = "odl_refresh_token";
@@ -32,10 +29,9 @@ const PERMISSIONS_KEY = "odl_permissions";
  * call its methods, and read its signals.
  *
  * Repository selection:
- *   `environment.useMock` decides, once, which IAuthRepository
- *   implementation this service delegates to (real HTTP vs mock data).
- *   Swapping environments is the only thing pages/components ever need —
- *   nothing else in the call chain changes.
+ *   the service only knows the AUTH_REPOSITORY token. `app.providers.ts`
+ *   (development) or `app.providers.prod.ts` (production build) decides
+ *   whether it is backed by the real API or by mock data.
  *
  * State management: Angular signals (no NgRx/Rxjs store needed for this
  * scope). Pages read `loading()`, `currentUser()`, etc.
@@ -44,14 +40,8 @@ const PERMISSIONS_KEY = "odl_permissions";
 @Injectable({ providedIn: "root" })
 export class AuthService {
   private readonly notify = inject(NotificationService);
-  private readonly apiRepository = inject(AuthApiRepository);
-  private readonly mockRepository = inject(AuthMockRepository);
+  private readonly repository = inject(AUTH_REPOSITORY);
   private readonly router = inject(Router);
-
-  /** Single flag drives which repository implementation is used everywhere. */
-  private readonly repository: IAuthRepository = environment.useMock
-    ? this.mockRepository
-    : this.apiRepository;
 
   // ── State (signals) ──────────────────────────────────────────────────────
   private readonly _loading = signal(false);

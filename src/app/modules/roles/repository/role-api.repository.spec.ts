@@ -48,7 +48,7 @@ describe("RoleApiRepository", () => {
   });
 
   it("GET /roles/{id}", () => {
-    repo.getRole(3).subscribe();
+    repo.getRoleById(3).subscribe();
 
     const req = http.expectOne(`${URL}/3`);
     expect(req.request.method).toBe("GET");
@@ -57,7 +57,7 @@ describe("RoleApiRepository", () => {
 
   it("GET /roles/{id} returns the matrix under `modules`", () => {
     let modules: unknown;
-    repo.getRole(2).subscribe((res) => (modules = res.data?.modules));
+    repo.getRoleById(2).subscribe((res) => (modules = res.data?.modules));
 
     http.expectOne(`${URL}/2`).flush({
       status: true,
