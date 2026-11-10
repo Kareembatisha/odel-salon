@@ -109,7 +109,6 @@ export class RoleDetails implements OnInit {
     this.baseline.set(modules);
     // The route's static breadcrumb says "Role"; swap in the real name.
     this.breadcrumbs.setBreadcrumbs([
-      { label: "LAYOUT.NAV.DASHBOARD", route: "/main" },
       { label: "LAYOUT.NAV.ROLES_PERMISSIONS", route: "/main/roles" },
       { label: role.name },
     ]);

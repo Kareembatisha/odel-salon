@@ -215,6 +215,48 @@ describe("UsersService", () => {
     });
   });
 
+  describe("remove steps back a page when it empties the current one", () => {
+    function loadPage(pageNumber: number, rows: number): void {
+      service.setPage(pageNumber);
+      const ids = Array.from({ length: rows }, (_, i) => i + 1);
+      repo.last.next(page(ids.map((id) => user(id))));
+      repo.last.complete();
+      repo.calls.length = 0;
+    }
+
+    it("deleting every row on page 3 reloads page 2", async () => {
+      loadPage(3, 2);
+
+      await firstValueFrom(service.remove([1, 2]));
+
+      expect(repo.calls.map((c) => c.pageNumber)).toEqual([2]);
+    });
+
+    it("deleting some rows keeps the page", async () => {
+      loadPage(3, 3);
+
+      await firstValueFrom(service.remove([1]));
+
+      expect(repo.calls.map((c) => c.pageNumber)).toEqual([3]);
+    });
+
+    it("emptying page 1 stays on page 1", async () => {
+      loadPage(1, 2);
+
+      await firstValueFrom(service.remove([1, 2]));
+
+      expect(repo.calls.map((c) => c.pageNumber)).toEqual([1]);
+    });
+
+    it("a failed delete does not move the page or reload", async () => {
+      loadPage(3, 2);
+      repo.next = () => throwError(() => new Error("409"));
+
+      expect(await firstValueFrom(service.remove([1, 2]))).toBe(false);
+      expect(repo.calls).toHaveLength(0);
+    });
+  });
+
   describe("saving", () => {
     it("is true while a mutation runs and false after", () => {
       const pending = new Subject<ApiResponse<unknown>>();

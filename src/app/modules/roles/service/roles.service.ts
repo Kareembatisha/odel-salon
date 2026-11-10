@@ -130,16 +130,31 @@ export class RolesService {
   }
 
   remove(ids: number[]): Observable<boolean> {
-    return this.mutate(this.repository.deleteRoles({ ids }), "ROLES.DELETED");
+    return this.mutate(this.repository.deleteRoles({ ids }), "ROLES.DELETED", () =>
+      this.reloadAfterRemoval(ids.length),
+    );
+  }
+
+  /** If the delete emptied the current page, step back one page first so the user isn't stranded. */
+  private reloadAfterRemoval(removed: number): void {
+    const pageEmptied = this._roles().length <= removed && this._query().pageNumber > 1;
+
+    if (pageEmptied) {
+      this._query.update((q) => ({ ...q, pageNumber: q.pageNumber - 1 }));
+    }
+
+    this.load();
   }
 
   /**
    * Runs a mutation, toasts a localized success message (our own i18n key — the
-   * backend's message is English-only text), and reloads the list on success.
+   * backend's message is English-only text), and reloads the list on success
+   * (`afterSuccess` lets a caller reload differently, e.g. after a delete).
    */
   private mutate(
     request: Observable<ApiResponse<unknown>>,
     successKey: string,
+    afterSuccess: () => void = () => this.load(),
   ): Observable<boolean> {
     this.pendingMutations.update((n) => n + 1);
     return request.pipe(
@@ -150,7 +165,7 @@ export class RolesService {
       tap(() => this.notify.success(successKey)),
       catchError(() => of(false)),
       finalize(() => this.pendingMutations.update((n) => n - 1)),
-      tap((ok) => ok && this.load()),
+      tap((ok) => ok && afterSuccess()),
     );
   }
 }

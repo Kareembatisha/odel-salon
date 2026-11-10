@@ -25,9 +25,6 @@ import { USER_REPOSITORY } from "@modules/users/repository/user.repository";
 import { RoleApiRepository } from "@modules/roles/repository/role-api.repository";
 import { RoleMockRepository } from "@modules/roles/repository/role-mock.repository";
 import { ROLE_REPOSITORY } from "@modules/roles/repository/role.repository";
-import { DashboardApiRepository } from "@modules/dashboard/repository/dashboard-api.repository";
-import { DashboardMockRepository } from "@modules/dashboard/repository/dashboard-mock.repository";
-import { DASHBOARD_REPOSITORY } from "@modules/dashboard/repository/dashboard.repository";
 import { ProfileApiRepository } from "@modules/profile-management/repository/profile-api.repository";
 import { ProfileMockRepository } from "@modules/profile-management/repository/profile-mock.repository";
 import { PROFILE_REPOSITORY } from "@modules/profile-management/repository/profile.repository";
@@ -75,10 +72,6 @@ export const DATA_PROVIDERS: Provider[] = [
   {
     provide: ROLE_REPOSITORY,
     useClass: environment.useMock ? RoleMockRepository : RoleApiRepository,
-  },
-  {
-    provide: DASHBOARD_REPOSITORY,
-    useClass: environment.useMock ? DashboardMockRepository : DashboardApiRepository,
   },
   {
     provide: PROFILE_REPOSITORY,

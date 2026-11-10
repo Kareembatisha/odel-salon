@@ -47,7 +47,7 @@ export function buildBranchPayload(value: BranchFormValue): BranchPayload {
     nameEn: basicInfo.nameEn.trim(),
     address: basicInfo.address.trim(),
     phone: basicInfo.phone.trim(),
-    mapUrl: basicInfo.mapUrl.trim() || null,
+    mapUrl: (basicInfo.mapUrl ?? "").trim() || null,
 
     allowsRegular: bookingTypes.allowsRegular,
     allowsVip: bookingTypes.allowsVip,

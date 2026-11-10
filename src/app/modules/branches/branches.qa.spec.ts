@@ -194,9 +194,8 @@ describe("Branches QA — form → payload", () => {
     },
   );
 
-  // BR-02 — latent: the URL validator tolerates null, the mapper does not. Not reachable through the
-  // input component today (it writes ''), but any programmatic patchValue(null) crashes the submit.
-  it.fails("BR-02: a null map link does not crash the payload builder", () => {
+  // BR-02 — fixed in Step 06: the mapper tolerates a null map link like the URL validator does.
+  it("BR-02: a null map link does not crash the payload builder", () => {
     const f = filled();
     f.get("basicInfo.mapUrl")!.setValue(null);
     expect(() => buildBranchPayload(f.getRawValue() as BranchFormValue)).not.toThrow();

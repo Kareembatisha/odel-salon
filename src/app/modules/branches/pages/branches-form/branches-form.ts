@@ -152,7 +152,6 @@ export class BranchesForm {
   /** The route's static breadcrumb says "Edit Branch"; put the branch name in the trail. */
   private setBreadcrumbs(branch: BranchDetails): void {
     this.breadcrumbs.setBreadcrumbs([
-      { label: "LAYOUT.NAV.DASHBOARD", route: "/main" },
       { label: "LAYOUT.NAV.BRANCHES", route: LIST_ROUTE },
       {
         label: this.language.currentLang() === "ar" ? branch.nameAr : branch.nameEn,

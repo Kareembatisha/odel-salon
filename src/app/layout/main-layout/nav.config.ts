@@ -31,12 +31,6 @@ export interface NavSection {
  */
 export const NAV_SECTIONS: NavSection[] = [
   {
-    id: "overview",
-    items: [
-      { id: "dashboard", labelKey: "LAYOUT.NAV.DASHBOARD", icon: "pi pi-th-large", route: "/main" },
-    ],
-  },
-  {
     id: "access",
     labelKey: "LAYOUT.SECTIONS.ACCESS",
     items: [

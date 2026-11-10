@@ -72,9 +72,8 @@ describe("Barbers QA — phone normaliser & validator", () => {
     expect(egyptianMobile({ value: null } as never)).toBeNull();
   });
 
-  // BA-03 — every non-digit is stripped before matching, so text around a number is silently accepted
-  // and the stored phone differs from what was typed.
-  it.fails.each(["0100123456a7", "abc01001234567", "01001234567xyz"])(
+  // BA-03 — fixed in Step 06: letters / symbols are rejected instead of being stripped silently.
+  it.each(["0100123456a7", "abc01001234567", "01001234567xyz"])(
     'BA-03: %j is rejected, not "cleaned" into a valid phone',
     (input) => {
       expect(egyptianMobile({ value: input } as never)).not.toBeNull();

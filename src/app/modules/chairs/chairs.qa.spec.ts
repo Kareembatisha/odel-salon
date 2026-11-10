@@ -332,9 +332,8 @@ describe("Chairs QA — ChairMockRepository business rules", () => {
     });
   });
 
-  // CH-05 — mock fidelity: ChairTypeEnum is 0|1 (model contract) yet the mock stores any number,
-  // so an out-of-range type slips through dev/demo mode and is rejected only by the real API.
-  it.fails("CH-05: creating a chair with an invalid type is rejected (400)", async () => {
+  // CH-05 — fixed in Step 06: the mock rejects an out-of-range type like the real API does.
+  it("CH-05: creating a chair with an invalid type is rejected (400)", async () => {
     arrange([["R1", REGULAR, true]]);
     expect(
       (await failure(repo.createChair({ branchId: 1, name: "X", type: 7 as ChairType }))).status,

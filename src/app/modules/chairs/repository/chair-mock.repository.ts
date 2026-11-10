@@ -38,6 +38,10 @@ const MOCK_DELAY_MS = 450;
  * unique name per branch, and the "last active chair of an offered type in a
  * visible branch" lock (409) on deactivate / delete / change type.
  */
+/** The API's ChairTypeEnum only has Regular (0) and Vip (1). */
+const isChairType = (value: unknown): value is ChairType =>
+  value === ChairType.Regular || value === ChairType.Vip;
+
 @Injectable({ providedIn: "root" })
 export class ChairMockRepository implements IChairRepository {
   private readonly db = inject(MockDb);
@@ -122,6 +126,8 @@ export class ChairMockRepository implements IChairRepository {
       return this.invalid("BranchId", "CHAIRS.ERRORS.BRANCH_NOT_FOUND");
     }
 
+    if (!isChairType(payload.type)) return this.invalid("Type", "CHAIRS.ERRORS.TYPE_INVALID");
+
     const name = payload.name.trim();
     const nameError = this.nameError(name, branch.id);
     if (nameError) return this.invalid("Name", nameError);
@@ -148,6 +154,8 @@ export class ChairMockRepository implements IChairRepository {
   updateChair(id: number, payload: UpdateChairPayload): Observable<ApiResponse<null>> {
     const chair = this.db.chairs.find((c) => c.id === id);
     if (!chair) return this.notFound();
+
+    if (!isChairType(payload.type)) return this.invalid("Type", "CHAIRS.ERRORS.TYPE_INVALID");
 
     const name = payload.name.trim();
     const nameError = this.nameError(name, chair.branchId, chair.id);

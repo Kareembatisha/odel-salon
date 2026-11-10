@@ -186,7 +186,6 @@ export class ServicesForm {
   /** The route's static breadcrumb says "Edit service"; put the service name in the trail. */
   private setBreadcrumbs(service: ServiceDetails): void {
     this.breadcrumbs.setBreadcrumbs([
-      { label: "LAYOUT.NAV.DASHBOARD", route: "/main" },
       { label: "LAYOUT.NAV.SERVICES", route: LIST_ROUTE },
       { label: localizedName(service.nameAr, service.nameEn, this.language.currentLang()) },
     ]);

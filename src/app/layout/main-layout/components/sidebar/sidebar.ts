@@ -93,13 +93,8 @@ export class Sidebar {
     let best: NavItem | undefined;
     for (const item of this.flatItems) {
       if (!item.route) continue;
-      // "/main" is a prefix of every route — only an exact match counts for the dashboard.
       const match =
-        item.route === "/main"
-          ? url === "/main" || url.startsWith("/main?")
-          : url === item.route ||
-            url.startsWith(`${item.route}/`) ||
-            url.startsWith(`${item.route}?`);
+        url === item.route || url.startsWith(`${item.route}/`) || url.startsWith(`${item.route}?`);
       if (match && (!best || item.route.length > (best.route?.length ?? 0))) best = item;
     }
     return best?.id ?? "";

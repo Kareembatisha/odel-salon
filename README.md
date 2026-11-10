@@ -57,7 +57,6 @@ src/
       services/           price table per branch + summary · create/edit page (price card per branch) · bulk tools
       packages/           cards per branch + summary · create/edit drawer (service picker, "Before discount") · status switch
       offers/             status tabs + cards per branch · create/edit drawer (banner, dates, service picker, "Before discount") · stop / resume
-      dashboard/          model · repository (api + mock) · service · page
       profile-management/ profile + change password
       design-system/      living reference page (dev only)
       no-access/ not-found/
@@ -74,13 +73,13 @@ The approved standard lives in [`docs/step-02/`](docs/step-02/step-02-architectu
 - **Structure:** every component has its own folder (`components/<name>/<name>.ts|html|scss|spec.ts`), including forms. Cards, forms and details are only created when a module needs them.
 - **Routes:** all `/main` routes stay in `modules/main.routes.ts`.
 - **Imports:** reach `core/` and `shared/` through `@core/*` and `@shared/*`, never deep relative paths (enforced by ESLint).
-- **Approved exceptions:** `auth`, `dashboard`, `profile-management`, `no-access`, `not-found` and `design-system` do not follow the CRUD layout. Services keeps its 20-row page size; Chairs keeps its own `ToggleStatus` permission. `services/service/services.service.ts` is intentional (layer folder `service/`, module `services`).
+- **Approved exceptions:** `auth`, `profile-management`, `no-access`, `not-found` and `design-system` do not follow the CRUD layout. Services keeps its 20-row page size; Chairs keeps its own `ToggleStatus` permission. `services/service/services.service.ts` is intentional (layer folder `service/`, module `services`).
 - **Cross-feature component:** `modules/services/components/service-picker` is also used by Packages and Offers. It stays in the Services module on purpose (decision D9); import it from there and keep it free of Packages/Offers-specific logic.
 - **Shared sibling stylesheet:** `modules/services/components/bulk-form.scss` is shared by the three bulk-tool forms through `styleUrls`.
 
 ### Mock data and production builds
 
-Every repository (all 11, including auth) is an injection token. `src/app/app.providers.ts` registers them for development and tests (`environment.useMock` picks mock data or the real API); the production configurations **replace that file** with `src/app/app.providers.prod.ts`, which imports API repositories only, so no mock class, mock data or mock login reaches a production bundle. Keep both files in step when adding a repository.
+Every repository (all 10, including auth) is an injection token. `src/app/app.providers.ts` registers them for development and tests (`environment.useMock` picks mock data or the real API); the production configurations **replace that file** with `src/app/app.providers.prod.ts`, which imports API repositories only, so no mock class, mock data or mock login reaches a production bundle. Keep both files in step when adding a repository.
 
 ```bash
 npm run check:providers     # both provider files list the same tokens; prod has no mock references;
@@ -138,7 +137,7 @@ Implements `API_Contract_Authentication.md` (all 9 endpoints). Email + password 
 
 - The backend returns `role` and `permissions[]` at login and on every refresh. Permissions are `Resource.Action` strings defined once in `core/auth/permissions.ts` (e.g. `User.View`); use `PERMISSIONS.User.Edit`, never a raw string.
 - Routes: `canActivate: [permissionGuard]` with `data: { permission }`. The sidebar filters by the same permissions, so a user only sees what they can open.
-- **The dashboard and profile only require being signed in.** The backend currently grants only `User.*`; gating the dashboard on a permission it doesn't issue would bounce every real admin to *No access*. Add new keys to `permissions.ts` as the backend introduces them.
+- **The profile only requires being signed in.** `/main` has no page of its own: `homeRedirectGuard` sends the user to the first sidebar item they can open (or to their profile). Add new permission keys to `permissions.ts` as the backend introduces them.
 - Breadcrumbs build themselves from route `data.breadcrumb`.
 
 ### Profile page (`/main/profile`)
@@ -154,7 +153,7 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 
 | Page | Route | Permission |
 |---|---|---|
-| Dashboard | `/main` | sign-in only |
+| Home | `/main` | redirects to the first section the user can open |
 | Users | `/main/users` | `User.View` (+ `Create` / `Edit` / `Delete` for the actions) |
 | Roles & permissions | `/main/roles` | `Role.View` (+ `Create` / `Edit` / `Delete`) |
 | Role details (permission matrix) | `/main/roles/:id` | `Role.View` (editing needs `Role.Edit`) |
@@ -273,8 +272,7 @@ An offer discounts a bundle of **at least ONE service of ONE branch** for a peri
 - The reference had no `fileReplacements`, so production builds silently used the dev environment. Fixed here.
 - Build-time font inlining is off (it needs network access to Google Fonts and breaks offline CI); fonts load from the `<link>` in `index.html`.
 - Users and Roles management is not in the sprint plan; it is placed in Sprint 1 next to admin login. Move it if the team disagrees.
-- Dashboard numbers are mock data. **There is no dashboard endpoint in the backend contract yet**, so against the real API the dashboard shows its "couldn't load" state (the shell, sidebar and profile work normally).
-- Currency is shown as EGP — change it in `dashboard.ts` / the future shared formatter if needed.
+- **The dashboard was removed for now** (the backend has no dashboard endpoint yet). When the endpoint exists, restore it as a module with its own repository token, route, sidebar item and `DASHBOARD.*` translations, and drop `homeRedirectGuard` from the `/main` route.
 - Auth contract items marked "assumption" there are assumed here too: logout/refresh/change-password/profile-update response bodies, `401` on an invalid refresh token, `400` on a wrong current password.
 - Change password keeps the current session (the contract doesn't say tokens are revoked). If the backend revokes them, the next request 401s and the interceptor signs the user out.
 - Phone number is optional (6–15 digits when filled); the contract doesn't say whether it is required. Photo limits (2 MB, JPG/PNG/WebP) are a client-side default — align them with the backend's real rules.

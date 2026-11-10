@@ -16,8 +16,6 @@ import { UserApiRepository } from "@modules/users/repository/user-api.repository
 import { USER_REPOSITORY } from "@modules/users/repository/user.repository";
 import { RoleApiRepository } from "@modules/roles/repository/role-api.repository";
 import { ROLE_REPOSITORY } from "@modules/roles/repository/role.repository";
-import { DashboardApiRepository } from "@modules/dashboard/repository/dashboard-api.repository";
-import { DASHBOARD_REPOSITORY } from "@modules/dashboard/repository/dashboard.repository";
 import { ProfileApiRepository } from "@modules/profile-management/repository/profile-api.repository";
 import { PROFILE_REPOSITORY } from "@modules/profile-management/repository/profile.repository";
 import { AuthApiRepository } from "@modules/auth/repository/auth-api.repository";
@@ -40,7 +38,6 @@ export const DATA_PROVIDERS: Provider[] = [
   { provide: OFFER_REPOSITORY, useClass: OfferApiRepository },
   { provide: USER_REPOSITORY, useClass: UserApiRepository },
   { provide: ROLE_REPOSITORY, useClass: RoleApiRepository },
-  { provide: DASHBOARD_REPOSITORY, useClass: DashboardApiRepository },
   { provide: PROFILE_REPOSITORY, useClass: ProfileApiRepository },
   { provide: AUTH_REPOSITORY, useClass: AuthApiRepository },
 ];

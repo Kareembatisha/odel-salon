@@ -182,7 +182,6 @@ describe("BranchDetails page", () => {
       await settle();
 
       expect(crumbs.mock.calls[0][0].map((c) => c.label)).toEqual([
-        "LAYOUT.NAV.DASHBOARD",
         "LAYOUT.NAV.BRANCHES",
         "Zamalek",
       ]);

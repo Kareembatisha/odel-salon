@@ -121,7 +121,6 @@ export class BranchDetails implements OnInit {
 
     // The route's static breadcrumb says "Branch details"; swap in the real name.
     this.breadcrumbs.setBreadcrumbs([
-      { label: "LAYOUT.NAV.DASHBOARD", route: "/main" },
       { label: "LAYOUT.NAV.BRANCHES", route: LIST_ROUTE },
       { label: this.isArabic() ? branch.nameAr : branch.nameEn },
     ]);

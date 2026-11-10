@@ -147,7 +147,6 @@
       "DEVELOPER": "المطوّر"
     },
     "NAV": {
-      "DASHBOARD": "الرئيسية",
       "USERS": "المستخدمون",
       "ROLES_PERMISSIONS": "الأدوار والصلاحيات",
       "BRANCHES": "الفروع",
@@ -157,44 +156,6 @@
       "SERVICES": "القائمة والخدمات",
       "PACKAGES": "الباقات",
       "OFFERS": "العروض"
-    }
-  },
-  "DASHBOARD": {
-    "GREETING_MORNING": "صباح الخير",
-    "GREETING_AFTERNOON": "مساء الخير",
-    "GREETING_EVENING": "مساء الخير",
-    "SUBTITLE": "هذا ملخص أداء الصالون الآن",
-    "OVERVIEW": "نظرة عامة",
-    "VS_LAST_WEEK": "{{value}} مقارنة بالأسبوع الماضي",
-    "CHAIR_VIP": "VIP",
-    "CHAIR_REGULAR": "عادي",
-    "STATS": {
-      "BOOKINGS": "حجوزات اليوم",
-      "REVENUE": "إيراد اليوم",
-      "BARBERS_FREE": "حلاقون متاحون الآن",
-      "BARBERS_HINT": "من أصل {{total}} حاضرين",
-      "RATING": "متوسط التقييم",
-      "RATING_HINT": "{{count}} تقييم"
-    },
-    "SCHEDULE": {
-      "TITLE": "جدول اليوم",
-      "EMPTY": "لا توجد حجوزات لباقي اليوم",
-      "TIME": "الوقت",
-      "CUSTOMER": "العميل",
-      "SERVICE": "الخدمة",
-      "BARBER": "الحلاق",
-      "CHAIR": "الكرسي",
-      "STATUS": "الحالة"
-    },
-    "CHAIRS": {
-      "TITLE": "إتاحة الكراسي",
-      "FREE": "{{free}} من {{total}} متاح",
-      "LOCKED": "{{count}} مقفول للصيانة"
-    },
-    "BARBERS": {
-      "TITLE": "الحلاقون الحاضرون",
-      "FREE": "متاح الآن",
-      "BUSY_UNTIL": "مشغول حتى {{time}}"
     }
   },
   "BOOKING_STATUS": {
@@ -643,7 +604,8 @@
       "NAME_TAKEN": "يوجد كرسي بنفس الاسم في هذا الفرع.",
       "IDS_REQUIRED": "اختر كرسيًا واحدًا على الأقل.",
       "LAST_ACTIVE_VIP": "{{name}} هو آخر كرسي VIP نشط في فرع ظاهر يقدّم حجز VIP. أخفِ الفرع أو أوقف حجز VIP أولًا.",
-      "LAST_ACTIVE_REGULAR": "{{name}} هو آخر كرسي عادي نشط في فرع ظاهر يقدّم الحجز العادي. أخفِ الفرع أو أوقف الحجز العادي أولًا."
+      "LAST_ACTIVE_REGULAR": "{{name}} هو آخر كرسي عادي نشط في فرع ظاهر يقدّم الحجز العادي. أخفِ الفرع أو أوقف الحجز العادي أولًا.",
+      "TYPE_INVALID": "اختر نوع كرسي صحيحًا."
     }
   },
   "SERVICES": {
@@ -1055,6 +1017,18 @@
     "StartDate": "تاريخ البداية",
     "EndDate": "تاريخ النهاية",
     "MaxBookings": "الحد الأقصى للحجوزات",
-    "OfferIds": "العروض"
+    "OfferIds": "العروض",
+    "Email": "البريد الإلكتروني",
+    "CountryCode": "مفتاح الدولة",
+    "PhoneNumber": "رقم الهاتف",
+    "Password": "كلمة المرور",
+    "PasswordConfirmation": "تأكيد كلمة المرور",
+    "CurrentPassword": "كلمة المرور الحالية",
+    "NewPassword": "كلمة المرور الجديدة",
+    "NewPasswordConfirmation": "تأكيد كلمة المرور الجديدة",
+    "RoleId": "الدور",
+    "Permissions": "الصلاحيات",
+    "Code": "رمز التحقق",
+    "Token": "رمز إعادة التعيين"
   }
 }

@@ -2,6 +2,7 @@ import { Routes } from "@angular/router";
 
 import { environment } from "@env/environment";
 import { permissionGuard } from "@core/guards/permission.guard";
+import { homeRedirectGuard } from "./home-redirect.guard";
 import { PERMISSIONS } from "@core/auth/permissions";
 
 /**
@@ -9,12 +10,13 @@ import { PERMISSIONS } from "@core/auth/permissions";
  * (layout/main-layout/nav.config.ts) and its permission (core/auth/permissions.ts).
  */
 export const MAIN_ROUTES: Routes = [
+  // No dashboard page for now (the backend has no endpoint for it yet): `/main` sends the user
+  // to the first section they can open.
   {
     path: "",
     pathMatch: "full",
-    // Sign-in is enough: the backend does not (yet) grant a Dashboard permission.
-    data: { breadcrumb: "LAYOUT.NAV.DASHBOARD" },
-    loadComponent: () => import("./dashboard/pages/dashboard/dashboard").then((m) => m.Dashboard),
+    canActivate: [homeRedirectGuard],
+    children: [],
   },
 
   // ── Access control ───────────────────────────────────

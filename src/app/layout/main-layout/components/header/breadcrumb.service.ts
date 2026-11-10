@@ -13,8 +13,8 @@ export interface BreadcrumbItem {
  * BreadcrumbService
  *
  * Builds the trail automatically after every navigation from route `data`:
- *   data: { breadcrumb: 'LAYOUT.NAV.BRANCHES' }                       → Dashboard / Branches
- *   data: { breadcrumb: ['LAYOUT.NAV.SETTINGS', 'LAYOUT.NAV.USERS'] } → Dashboard / Settings / Users
+ *   data: { breadcrumb: 'LAYOUT.NAV.BRANCHES' }                       → Branches
+ *   data: { breadcrumb: ['LAYOUT.NAV.SETTINGS', 'LAYOUT.NAV.USERS'] } → Settings / Users
  * (earlier entries of an array are group labels without a link.)
  *
  * A page with a dynamic name (e.g. "Edit Downtown branch") can still call
@@ -64,10 +64,6 @@ export class BreadcrumbService {
       node = node.firstChild;
     }
 
-    // Everything under /main hangs off the dashboard.
-    const isDashboard = trail.length === 1 && trail[0].route === "/main";
-    if (trail.length && !isDashboard)
-      trail.unshift({ label: "LAYOUT.NAV.DASHBOARD", route: "/main" });
     return trail;
   }
 }

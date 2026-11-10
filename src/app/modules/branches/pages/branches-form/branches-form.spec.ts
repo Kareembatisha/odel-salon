@@ -444,7 +444,6 @@ describe("BranchesForm", () => {
 
       const trail = crumbs.mock.calls[0][0];
       expect(trail.map((c) => c.label)).toEqual([
-        "LAYOUT.NAV.DASHBOARD",
         "LAYOUT.NAV.BRANCHES",
         "Zamalek",
         "BRANCHES.FORM.EDIT_TITLE",

@@ -147,7 +147,6 @@
       "DEVELOPER": "Developer"
     },
     "NAV": {
-      "DASHBOARD": "Dashboard",
       "USERS": "Users",
       "ROLES_PERMISSIONS": "Roles & permissions",
       "BRANCHES": "Branches",
@@ -157,44 +156,6 @@
       "SERVICES": "Menu & services",
       "PACKAGES": "Packages",
       "OFFERS": "Offers"
-    }
-  },
-  "DASHBOARD": {
-    "GREETING_MORNING": "Good morning",
-    "GREETING_AFTERNOON": "Good afternoon",
-    "GREETING_EVENING": "Good evening",
-    "SUBTITLE": "here is how the salon is doing right now",
-    "OVERVIEW": "Overview",
-    "VS_LAST_WEEK": "{{value}} vs last week",
-    "CHAIR_VIP": "VIP",
-    "CHAIR_REGULAR": "Regular",
-    "STATS": {
-      "BOOKINGS": "Bookings today",
-      "REVENUE": "Revenue today",
-      "BARBERS_FREE": "Barbers free now",
-      "BARBERS_HINT": "of {{total}} on shift",
-      "RATING": "Average rating",
-      "RATING_HINT": "{{count}} reviews"
-    },
-    "SCHEDULE": {
-      "TITLE": "Today’s schedule",
-      "EMPTY": "No bookings for the rest of today",
-      "TIME": "Time",
-      "CUSTOMER": "Customer",
-      "SERVICE": "Service",
-      "BARBER": "Barber",
-      "CHAIR": "Chair",
-      "STATUS": "Status"
-    },
-    "CHAIRS": {
-      "TITLE": "Chair availability",
-      "FREE": "{{free}} of {{total}} free",
-      "LOCKED": "{{count}} locked for maintenance"
-    },
-    "BARBERS": {
-      "TITLE": "Barbers on shift",
-      "FREE": "Free now",
-      "BUSY_UNTIL": "Busy until {{time}}"
     }
   },
   "BOOKING_STATUS": {
@@ -643,7 +604,8 @@
       "NAME_TAKEN": "A chair with this name already exists in this branch.",
       "IDS_REQUIRED": "Select at least one chair.",
       "LAST_ACTIVE_VIP": "{{name}} is the last active VIP chair in a visible branch that offers VIP booking. Hide the branch or disable VIP booking first.",
-      "LAST_ACTIVE_REGULAR": "{{name}} is the last active Regular chair in a visible branch that offers Regular booking. Hide the branch or disable Regular booking first."
+      "LAST_ACTIVE_REGULAR": "{{name}} is the last active Regular chair in a visible branch that offers Regular booking. Hide the branch or disable Regular booking first.",
+      "TYPE_INVALID": "Choose a valid chair type."
     }
   },
   "SERVICES": {
@@ -1055,6 +1017,18 @@
     "StartDate": "Start date",
     "EndDate": "End date",
     "MaxBookings": "Maximum bookings",
-    "OfferIds": "Offers"
+    "OfferIds": "Offers",
+    "Email": "Email address",
+    "CountryCode": "Country code",
+    "PhoneNumber": "Phone number",
+    "Password": "Password",
+    "PasswordConfirmation": "Password confirmation",
+    "CurrentPassword": "Current password",
+    "NewPassword": "New password",
+    "NewPasswordConfirmation": "New password confirmation",
+    "RoleId": "Role",
+    "Permissions": "Permissions",
+    "Code": "Verification code",
+    "Token": "Reset token"
   }
 }
