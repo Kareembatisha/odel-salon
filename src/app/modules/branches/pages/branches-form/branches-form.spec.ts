@@ -20,6 +20,8 @@ const DETAILS: BranchDetails = {
   nameEn: "Zamalek",
   address: "8 Hassan Sabry St",
   mapUrl: "https://maps.example/z",
+  instaPayAccount: null,
+  walletNumber: null,
   phone: "+201020304050",
   allowsRegular: true,
   allowsVip: false,
@@ -63,6 +65,7 @@ describe("BranchesForm", () => {
   const inputs = () =>
     Array.from(el().querySelectorAll<HTMLInputElement>("app-float-label-input input"));
   const textFields = () => inputs().slice(0, 5); // nameAr, nameEn, address, phone, mapUrl
+  const paymentFields = () => inputs().slice(5, 7); // instaPayAccount, walletNumber
   const bookingBoxes = () => Array.from(el().querySelectorAll<HTMLInputElement>("input.odl-check"));
   const switches = () => Array.from(el().querySelectorAll<HTMLButtonElement>("app-switch button"));
   const timeInputs = () =>
@@ -107,6 +110,15 @@ describe("BranchesForm", () => {
     await settle();
   }
 
+  /** Open Saturday and give it times, so the working-hours part of the form is valid. */
+  async function openFirstDay() {
+    switches()[0].click();
+    await settle();
+    type(timeInputs()[0], "09:00");
+    type(timeInputs()[1], "23:00");
+    await settle();
+  }
+
   async function fillValid() {
     const [nameAr, nameEn, address, phone] = textFields();
     type(nameAr, "فرع جديد");
@@ -137,10 +149,101 @@ describe("BranchesForm", () => {
     it("is built from the design-system components, not raw inputs", async () => {
       await setup();
 
-      expect(el().querySelectorAll("app-float-label-input").length).toBe(5);
+      expect(el().querySelectorAll("app-float-label-input").length).toBe(7);
       expect(el().querySelector("app-page-header")).not.toBeNull();
       expect(el().querySelectorAll(".form-actions app-button").length).toBe(2);
       expect(el().querySelector(".odl-page")).not.toBeNull();
+    });
+
+    describe("page layout", () => {
+      // The page is a 12-column grid: a section with no `grid-column` rule falls into ONE column and
+      // renders as a thin strip (this happened to Payment methods). jsdom doesn't lay out grids, so
+      // check the component's injected stylesheet instead.
+      const css = () =>
+        Array.from(document.head.querySelectorAll("style"))
+          .map((s) => s.textContent ?? "")
+          .join("\n");
+
+      it("gives every top-level section a grid-column, Payment methods included", async () => {
+        await setup();
+        const names = Array.from(el().querySelectorAll("section.form-section")).map((s) =>
+          Array.from(s.classList).find((c) => c !== "odl-card" && c !== "form-section")!,
+        );
+
+        expect(names).toEqual(
+          expect.arrayContaining(["basic-info", "payment", "booking-types", "working-hours"]),
+        );
+        for (const name of names) {
+          const rule = new RegExp(`\\.${name}\\b[^{]*\\{[^}]*grid-column`);
+          expect(css(), `.${name} has no grid-column`).toMatch(rule);
+        }
+      });
+    });
+
+    describe("payment methods", () => {
+      it("shows a Payment methods section with two optional fields, left-to-right", async () => {
+        await setup();
+
+        expect(el().querySelector("section.payment")).not.toBeNull();
+        expect(paymentFields().length).toBe(2);
+        expect(paymentFields().every((i) => i.value === "")).toBe(true);
+        expect(text()).toContain("BRANCHES.FORM.PAYMENT_HINT");
+      });
+
+      it("a branch with no payment accounts can be created (both fields empty = off)", async () => {
+        await setup();
+        await fillValid();
+        await openFirstDay();
+        el().querySelector("form")!.dispatchEvent(new Event("submit"));
+        await settle();
+
+        expect(repo.create).toHaveBeenCalledTimes(1);
+      });
+
+      it("sends the trimmed accounts when both are filled in", async () => {
+        await setup();
+        await fillValid();
+        type(paymentFields()[0], "  odel.nasr@instapay ");
+        type(paymentFields()[1], "+201012345678");
+        await openFirstDay();
+        await settle();
+
+        el().querySelector("form")!.dispatchEvent(new Event("submit"));
+        await settle();
+
+        expect(repo.create.mock.calls[0][0]).toMatchObject({
+          instaPayAccount: "odel.nasr@instapay",
+          walletNumber: "+201012345678",
+        });
+      });
+
+      it("an invalid wallet number shows its message and blocks the save", async () => {
+        await setup();
+        await fillValid();
+        type(paymentFields()[1], "01012345678");
+        await openFirstDay();
+        await settle();
+
+        el().querySelector("form")!.dispatchEvent(new Event("submit"));
+        await settle();
+
+        expect(repo.create).not.toHaveBeenCalled();
+        expect(text()).toContain("BRANCHES.VALIDATION.WALLET_INVALID");
+      });
+
+      it("an InstaPay account over 100 characters shows its message and blocks the save", async () => {
+        await setup();
+        await fillValid();
+        type(paymentFields()[0], "a".repeat(101));
+        await openFirstDay();
+        await settle();
+
+        el().querySelector("form")!.dispatchEvent(new Event("submit"));
+        await settle();
+
+        expect(repo.create).not.toHaveBeenCalled();
+        expect(text()).toContain("BRANCHES.VALIDATION.INSTAPAY_MAX");
+      });
     });
 
     it("keeps phone, map link and times left-to-right", async () => {
@@ -311,6 +414,8 @@ describe("BranchesForm", () => {
           address: "1 Main St",
           phone: "+201001234567",
           mapUrl: null,
+          instaPayAccount: null,
+          walletNumber: null,
           allowsRegular: true,
           allowsVip: false,
           allowsHome: false,
@@ -474,6 +579,75 @@ describe("BranchesForm", () => {
         closeTime: "22:00:00",
       });
       expect(navigate).toHaveBeenCalledWith(["/main/branches", 5]);
+    });
+
+    it("fills the payment accounts from the loaded branch and saves them back unchanged", async () => {
+      repo = new FakeRepository();
+      repo.byId.mockReturnValue(
+        of(
+          ok({ ...DETAILS, instaPayAccount: "odel.nasr@instapay", walletNumber: "+201012345678" }),
+        ),
+      );
+      TestBed.configureTestingModule({
+        imports: [BranchesForm, TranslateModule.forRoot()],
+        providers: [
+          provideRouter([]),
+          { provide: BRANCH_REPOSITORY, useValue: repo },
+          {
+            provide: ActivatedRoute,
+            useValue: { snapshot: { paramMap: convertToParamMap({ id: "5" }) } },
+          },
+        ],
+      });
+      TestBed.inject(TranslateService).use("en");
+      navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+      fixture = TestBed.createComponent(BranchesForm);
+      await settle();
+
+      expect(paymentFields().map((i) => i.value)).toEqual(["odel.nasr@instapay", "+201012345678"]);
+
+      el().querySelector("form")!.dispatchEvent(new Event("submit"));
+      await settle();
+
+      // The API removes a value that is not sent, so the current ones must go back.
+      expect(repo.update.mock.calls[0][1]).toMatchObject({
+        instaPayAccount: "odel.nasr@instapay",
+        walletNumber: "+201012345678",
+      });
+    });
+
+    it("clearing a payment account on edit sends null, turning that method off", async () => {
+      repo = new FakeRepository();
+      repo.byId.mockReturnValue(
+        of(
+          ok({ ...DETAILS, instaPayAccount: "odel.nasr@instapay", walletNumber: "+201012345678" }),
+        ),
+      );
+      TestBed.configureTestingModule({
+        imports: [BranchesForm, TranslateModule.forRoot()],
+        providers: [
+          provideRouter([]),
+          { provide: BRANCH_REPOSITORY, useValue: repo },
+          {
+            provide: ActivatedRoute,
+            useValue: { snapshot: { paramMap: convertToParamMap({ id: "5" }) } },
+          },
+        ],
+      });
+      TestBed.inject(TranslateService).use("en");
+      navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+      fixture = TestBed.createComponent(BranchesForm);
+      await settle();
+
+      type(paymentFields()[1], "");
+      await settle();
+      el().querySelector("form")!.dispatchEvent(new Event("submit"));
+      await settle();
+
+      expect(repo.update.mock.calls[0][1]).toMatchObject({
+        instaPayAccount: "odel.nasr@instapay",
+        walletNumber: null,
+      });
     });
 
     it("Cancel returns to the branch details", async () => {

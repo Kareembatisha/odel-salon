@@ -119,6 +119,7 @@ export const MOCK_MANAGER_PERMISSIONS: string[] = [
   "Package.View",
   "Offer.View",
   "Barber.View",
+  "Barber.Attendance",
   "Chair.View",
   "Offer.View",
   "Review.View",
@@ -373,6 +374,18 @@ export class MockDb {
    * the real backend enforces), and a few barbers start suspended.
    */
   barbers: MockBarber[] = this.seedBarbers();
+
+  /**
+   * Today's attendance sheet. A barber counts as present only if marked present on TODAY's Cairo
+   * date, so an old entry silently expires at midnight, like the real API's daily sheet.
+   */
+  barberAttendance: Record<number, { date: string; isPresent: boolean }> = this.seedAttendance();
+
+  /**
+   * Pending / confirmed bookings that haven't ended, per barber. The mock has no bookings module,
+   * so a couple of barbers are seeded with some — enough to try the "can't be marked absent" rule.
+   */
+  barberUpcomingBookings: Record<number, number> = this.seedUpcomingBookings();
 
   // ----------------------------------------------------------
   // Services (menu & pricing)
@@ -737,6 +750,23 @@ export class MockDb {
     return offers;
   }
 
+  /**
+   * The barber seeded with 3 upcoming bookings starts the day PRESENT, so the locked switch
+   * ("can't be marked absent") shows on the attendance page the moment it opens.
+   */
+  private seedAttendance(): Record<number, { date: string; isPresent: boolean }> {
+    const first = this.barbers.find((b) => b.isActive);
+    return first ? { [first.id]: { date: cairoToday(), isPresent: true } } : {};
+  }
+
+  private seedUpcomingBookings(): Record<number, number> {
+    const active = this.barbers.filter((b) => b.isActive);
+    const bookings: Record<number, number> = {};
+    if (active[0]) bookings[active[0].id] = 3;
+    if (active[2]) bookings[active[2].id] = 1;
+    return bookings;
+  }
+
   private seedBarbers(): MockBarber[] {
     const barbers: MockBarber[] = [];
     let id = 1;
@@ -856,6 +886,8 @@ export class MockDb {
       regularChairsCount: counts[1],
       vipChairsCount: counts[2],
       mapUrl: null,
+      instaPayAccount: null,
+      walletNumber: null,
       workingHours: DEFAULT_WORKING_HOURS.map((hour) => ({ ...hour })),
       createdAt: new Date().toISOString(),
       updatedAt: null,

@@ -14,6 +14,8 @@ const PAYLOAD: BranchPayload = {
   nameEn: "New Branch",
   address: "1 Test St",
   mapUrl: "https://maps.example/x",
+  instaPayAccount: null,
+  walletNumber: null,
   phone: "+201001234567",
   allowsRegular: true,
   allowsVip: true,
@@ -135,6 +137,13 @@ describe("BranchMockRepository", () => {
       expect(res.data).not.toHaveProperty("barbersCount");
     });
 
+    it("returns the payment accounts (null when not set)", async () => {
+      const res = await settle(repo.getBranchById(1));
+
+      expect(res.data).toHaveProperty("instaPayAccount");
+      expect(res.data).toHaveProperty("walletNumber");
+    });
+
     it("answers a 404 body for an unknown id instead of throwing", async () => {
       const res = await settle(repo.getBranchById(9999));
 
@@ -160,6 +169,24 @@ describe("BranchMockRepository", () => {
       expect(created.workingHours).toEqual(PAYLOAD.workingHours);
     });
 
+    it("stores the payment accounts and returns them in the details", async () => {
+      const id = (
+        await settle(
+          repo.createBranch({
+            ...PAYLOAD,
+            instaPayAccount: "odel@instapay",
+            walletNumber: "+201012345678",
+          }),
+        )
+      ).data!;
+
+      const res = await settle(repo.getBranchById(id));
+      expect(res.data).toMatchObject({
+        instaPayAccount: "odel@instapay",
+        walletNumber: "+201012345678",
+      });
+    });
+
     it("allocates a fresh id every time", async () => {
       const a = await settle(repo.createBranch(PAYLOAD));
       const b = await settle(repo.createBranch(PAYLOAD));
@@ -179,6 +206,28 @@ describe("BranchMockRepository", () => {
       expect(before.nameEn).toBe("Renamed");
       expect(before.isVisible).toBe(visible);
       expect(before.updatedAt).not.toBeNull();
+    });
+
+    it("sets, changes and removes the payment accounts — null removes them", async () => {
+      await settle(
+        repo.updateBranch(1, {
+          ...PAYLOAD,
+          instaPayAccount: "odel@instapay",
+          walletNumber: "+201012345678",
+        }),
+      );
+      let details = (await settle(repo.getBranchById(1))).data!;
+      expect(details).toMatchObject({
+        instaPayAccount: "odel@instapay",
+        walletNumber: "+201012345678",
+      });
+
+      await settle(
+        repo.updateBranch(1, { ...PAYLOAD, instaPayAccount: "odel@instapay", walletNumber: null }),
+      );
+      details = (await settle(repo.getBranchById(1))).data!;
+      expect(details.instaPayAccount).toBe("odel@instapay");
+      expect(details.walletNumber).toBeNull();
     });
 
     it("answers a 404 body for an unknown id", async () => {

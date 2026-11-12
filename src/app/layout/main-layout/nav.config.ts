@@ -76,6 +76,13 @@ export const NAV_SECTIONS: NavSection[] = [
         permission: PERMISSIONS.Barber.View,
       },
       {
+        id: "barber-attendance",
+        labelKey: "LAYOUT.NAV.BARBER_ATTENDANCE",
+        icon: "pi pi-check-square",
+        route: "/main/barbers/attendance",
+        permission: PERMISSIONS.Barber.Attendance,
+      },
+      {
         id: "services",
         labelKey: "LAYOUT.NAV.SERVICES",
         icon: "pi pi-list",

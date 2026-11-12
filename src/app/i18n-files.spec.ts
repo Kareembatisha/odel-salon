@@ -55,6 +55,7 @@ describe("translation files", () => {
       "Permissions",
       "Code",
       "Token",
+      "Barbers",
       "FullName",
       "Name",
     ];

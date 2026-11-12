@@ -27,9 +27,14 @@
 | A-07 | Sign out | Back at login; browser **Back** doesn't reveal protected pages; token keys gone from localStorage | |
 | A-08 | Two tabs signed in; sign out in tab 1 | Tab 2 goes to login by itself | |
 | A-09 | Let the access token expire (or delete it in DevTools → Application) and click around | Silent refresh; the action succeeds, or you're sent to login cleanly — no endless spinner / loop | |
-| A-10 | Forgot password → code → reset flow | Each step shows its toast; new password works; old doesn't | |
+| A-10 | Forgot password: empty and malformed email, then a real one | Inline error for bad input; a real email moves to the code page | |
+| A-10b | Code page: open `/email-verification` directly (no email in the URL) | Sent back to forgot-password | |
+| A-10c | Code page: wrong code; correct code; paste a code (`98-76` style); wait for the timer | Wrong code shows an error and doesn't navigate; the 4 digits verify automatically; paste fills the boxes; "resend" is disabled for 45 s, then works and restarts the timer | |
+| A-10d | Reset page: open `/create-new-password` without a token; weak password; mismatching confirmation; strong password | No token → forgot-password; strength meter follows the rules; strong password → success page | |
+| A-10e | Success page → "go to login", then sign in with the NEW password (old one must fail) | Works as described | |
 | A-11 | Profile: change name/phone/image; change password | Saved; header name/avatar update immediately | |
-| A-12 | Dashboard | **Expected on the live API: error state** (no `/dashboard/summary` endpoint — finding S5-01). Confirm it doesn't break navigation | |
+| A-12 | **Landing page after login** (the dashboard was removed) | `/main` sends you to the first sidebar section you can open (SuperAdmin → Users). A limited user lands on their own first permitted section; a user with nothing lands on the profile. No blank page, no "No access" flash | |
+| A-13 | Server-side validation message in **Arabic**: e.g. create a user with an email that already exists (or any 400 with field errors) | The toast names the field in Arabic (e.g. "البريد الإلكتروني"), not the English field name | |
 
 ## L. Layout, language, responsive, keyboard
 
@@ -40,7 +45,7 @@
 | L-03 | Dark/theme or brand toggles if present | Contrast OK, nothing unreadable | |
 | L-04 | Keyboard only: Tab through a list, open a drawer with Enter, press **Esc** | Visible focus ring, focus stays inside the drawer, Esc closes, focus returns to the button that opened it | |
 | L-05 | Open a confirm dialog and press Esc / click the backdrop | Cancels, nothing deleted | |
-| L-06 | Sidebar and breadcrumbs | Active item highlighted; breadcrumb text correct on list, details and edit pages | |
+| L-06 | Sidebar and breadcrumbs | Active item highlighted (also on details/edit pages); breadcrumbs now **start at the section** (no "Dashboard" crumb), text correct on list, details and edit pages | |
 | L-07 | Toasts | Appear in the right corner for the language, auto-dismiss, readable in AR | |
 
 ## S. Every list (repeat for each module in section M)
@@ -54,7 +59,7 @@
 | S-05 | Filter to zero results; and an empty module | "No matches" vs "nothing yet" messages differ | |
 | S-06 | Go offline (DevTools → Offline), reload the list | Error state with Retry; Retry works when back online | |
 | S-07 | Throttle to Slow 3G and type quickly in search | No stale results overwrite newer ones | |
-| S-08 | Delete the **only row on the last page** | Table moves to the previous page, not an empty page (finding S5-04 for Users/Roles/Barbers) | |
+| S-08 | Delete the **only row on the last page** (page 2+) — Users, Roles, Barbers, Chairs, Services… | Table moves to the previous page, never an empty page (fixed in Step 06 for Users/Roles) | |
 | S-09 | Double-click Save / Delete / toggle | Only one request in Network | |
 | S-10 | Cancel / close a form with unsaved input | Drawer closes without saving (note whether you'd expect a warning — decision D16) | |
 
@@ -73,20 +78,36 @@
 | ID | Steps | Expected | Result |
 |---|---|---|---|
 | B-01 | Create with image (jpg/png/webp) and Egyptian mobile number | Saved, image shown | |
-| B-02 | Invalid phone (letters, wrong prefix, too short); image over 5 MB or not jpg/png/webp | Inline error, nothing sent | |
+| B-02 | Invalid phone (**letters inside the number**, wrong prefix, too short); image over 5 MB or not jpg/png/webp. Separators like `0100-123-4567` or `+20 100 123 4567` must still be accepted | Inline error, nothing sent; valid formats accepted | |
 | B-03 | Edit: change image, then remove image | Image updates / is removed | |
 | B-04 | Select 3 rows, bulk delete; then delete one row while others are ticked | Bulk works; the **other ticks stay** after a single delete | |
 | B-05 | **Edit a barber on the real API** | Update succeeds (watch for a 400 mentioning `Id` — finding S5-05) | |
 | B-06 | Branch filter and toggle | Works; toggle disabled while a request runs | |
+
+### Barber attendance (`/main/barbers/attendance`)
+| ID | Steps | Expected | Result |
+|---|---|---|---|
+| AT-01 | Sign in as `manager@odel.com` (has `Barber.Attendance`), open **Attendance** in the sidebar | Page opens on the **first branch**, today's date shown, "N of M present"; sidebar highlights Attendance (not Barbers) | |
+| AT-02 | Flip a barber to Present | Row turns Present at once, no toast, only that switch is disabled while saving; the counter updates | |
+| AT-03 | The barber seeded with 3 bookings (present on open) | Switch is **disabled**, the row shows "3 upcoming bookings" and why it can't be marked absent | |
+| AT-04 | Mark the barber with 1 booking present, then try Absent | Absent is blocked (disabled + explanation); nothing is sent | |
+| AT-05 | Change branch | Old rows disappear at once, the new branch's sheet loads; a slow answer for the old branch never overwrites it | |
+| AT-06 | Role without `Barber.Attendance` (e.g. a custom role with `Barber.View` only) | No sidebar item; `/main/barbers/attendance` lands on *No access*; the Barbers page is unaffected | |
+| AT-07 | Arabic + dark mode, then a 375px viewport | RTL layout, date and counts in Arabic, no horizontal scroll, switch and badge stay on the row | |
+| AT-08 | Keyboard + screen reader | Switches reachable with Tab, named "Mark <name> present/absent"; the live region announces each save | |
+| AT-09 | Leave the tab open past midnight (Cairo), return to it | Sheet reloads on focus and shows the new date; yesterday's marks don't count | |
+| AT-10 | **Real API:** mark absent a barber who got a booking after the page loaded | Server's `409` message shown once, sheet refreshes with the new count | |
 
 ### Branches
 | ID | Steps | Expected | Result |
 |---|---|---|---|
 | BR-01 | Create: names, address, phone, map URL, service modes (regular/VIP/home), working hours | Validation per field; whitespace-only names rejected; saved; opens details | |
 | BR-02 | Working hours: closed day, open day, closing earlier than opening (treated as an overnight shift and flagged as such), and **same open/close time** | Overnight is labelled on the details page; **note exactly what is accepted for equal times** (decision D13) | |
-| BR-03 | Details page: info, booking types, working hours, record dates, map | Correct; a branch **without** a map URL shows the "no map" message, not a broken link | |
+| BR-03 | Details page: info, booking types, working hours, record dates, map | Correct; a branch **without** a map URL (create one with an empty map field) saves and shows the "no map" message, not a broken link | |
 | BR-04 | Edit, toggle visibility, delete | Works; list refreshes on return | |
 | BR-05 | Cards view: search, visibility filter, pagination | S-cases pass | |
+| BR-06 | Payment methods: fill InstaPay (max 100) and a wallet (`+201…` / `01…`), save, open details | Both shown (left-to-right); an invalid wallet or 101-char InstaPay blocks the save with an inline error | |
+| BR-07 | Edit a branch, clear both payment fields, save | Details show "Not enabled" for both; on the **real API** the request carries explicit `null` | |
 
 ### Services
 | ID | Steps | Expected | Result |

@@ -1,0 +1,88 @@
+@use "styles/variables" as v;
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-3;
+  min-height: 42px;
+
+  &__info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: v.$space-3;
+    margin-inline-start: auto;
+  }
+}
+
+.today {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  color: v.$text-secondary;
+  font-size: v.$text-base;
+  font-weight: v.$fw-medium;
+
+  .pi {
+    color: v.$primary-text;
+  }
+}
+
+.sheet {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  padding: v.$space-3 v.$space-5;
+  border-bottom: 1px solid v.$border;
+  transition: background v.$transition-fast;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+  &--present {
+    background: v.tint(v.$success, 6%);
+  }
+
+  &__who {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+    gap: 2px;
+    line-height: v.$lh-snug;
+  }
+  &__name {
+    font-weight: v.$fw-semibold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__note {
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-1;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+
+    &--lock {
+      color: v.$warning-text;
+    }
+  }
+
+  @media (max-width: v.$bp-sm) {
+    padding-inline: v.$space-4;
+    gap: v.$space-2;
+  }
+}
+
+.stale {
+  padding: 0;
+}

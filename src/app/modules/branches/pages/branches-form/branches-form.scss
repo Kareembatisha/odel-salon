@@ -38,7 +38,8 @@
 .form-section {
   min-width: 0;
 }
-.basic-info {
+.basic-info,
+.payment {
   grid-column: 1 / -1;
 }
 .booking-types {

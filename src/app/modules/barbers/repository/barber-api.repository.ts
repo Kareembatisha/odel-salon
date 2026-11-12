@@ -1,15 +1,17 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { Observable } from "rxjs";
 
 import { environment } from "@env/environment";
 import { ApiResponse } from "@shared/model/api_response.model";
 import {
+  BarberAttendanceRow,
   BarberDetails,
   BarberListItem,
   BarbersQuery,
   CreateBarberPayload,
   DeleteBarbersRequest,
+  SetBarberAttendanceRequest,
   UpdateBarberPayload,
 } from "../model/barber.model";
 import { buildCreateBarberFormData, buildUpdateBarberFormData } from "../utils/barber-form-data";
@@ -68,5 +70,17 @@ export class BarberApiRepository implements IBarberRepository {
    */
   deleteBarbers(payload: DeleteBarbersRequest): Observable<ApiResponse<null>> {
     return this.http.delete<ApiResponse<null>>(this.url, { body: payload });
+  }
+
+  /** Today's sheet for one branch (`branchId` is required; unknown branch answers `404`). */
+  getAttendance(branchId: number): Observable<ApiResponse<BarberAttendanceRow[]>> {
+    return this.http.get<ApiResponse<BarberAttendanceRow[]>>(`${this.url}/attendance`, {
+      params: new HttpParams().set("branchId", branchId),
+    });
+  }
+
+  /** Mark the listed barbers present / absent today (JSON body, all-or-nothing). */
+  setAttendance(payload: SetBarberAttendanceRequest): Observable<ApiResponse<null>> {
+    return this.http.put<ApiResponse<null>>(`${this.url}/attendance`, payload);
   }
 }

@@ -44,6 +44,12 @@ const FIELD_ERRORS: Record<string, Record<string, string>> = {
   "basicInfo.mapUrl": {
     invalidUrl: "BRANCHES.VALIDATION.URL_INVALID",
   },
+  "payment.instaPayAccount": {
+    maxlength: "BRANCHES.VALIDATION.INSTAPAY_MAX",
+  },
+  "payment.walletNumber": {
+    pattern: "BRANCHES.VALIDATION.WALLET_INVALID",
+  },
 };
 
 /** Working-day group error → translation key. */

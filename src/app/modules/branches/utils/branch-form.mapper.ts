@@ -15,6 +15,10 @@ export interface BranchFormValue {
     phone: string;
     mapUrl: string;
   };
+  payment: {
+    instaPayAccount: string;
+    walletNumber: string;
+  };
   bookingTypes: {
     allowsRegular: boolean;
     allowsVip: boolean;
@@ -38,9 +42,12 @@ export function toApiTime(time: string | null): string | null {
   return time ? `${time.substring(0, 5)}:00` : null;
 }
 
-/** Trim text, turn an empty map link into `null`, and drop times of closed days. */
+/**
+ * Trim text, turn an empty map link / payment account into `null` (which turns that payment
+ * method off), and drop times of closed days.
+ */
 export function buildBranchPayload(value: BranchFormValue): BranchPayload {
-  const { basicInfo, bookingTypes, workingHours } = value;
+  const { basicInfo, payment, bookingTypes, workingHours } = value;
 
   return {
     nameAr: basicInfo.nameAr.trim(),
@@ -48,6 +55,8 @@ export function buildBranchPayload(value: BranchFormValue): BranchPayload {
     address: basicInfo.address.trim(),
     phone: basicInfo.phone.trim(),
     mapUrl: (basicInfo.mapUrl ?? "").trim() || null,
+    instaPayAccount: (payment?.instaPayAccount ?? "").trim() || null,
+    walletNumber: (payment?.walletNumber ?? "").trim() || null,
 
     allowsRegular: bookingTypes.allowsRegular,
     allowsVip: bookingTypes.allowsVip,
@@ -74,6 +83,10 @@ export function applyBranchToForm(form: FormGroup, branch: BranchDetails): void 
       address: branch.address,
       phone: branch.phone,
       mapUrl: branch.mapUrl ?? "",
+    },
+    payment: {
+      instaPayAccount: branch.instaPayAccount ?? "",
+      walletNumber: branch.walletNumber ?? "",
     },
     bookingTypes: {
       allowsRegular: branch.allowsRegular,

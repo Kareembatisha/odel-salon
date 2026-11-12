@@ -74,6 +74,10 @@ export interface BranchDetails {
   allowsVip: boolean;
   allowsHome: boolean;
   isVisible: boolean;
+  /** InstaPay account customers pay to; `null` = InstaPay is off for this branch. */
+  instaPayAccount: string | null;
+  /** Mobile-wallet number (international format); `null` = wallet payments are off. */
+  walletNumber: string | null;
   createdAt: string;
   updatedAt: string | null;
   workingHours: BranchWorkingHour[];
@@ -93,6 +97,10 @@ export interface BranchPayload {
   allowsRegular: boolean;
   allowsVip: boolean;
   allowsHome: boolean;
+  /** Optional (max 100 chars). `null` turns the method off — the API removes a value you omit. */
+  instaPayAccount: string | null;
+  /** Optional Egyptian mobile in international format. `null` turns the method off. */
+  walletNumber: string | null;
   workingHours: BranchWorkingHour[];
 }
 

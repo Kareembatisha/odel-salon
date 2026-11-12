@@ -9,6 +9,20 @@ function toMinutes(time: string): number | null {
   return Number(match[1]) * 60 + Number(match[2]);
 }
 
+/** Egyptian mobile in international format: +20 10/11/12/15 followed by 8 digits. */
+export const EGYPT_INTL_MOBILE = /^\+201[0125][0-9]{8}$/;
+
+// Optional mobile-wallet number: empty is fine, otherwise the trimmed text must match.
+export function optionalIntlMobileValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = String(control.value ?? "").trim();
+
+    if (!value) return null;
+
+    return EGYPT_INTL_MOBILE.test(value) ? null : { pattern: true };
+  };
+}
+
 // Optional URL Validator
 export function optionalUrlValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {

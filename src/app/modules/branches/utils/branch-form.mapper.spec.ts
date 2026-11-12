@@ -22,6 +22,7 @@ function value(over: Partial<BranchFormValue> = {}): BranchFormValue {
       phone: " +201001102194 ",
       mapUrl: "  https://maps.example/x  ",
     },
+    payment: { instaPayAccount: "  odel.nasr@instapay  ", walletNumber: " +201012345678 " },
     bookingTypes: { allowsRegular: true, allowsVip: false, allowsHome: true },
     workingHours: [
       { dayOfWeek: BranchDayOfWeek.Saturday, isOpen: true, openTime: "09:00", closeTime: "23:00" },
@@ -37,6 +38,8 @@ const DETAILS: BranchDetails = {
   nameEn: "Zamalek",
   address: "8 Hassan Sabry St",
   mapUrl: "https://maps.example/z",
+  instaPayAccount: null,
+  walletNumber: null,
   phone: "+201020304050",
   allowsRegular: true,
   allowsVip: true,
@@ -86,6 +89,25 @@ describe("buildBranchPayload", () => {
       allowsHome: true,
     });
   });
+
+  it("trims the payment accounts", () => {
+    const p = buildBranchPayload(value());
+
+    expect(p.instaPayAccount).toBe("odel.nasr@instapay");
+    expect(p.walletNumber).toBe("+201012345678");
+  });
+
+  it.each(["", "   "])(
+    "sends a blank payment account (%j) as null — that turns the method off",
+    (blank) => {
+      const v = value();
+      v.payment = { instaPayAccount: blank, walletNumber: blank };
+
+      const p = buildBranchPayload(v);
+      expect(p.instaPayAccount).toBeNull();
+      expect(p.walletNumber).toBeNull();
+    },
+  );
 
   it("sends a blank map link as null", () => {
     const v = value();
@@ -142,6 +164,36 @@ describe("applyBranchToForm", () => {
       allowsVip: true,
       allowsHome: false,
     });
+  });
+
+  it("fills the payment accounts, turning null into an empty field", () => {
+    const form = createBranchForm(fb);
+
+    applyBranchToForm(form, {
+      ...DETAILS,
+      instaPayAccount: "odel.nasr@instapay",
+      walletNumber: null,
+    });
+
+    expect(form.getRawValue().payment).toEqual({
+      instaPayAccount: "odel.nasr@instapay",
+      walletNumber: "",
+    });
+    expect(form.pristine).toBe(true);
+  });
+
+  it("a branch that is loaded and saved unchanged keeps its payment accounts", () => {
+    const form = createBranchForm(fb);
+    applyBranchToForm(form, {
+      ...DETAILS,
+      instaPayAccount: "odel.nasr@instapay",
+      walletNumber: "+201012345678",
+    });
+
+    const p = buildBranchPayload(form.getRawValue() as BranchFormValue);
+
+    expect(p.instaPayAccount).toBe("odel.nasr@instapay");
+    expect(p.walletNumber).toBe("+201012345678");
   });
 
   it("matches working days by dayOfWeek, not by position, and trims seconds", () => {

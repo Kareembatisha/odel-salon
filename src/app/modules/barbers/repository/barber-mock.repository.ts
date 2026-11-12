@@ -7,13 +7,16 @@ import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse } from "@shared/model/api_response.model";
 import {
   BARBER_NAME_MAX_LENGTH,
+  BarberAttendanceRow,
   BarberDetails,
   BarberListItem,
   BarbersQuery,
   CreateBarberPayload,
   DeleteBarbersRequest,
+  SetBarberAttendanceRequest,
   UpdateBarberPayload,
 } from "../model/barber.model";
+import { cairoToday } from "../../offers/utils/offer-dates.util";
 import { validateBarberImage } from "../utils/barber-image.util";
 import { isValidEgyptianMobile } from "../utils/barber-phone.util";
 import { IBarberRepository } from "./barber.repository";
@@ -225,6 +228,85 @@ export class BarberMockRepository implements IBarberRepository {
   // ----------------------------------------------------------
   // Business rules
   // ----------------------------------------------------------
+
+  /**
+   * Today's sheet (Cairo date) for the branch's ACTIVE barbers, ordered by name. Nobody is present
+   * until marked today. An unknown branch is a `status: false` 404 body, like the other reads.
+   */
+  getAttendance(branchId: number): Observable<ApiResponse<BarberAttendanceRow[]>> {
+    if (!this.db.branches.some((b) => b.id === branchId)) {
+      return of<ApiResponse<BarberAttendanceRow[]>>({
+        status: false,
+        statusCode: 404,
+        message: "Branch not found",
+        errors: null,
+        meta: null,
+        data: null,
+      }).pipe(delay(MOCK_DELAY_MS));
+    }
+
+    const today = cairoToday();
+    const rows = this.db.barbers
+      .filter((b) => b.branchId === branchId && b.isActive)
+      .sort((a, b) => a.fullName.localeCompare(b.fullName) || a.id - b.id)
+      .map((b) => ({
+        barberId: b.id,
+        fullName: b.fullName,
+        imageUrl: b.imageUrl,
+        isPresent: this.isPresent(b.id, today),
+        upcomingBookingsCount: this.db.barberUpcomingBookings[b.id] ?? 0,
+      }));
+
+    return this.reply(rows, "Operation completed successfully");
+  }
+
+  /**
+   * Mark barbers present / absent TODAY. Same rules as the API: an empty list or a repeated id is
+   * a 400, an unknown id a 404, and marking a PRESENT barber who has upcoming bookings absent is a
+   * 409. All-or-nothing: every item is checked before anything is saved. Barbers not sent keep
+   * their state.
+   */
+  setAttendance(payload: SetBarberAttendanceRequest): Observable<ApiResponse<null>> {
+    const items = payload.barbers ?? [];
+    if (!items.length) return this.invalid("Barbers", "BARBERS.ERRORS.ATTENDANCE_REQUIRED");
+
+    const ids = items.map((item) => item.barberId);
+    if (new Set(ids).size !== ids.length) {
+      return this.invalid("Barbers", "BARBERS.ERRORS.ATTENDANCE_DUPLICATE");
+    }
+
+    const today = cairoToday();
+    const changes: Array<{ barber: MockBarber; isPresent: boolean }> = [];
+
+    for (const item of items) {
+      const barber = this.db.barbers.find((b) => b.id === item.barberId);
+      if (!barber) return this.notFound();
+
+      const upcoming = this.db.barberUpcomingBookings[barber.id] ?? 0;
+      if (!item.isPresent && this.isPresent(barber.id, today) && upcoming > 0) {
+        return this.fail(
+          this.translate.instant("BARBERS.ERRORS.ATTENDANCE_HAS_BOOKINGS", {
+            name: barber.fullName,
+            count: upcoming,
+          }),
+          409,
+        );
+      }
+      changes.push({ barber, isPresent: item.isPresent });
+    }
+
+    for (const { barber, isPresent } of changes) {
+      this.db.barberAttendance[barber.id] = { date: today, isPresent };
+    }
+
+    return this.reply(null, "Attendance Updated Successfully");
+  }
+
+  /** Present only if marked present on `today` — an older entry counts as "not marked yet". */
+  private isPresent(barberId: number, today: string): boolean {
+    const entry = this.db.barberAttendance[barberId];
+    return !!entry && entry.date === today && entry.isPresent;
+  }
 
   /**
    * First barber in `leaving` whose departure (suspended, deleted or moved away)

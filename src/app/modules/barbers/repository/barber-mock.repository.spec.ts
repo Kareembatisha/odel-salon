@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MockBarber, MockDb } from "@core/mock/mock-db";
 import { NotificationService } from "@core/services/notification.service";
+import { cairoToday } from "../../offers/utils/offer-dates.util";
 import { BARBER_IMAGE_MAX_BYTES } from "../model/barber.model";
 import { BarberMockRepository } from "./barber-mock.repository";
 
@@ -79,6 +80,7 @@ describe("BarberMockRepository", () => {
         ERRORS: {
           NOT_FOUND: "not found",
           LAST_ACTIVE: "{{name}} is the last active barber",
+          ATTENDANCE_HAS_BOOKINGS: "{{name}} has {{count}} upcoming booking(s)",
         },
       },
     });
@@ -483,6 +485,213 @@ describe("BarberMockRepository", () => {
       );
       await settle(repo.deleteBarbers({ ids: [a.id, b.id] }));
       expect(db.barbers.filter((x) => x.branchId === 1)).toHaveLength(0);
+    });
+  });
+
+  describe("attendance", () => {
+    /** Three barbers in branch 1: Ali (active), Omar (active), Zed (suspended). */
+    function sheetOf3() {
+      db.barberAttendance = {};
+      db.barberUpcomingBookings = {};
+      arrange([
+        ["Omar", true],
+        ["Ali", true],
+        ["Zed", false],
+      ]);
+      return { ali: byName("Ali"), omar: byName("Omar"), zed: byName("Zed") };
+    }
+
+    describe("getAttendance", () => {
+      it("lists the branch's ACTIVE barbers ordered by name; nobody is present until marked", async () => {
+        sheetOf3();
+
+        const res = await settle(repo.getAttendance(1));
+
+        expect(res.status).toBe(true);
+        expect(res.data!.map((r) => r.fullName)).toEqual(["Ali", "Omar"]); // Zed is suspended
+        expect(res.data!.every((r) => r.isPresent === false)).toBe(true);
+        expect(res.data![0]).toEqual({
+          barberId: byName("Ali").id,
+          fullName: "Ali",
+          imageUrl: null,
+          isPresent: false,
+          upcomingBookingsCount: 0,
+        });
+      });
+
+      it("never lists a barber of another branch", async () => {
+        sheetOf3();
+
+        const ids = (await settle(repo.getAttendance(1))).data!.map((r) => r.barberId);
+        const other = db.barbers.filter((b) => b.branchId !== 1).map((b) => b.id);
+
+        expect(ids.some((id) => other.includes(id))).toBe(false);
+      });
+
+      it("reports the upcoming bookings count per barber", async () => {
+        const { ali, omar } = sheetOf3();
+        db.barberUpcomingBookings = { [ali.id]: 3 };
+
+        const rows = (await settle(repo.getAttendance(1))).data!;
+
+        expect(rows.find((r) => r.barberId === ali.id)!.upcomingBookingsCount).toBe(3);
+        expect(rows.find((r) => r.barberId === omar.id)!.upcomingBookingsCount).toBe(0);
+      });
+
+      it("counts only a mark made TODAY — an older entry means 'not marked yet'", async () => {
+        const { ali, omar } = sheetOf3();
+        db.barberAttendance = {
+          [ali.id]: { date: cairoToday(), isPresent: true },
+          [omar.id]: { date: "2000-01-01", isPresent: true },
+        };
+
+        const rows = (await settle(repo.getAttendance(1))).data!;
+
+        expect(rows.find((r) => r.barberId === ali.id)!.isPresent).toBe(true);
+        expect(rows.find((r) => r.barberId === omar.id)!.isPresent).toBe(false);
+      });
+
+      it("answers a 404 body for an unknown branch", async () => {
+        const res = await settle(repo.getAttendance(9999));
+
+        expect(res).toMatchObject({ status: false, statusCode: 404, data: null });
+      });
+    });
+
+    describe("setAttendance", () => {
+      const sheet = async () => (await settle(repo.getAttendance(1))).data!;
+
+      it("marks the whole sheet in one call, for today", async () => {
+        const { ali, omar } = sheetOf3();
+
+        const res = await settle(
+          repo.setAttendance({
+            barbers: [
+              { barberId: ali.id, isPresent: true },
+              { barberId: omar.id, isPresent: false },
+            ],
+          }),
+        );
+
+        expect(res).toMatchObject({ status: true, statusCode: 200, data: null });
+        expect(db.barberAttendance[ali.id]).toEqual({ date: cairoToday(), isPresent: true });
+        expect((await sheet()).map((r) => r.isPresent)).toEqual([true, false]);
+      });
+
+      it("changes only the barbers sent — the others keep their state", async () => {
+        const { ali, omar } = sheetOf3();
+        await settle(
+          repo.setAttendance({
+            barbers: [
+              { barberId: ali.id, isPresent: true },
+              { barberId: omar.id, isPresent: true },
+            ],
+          }),
+        );
+
+        await settle(repo.setAttendance({ barbers: [{ barberId: omar.id, isPresent: false }] }));
+
+        const rows = await sheet();
+        expect(rows.find((r) => r.barberId === ali.id)!.isPresent).toBe(true);
+        expect(rows.find((r) => r.barberId === omar.id)!.isPresent).toBe(false);
+      });
+
+      it("lets a barber with upcoming bookings be marked PRESENT", async () => {
+        const { ali } = sheetOf3();
+        db.barberUpcomingBookings = { [ali.id]: 3 };
+
+        await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: true }] }));
+
+        expect((await sheet())[0].isPresent).toBe(true);
+      });
+
+      it("answers 409 when a present barber with upcoming bookings is marked absent — and saves nothing", async () => {
+        const { ali, omar } = sheetOf3();
+        db.barberUpcomingBookings = { [ali.id]: 3 };
+        await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: true }] }));
+
+        const error = await failure(
+          repo.setAttendance({
+            barbers: [
+              { barberId: omar.id, isPresent: true }, // valid, but must not be saved either
+              { barberId: ali.id, isPresent: false },
+            ],
+          }),
+        );
+
+        expect(error.status).toBe(409);
+        expect(error.message).toBe("Ali has 3 upcoming booking(s)");
+        expect(warning).toHaveBeenCalledWith("Ali has 3 upcoming booking(s)");
+        const rows = await sheet();
+        expect(rows.find((r) => r.barberId === ali.id)!.isPresent).toBe(true);
+        expect(rows.find((r) => r.barberId === omar.id)!.isPresent).toBe(false);
+      });
+
+      it("allows marking absent a barber with bookings who was never marked present", async () => {
+        const { ali } = sheetOf3();
+        db.barberUpcomingBookings = { [ali.id]: 3 };
+
+        const res = await settle(
+          repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: false }] }),
+        );
+
+        expect(res.status).toBe(true);
+      });
+
+      it("allows marking absent once the bookings are gone", async () => {
+        const { ali } = sheetOf3();
+        db.barberUpcomingBookings = { [ali.id]: 3 };
+        await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: true }] }));
+        db.barberUpcomingBookings = {};
+
+        await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: false }] }));
+
+        expect((await sheet())[0].isPresent).toBe(false);
+      });
+
+      it("answers 400 for an empty list", async () => {
+        sheetOf3();
+
+        const error = await failure(repo.setAttendance({ barbers: [] }));
+
+        expect(error.status).toBe(400);
+        expect(warning).toHaveBeenCalledWith(
+          "VALIDATION_FIELDS.Barbers",
+          "BARBERS.ERRORS.ATTENDANCE_REQUIRED",
+        );
+      });
+
+      it("answers 400 when a barber appears twice — and saves nothing", async () => {
+        const { ali } = sheetOf3();
+
+        const error = await failure(
+          repo.setAttendance({
+            barbers: [
+              { barberId: ali.id, isPresent: true },
+              { barberId: ali.id, isPresent: false },
+            ],
+          }),
+        );
+
+        expect(error.status).toBe(400);
+        expect(db.barberAttendance[ali.id]).toBeUndefined();
+      });
+
+      it("answers 404 for an unknown barber — all-or-nothing, the valid ones are not saved", async () => {
+        const { ali } = sheetOf3();
+
+        const error = await failure(
+          repo.setAttendance({
+            barbers: [
+              { barberId: ali.id, isPresent: true },
+              { barberId: 99999, isPresent: true },
+            ],
+          }),
+        );
+
+        expect(error.status).toBe(404);
+        expect(db.barberAttendance[ali.id]).toBeUndefined();
+      });
     });
   });
 });

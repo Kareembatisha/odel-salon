@@ -110,4 +110,29 @@ describe("BarberApiRepository", () => {
     expect(req.request.body).toEqual({ ids: [7, 8] });
     req.flush({});
   });
+
+  it("GET /barbers/attendance with branchId (required) as the only param", () => {
+    repo.getAttendance(3).subscribe();
+
+    const req = http.expectOne((r) => r.url === `${URL}/attendance`);
+    expect(req.request.method).toBe("GET");
+    expect(req.request.params.get("branchId")).toBe("3");
+    expect(req.request.params.keys()).toEqual(["branchId"]);
+    req.flush({});
+  });
+
+  it("PUT /barbers/attendance with the barbers list as JSON", () => {
+    const payload = {
+      barbers: [
+        { barberId: 7, isPresent: true },
+        { barberId: 8, isPresent: false },
+      ],
+    };
+    repo.setAttendance(payload).subscribe();
+
+    const req = http.expectOne(`${URL}/attendance`);
+    expect(req.request.method).toBe("PUT");
+    expect(req.request.body).toEqual(payload);
+    req.flush({});
+  });
 });

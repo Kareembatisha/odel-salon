@@ -100,6 +100,35 @@
           </div>
         </section>
 
+        <!-- Payment methods -->
+        <section class="odl-card panel" aria-labelledby="sec-payment">
+          <h2 class="panel__title" id="sec-payment">{{ 'BRANCHES.FORM.PAYMENT' | translate }}</h2>
+          <p class="panel__hint">{{ 'BRANCHES.DETAILS.PAYMENT_HINT' | translate }}</p>
+
+          <dl class="facts">
+            <div>
+              <dt><i class="pi pi-at" aria-hidden="true"></i>{{ 'BRANCHES.FORM.INSTAPAY_ACCOUNT' | translate }}</dt>
+              <dd>
+                @if (branch()!.instaPayAccount) {
+                  <span class="u-num" dir="ltr">{{ branch()!.instaPayAccount }}</span>
+                } @else {
+                  <span class="muted">{{ 'BRANCHES.DETAILS.PAYMENT_OFF' | translate }}</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt><i class="pi pi-mobile" aria-hidden="true"></i>{{ 'BRANCHES.FORM.WALLET_NUMBER' | translate }}</dt>
+              <dd>
+                @if (branch()!.walletNumber) {
+                  <span class="u-num" dir="ltr">{{ branch()!.walletNumber }}</span>
+                } @else {
+                  <span class="muted">{{ 'BRANCHES.DETAILS.PAYMENT_OFF' | translate }}</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </section>
+
         <!-- Record -->
         <section class="odl-card panel" aria-labelledby="sec-record">
           <h2 class="panel__title" id="sec-record">{{ 'BRANCHES.DETAILS.RECORD' | translate }}</h2>

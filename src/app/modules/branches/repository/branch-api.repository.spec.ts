@@ -14,6 +14,8 @@ const PAYLOAD: BranchPayload = {
   nameEn: "Branch",
   address: "Somewhere",
   mapUrl: null,
+  instaPayAccount: null,
+  walletNumber: null,
   phone: "+201001102194",
   allowsRegular: true,
   allowsVip: false,
@@ -71,6 +73,22 @@ describe("BranchApiRepository", () => {
     expect(req.request.method).toBe("PUT");
     expect(req.request.body).toEqual(PAYLOAD);
     req.flush({});
+  });
+
+  it("sends instaPayAccount and walletNumber in the create and edit bodies, null included", () => {
+    const payment = { instaPayAccount: "odel@instapay", walletNumber: null };
+
+    repo.createBranch({ ...PAYLOAD, ...payment }).subscribe();
+    const create = http.expectOne(URL);
+    expect(create.request.body).toMatchObject(payment);
+    expect(create.request.body).toHaveProperty("walletNumber", null); // explicit null, not omitted
+    create.flush({});
+
+    repo.updateBranch(7, { ...PAYLOAD, ...payment }).subscribe();
+    const update = http.expectOne(`${URL}/7`);
+    expect(update.request.body).toMatchObject(payment);
+    expect(update.request.body).toHaveProperty("walletNumber", null);
+    update.flush({});
   });
 
   it("PATCH /branches/{id}/toggle-status with no body", () => {

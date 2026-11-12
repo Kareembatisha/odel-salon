@@ -155,7 +155,8 @@
       "DESIGN_SYSTEM": "Design system",
       "SERVICES": "Menu & services",
       "PACKAGES": "Packages",
-      "OFFERS": "Offers"
+      "OFFERS": "Offers",
+      "BARBER_ATTENDANCE": "Attendance"
     }
   },
   "BOOKING_STATUS": {
@@ -222,7 +223,8 @@
       "Cancel": "Cancel",
       "Manage": "Manage",
       "Moderate": "Moderate",
-      "Export": "Export"
+      "Export": "Export",
+      "Attendance": "Attendance"
     }
   },
   "ROLES": {
@@ -390,7 +392,13 @@
       "EDIT_SUBTITLE": "Update this branch’s details, booking types and working hours.",
       "PHONE_HINT": "Egyptian mobile, e.g. +201001234567",
       "MAP_URL_HINT": "Optional — paste the share link from Google Maps.",
-      "HOURS_CLOSE_NEXT_DAY": "A closing time up to 06:00 is counted as the next day."
+      "HOURS_CLOSE_NEXT_DAY": "A closing time up to 06:00 is counted as the next day.",
+      "PAYMENT": "Payment methods",
+      "PAYMENT_HINT": "Customers can pay for bookings only with the methods set here. Leave a field empty to turn that method off.",
+      "INSTAPAY_ACCOUNT": "InstaPay account",
+      "INSTAPAY_HINT": "e.g. odel.nasrcity@instapay",
+      "WALLET_NUMBER": "Mobile wallet number",
+      "WALLET_HINT": "+201012345678"
     },
     "DAYS": {
       "Saturday": "Saturday",
@@ -415,7 +423,9 @@
       "HOURS_REQUIRED": "Set both opening and closing times.",
       "HOURS_INVALID": "Enter a valid time.",
       "HOURS_MIN_DURATION": "A working day must be at least one hour long.",
-      "HOURS_OVERNIGHT": "An overnight closing time can’t be later than 06:00."
+      "HOURS_OVERNIGHT": "An overnight closing time can’t be later than 06:00.",
+      "INSTAPAY_MAX": "The InstaPay account must be 100 characters or fewer.",
+      "WALLET_INVALID": "Enter an Egyptian mobile number in international format, like +201012345678."
     },
     "CREATED": "Branch created.",
     "UPDATED": "Branch updated.",
@@ -440,7 +450,9 @@
       "RECORD": "Record",
       "CREATED_AT": "Created",
       "UPDATED_AT": "Last updated",
-      "NOT_UPDATED": "Not updated yet"
+      "NOT_UPDATED": "Not updated yet",
+      "PAYMENT_HINT": "The accounts customers see when they pay for a booking.",
+      "PAYMENT_OFF": "Not enabled"
     },
     "SHOW_IN_APP": "Show in app",
     "VISIBILITY_HINT": "Hidden branches don’t appear in the customer app. Existing bookings are kept.",
@@ -471,7 +483,10 @@
       "PHONE_TAKEN": "Another barber already uses this phone number.",
       "INVALID_IMAGE": "Invalid image. Use a JPG, PNG or WEBP file up to 5 MB.",
       "IDS_REQUIRED": "Select at least one barber.",
-      "LAST_ACTIVE": "{{name}} is the last active barber in a visible branch. Hide the branch first."
+      "LAST_ACTIVE": "{{name}} is the last active barber in a visible branch. Hide the branch first.",
+      "ATTENDANCE_REQUIRED": "Send at least one barber.",
+      "ATTENDANCE_DUPLICATE": "Each barber can appear only once.",
+      "ATTENDANCE_HAS_BOOKINGS": "{{name}} has {{count}} upcoming booking(s). Reassign them to another barber first."
     },
     "TITLE": "Barbers",
     "SUBTITLE": "The team that works in each branch, and who is available to book.",
@@ -528,6 +543,26 @@
       "TITLE_MANY": "Delete selected barbers?",
       "MESSAGE_ONE": "{{name}} and their photo will be permanently deleted. This can’t be undone.",
       "MESSAGE_MANY": "{{count}} barbers and their photos will be permanently deleted. This can’t be undone."
+    },
+    "ATTENDANCE": {
+      "BREADCRUMB": "Attendance",
+      "TITLE": "Barber attendance",
+      "SUBTITLE": "Mark who is in today. Only present barbers can be booked.",
+      "LIST_LABEL": "Today’s attendance",
+      "SUMMARY": "{{present}} of {{total}} present",
+      "PRESENT": "Present",
+      "ABSENT": "Absent",
+      "MARK_PRESENT": "Mark {{name}} present",
+      "MARK_ABSENT": "Mark {{name}} absent",
+      "UPCOMING_ONE": "1 upcoming booking",
+      "UPCOMING_MANY": "{{count}} upcoming bookings",
+      "LOCKED_HINT": "Can’t be marked absent until these bookings are reassigned.",
+      "ANNOUNCE_PRESENT": "{{name}} marked present.",
+      "ANNOUNCE_ABSENT": "{{name}} marked absent.",
+      "EMPTY_TITLE": "No active barbers in this branch",
+      "EMPTY_TEXT": "Add or activate a barber to take attendance here.",
+      "NO_BRANCHES_TITLE": "No branches yet",
+      "NO_BRANCHES_TEXT": "Create a branch and add barbers to take attendance."
     }
   },
   "CHAIRS": {

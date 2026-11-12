@@ -3,11 +3,13 @@ import { Observable } from "rxjs";
 
 import { ApiResponse } from "@shared/model/api_response.model";
 import {
+  BarberAttendanceRow,
   BarberDetails,
   BarberListItem,
   BarbersQuery,
   CreateBarberPayload,
   DeleteBarbersRequest,
+  SetBarberAttendanceRequest,
   UpdateBarberPayload,
 } from "../model/barber.model";
 
@@ -32,4 +34,14 @@ export interface IBarberRepository {
 
   /** DELETE /barbers — bulk, all-or-nothing, body `{ ids }`. */
   deleteBarbers(payload: DeleteBarbersRequest): Observable<ApiResponse<null>>;
+
+  /** GET /barbers/attendance?branchId — today's sheet (Cairo date) of the branch's active barbers. */
+  getAttendance(branchId: number): Observable<ApiResponse<BarberAttendanceRow[]>>;
+
+  /**
+   * PUT /barbers/attendance — marks the listed barbers present / absent TODAY (one item = a single
+   * toggle, many = the whole sheet). All-or-nothing: 400 duplicate ids, 404 unknown id, 409 when a
+   * present barber with upcoming bookings is marked absent.
+   */
+  setAttendance(payload: SetBarberAttendanceRequest): Observable<ApiResponse<null>>;
 }

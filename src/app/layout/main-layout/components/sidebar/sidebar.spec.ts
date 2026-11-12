@@ -64,6 +64,14 @@ describe("Sidebar", () => {
       expect(ids).not.toContain("branches");
     });
 
+    it("shows Attendance to a user who only has Barber.Attendance, without Barbers", () => {
+      granted = [PERMISSIONS.Barber.Attendance];
+      const ids = visibleIds(create());
+
+      expect(ids).toContain("barber-attendance");
+      expect(ids).not.toContain("barbers");
+    });
+
     it("shows every permission-gated item to a user holding all permissions", () => {
       granted = NAV_SECTIONS.flatMap((s) => s.items)
         .map((i) => i.permission)
@@ -82,6 +90,8 @@ describe("Sidebar", () => {
       ["/main/users#top", "users"],
       ["/main/roles/3", "roles"],
       ["/main/branches/new", "branches"],
+      ["/main/barbers", "barbers"],
+      ["/main/barbers/attendance", "barber-attendance"],
     ])("%s highlights %s", (url, id) => {
       router.url = url;
       expect(create().activeItemId()).toBe(id);

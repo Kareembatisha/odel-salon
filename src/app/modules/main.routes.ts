@@ -112,6 +112,19 @@ export const MAIN_ROUTES: Routes = [
   },
 
   {
+    path: "barbers/attendance",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Barber.Attendance,
+      breadcrumb: ["LAYOUT.NAV.BARBERS", "BARBERS.ATTENDANCE.BREADCRUMB"],
+    },
+    loadComponent: () =>
+      import("./barbers/pages/barbers-attendance/barbers-attendance").then(
+        (m) => m.BarbersAttendance,
+      ),
+  },
+
+  {
     path: "services",
     canActivate: [permissionGuard],
     data: {

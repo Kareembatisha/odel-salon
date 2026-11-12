@@ -69,11 +69,71 @@ describe("createBranchForm", () => {
     return { form, basic, fill };
   };
 
-  it("has the three sections", () => {
+  it("has the four sections", () => {
     const { form } = setup();
 
-    expect(Object.keys(form.controls)).toEqual(["basicInfo", "bookingTypes", "workingHours"]);
+    expect(Object.keys(form.controls)).toEqual([
+      "basicInfo",
+      "payment",
+      "bookingTypes",
+      "workingHours",
+    ]);
     expect(form.get("workingHours")).toBeInstanceOf(FormArray);
+  });
+
+  describe("payment methods (both optional)", () => {
+    it("start empty and do not block the form", () => {
+      const { form } = setup();
+      const payment = form.get("payment")!;
+
+      expect(payment.value).toEqual({ instaPayAccount: "", walletNumber: "" });
+      expect(payment.valid).toBe(true);
+    });
+
+    it("InstaPay accepts any text up to 100 characters once trimmed", () => {
+      const { form } = setup();
+      const account = form.get("payment.instaPayAccount")!;
+
+      account.setValue("a".repeat(100) + "  ");
+      expect(account.errors).toBeNull();
+
+      account.setValue("a".repeat(101));
+      expect(account.hasError("maxlength")).toBe(true);
+    });
+
+    it.each([
+      "+201001234567",
+      "+201112345678",
+      "+201212345678",
+      "+201512345678",
+      "  +201012345678  ",
+    ])("wallet accepts %j", (value) => {
+      const { form } = setup();
+      const wallet = form.get("payment.walletNumber")!;
+      wallet.setValue(value);
+      expect(wallet.errors).toBeNull();
+    });
+
+    it.each(["", "   ", null])("wallet treats %j as 'turned off', not an error", (value) => {
+      const { form } = setup();
+      const wallet = form.get("payment.walletNumber")!;
+      wallet.setValue(value);
+      expect(wallet.errors).toBeNull();
+    });
+
+    it.each([
+      "01001234567",
+      "+201312345678",
+      "+20100123456",
+      "+2010012345678",
+      "+20 100 123 4567",
+      "abc",
+    ])("wallet rejects %j", (value) => {
+      const { form } = setup();
+      const wallet = form.get("payment.walletNumber")!;
+      wallet.setValue(value);
+      expect(wallet.hasError("pattern")).toBe(true);
+    });
   });
 
   it("starts invalid: required fields are empty and no booking type is chosen", () => {

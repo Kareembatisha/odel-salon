@@ -5,6 +5,8 @@ import { BranchDayOfWeek } from "@modules/branches/model/branch.model";
 import { maxTrimmedLength, notBlank } from "@shared/validators/text.validators";
 import {
   atLeastOneBookingTypeValidator,
+  EGYPT_INTL_MOBILE,
+  optionalIntlMobileValidator,
   optionalUrlValidator,
   workingHourValidator,
 } from "./branch-form.validators";
@@ -51,9 +53,15 @@ export function createBranchForm(fb: FormBuilder): FormGroup {
 
       address: ["", [notBlank, maxTrimmedLength(250)]],
 
-      phone: ["", [Validators.required, Validators.pattern(/^\+201[0125][0-9]{8}$/)]],
+      phone: ["", [Validators.required, Validators.pattern(EGYPT_INTL_MOBILE)]],
 
       mapUrl: ["", [optionalUrlValidator()]],
+    }),
+
+    // Payment methods (both optional: empty turns the method off)
+    payment: fb.group({
+      instaPayAccount: ["", [maxTrimmedLength(100)]],
+      walletNumber: ["", [optionalIntlMobileValidator()]],
     }),
 
     // Booking Types

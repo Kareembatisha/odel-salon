@@ -22,6 +22,8 @@ const BRANCH: BranchModel = {
   nameEn: "Zamalek",
   address: "8 Hassan Sabry St, Zamalek",
   mapUrl: "https://maps.example/z",
+  instaPayAccount: null,
+  walletNumber: null,
   phone: "+201020304050",
   allowsRegular: true,
   allowsVip: false,
@@ -223,6 +225,36 @@ describe("BranchDetails page", () => {
 
       expect(el().querySelector("a.link")).toBeNull();
       expect(text()).toContain("BRANCHES.DETAILS.NO_MAP");
+    });
+
+    it("shows both payment accounts left-to-right when they are set", async () => {
+      repo = new FakeRepository();
+      repo.byId.mockReturnValue(
+        of(ok({ ...BRANCH, instaPayAccount: "odel.nasr@instapay", walletNumber: "+201012345678" })),
+      );
+      await setup();
+
+      expect(text()).toContain("BRANCHES.FORM.PAYMENT");
+      expect(text()).toContain("odel.nasr@instapay");
+      expect(text()).toContain("+201012345678");
+      expect(text()).not.toContain("BRANCHES.DETAILS.PAYMENT_OFF");
+      expect(el().querySelector('[dir="ltr"].u-num')).not.toBeNull();
+    });
+
+    it("says 'not enabled' for a payment method that is not set", async () => {
+      repo = new FakeRepository();
+      repo.byId.mockReturnValue(
+        of(ok({ ...BRANCH, instaPayAccount: "odel.nasr@instapay", walletNumber: null })),
+      );
+      await setup();
+
+      expect(text()).toContain("odel.nasr@instapay");
+      expect(text().match(/BRANCHES\.DETAILS\.PAYMENT_OFF/g)).toHaveLength(1);
+    });
+
+    it("says 'not enabled' for both when neither is set", async () => {
+      await setup();
+      expect(text().match(/BRANCHES\.DETAILS\.PAYMENT_OFF/g)).toHaveLength(2);
     });
 
     it("shows a badge for each enabled booking type only", async () => {

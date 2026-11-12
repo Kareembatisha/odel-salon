@@ -1,0 +1,99 @@
+<div class="odl-page">
+  <app-page-header [title]="'BARBERS.ATTENDANCE.TITLE' | translate" [subtitle]="'BARBERS.ATTENDANCE.SUBTITLE' | translate" />
+
+  @if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state
+        [title]="'BARBERS.ATTENDANCE.NO_BRANCHES_TITLE' | translate"
+        [description]="'BARBERS.ATTENDANCE.NO_BRANCHES_TEXT' | translate"
+        icon="pi pi-building"
+      />
+    </div>
+  } @else {
+    <div class="toolbar">
+      <app-filter-select
+        [label]="'BARBERS.FILTER.BRANCH' | translate"
+        [options]="branchOptions()"
+        [value]="branchId() !== null ? '' + branchId() : ''"
+        (changed)="onBranch($event)"
+      />
+
+      <div class="toolbar__info">
+        <span class="today"><i class="pi pi-calendar" aria-hidden="true"></i>{{ dateLabel() }}</span>
+        @if (rows().length) {
+          <app-status-badge variant="info" [dot]="false">
+            <span class="u-num">{{ 'BARBERS.ATTENDANCE.SUMMARY' | translate: { present: presentCount(), total: totalCount() } }}</span>
+          </app-status-badge>
+        }
+      </div>
+    </div>
+
+    <!-- Polite live region: there is no success toast, so this says what the last switch saved. -->
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</p>
+
+    @if (showSkeleton()) {
+      <div class="odl-card sheet" aria-busy="true">
+        @for (n of skeletons; track n) {
+          <div class="row row--skeleton">
+            <app-skeleton shape="circle" width="40px" height="40px" />
+            <span class="row__who"><app-skeleton width="45%" height="16px" /></span>
+            <app-skeleton width="72px" height="24px" />
+            <app-skeleton width="44px" height="24px" />
+          </div>
+        }
+      </div>
+    } @else if (hasError() && !rows().length) {
+      <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+    } @else if (!rows().length) {
+      <div class="odl-card">
+        <app-empty-state
+          [title]="'BARBERS.ATTENDANCE.EMPTY_TITLE' | translate"
+          [description]="'BARBERS.ATTENDANCE.EMPTY_TEXT' | translate"
+          icon="pi pi-id-card"
+        />
+      </div>
+    } @else {
+      <!-- A reload failed but the last sheet is still on screen: say so, keep the rows. -->
+      @if (hasError()) {
+        <div class="odl-card stale"><app-failed-state [compact]="true" (retry)="reload()" /></div>
+      }
+
+      <ul class="odl-card sheet" [attr.aria-label]="'BARBERS.ATTENDANCE.LIST_LABEL' | translate" [attr.aria-busy]="loading()">
+        @for (row of rows(); track row.barberId) {
+          <li class="row" [class.row--present]="row.isPresent">
+            <app-avatar size="md" [name]="row.fullName" [src]="row.imageUrl" />
+
+            <span class="row__who">
+              <span class="row__name" [attr.title]="row.fullName">{{ row.fullName }}</span>
+              @if (row.upcomingBookingsCount > 0) {
+                <span class="row__note">
+                  <i class="pi pi-clock" aria-hidden="true"></i>
+                  {{ (row.upcomingBookingsCount === 1 ? 'BARBERS.ATTENDANCE.UPCOMING_ONE' : 'BARBERS.ATTENDANCE.UPCOMING_MANY') | translate: { count: row.upcomingBookingsCount } }}
+                </span>
+              }
+              @if (isLocked(row)) {
+                <span class="row__note row__note--lock">
+                  <i class="pi pi-lock" aria-hidden="true"></i>
+                  {{ 'BARBERS.ATTENDANCE.LOCKED_HINT' | translate }}
+                </span>
+              }
+            </span>
+
+            <app-status-badge [variant]="row.isPresent ? 'success' : 'neutral'">
+              {{ (row.isPresent ? 'BARBERS.ATTENDANCE.PRESENT' : 'BARBERS.ATTENDANCE.ABSENT') | translate }}
+            </app-status-badge>
+
+            @if (canMark()) {
+              <app-switch
+                [checked]="row.isPresent"
+                [disabled]="isPending(row) || isLocked(row)"
+                [label]="switchLabel(row)"
+                (toggled)="toggle(row, $event)"
+              />
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>

@@ -29,6 +29,38 @@ export interface BarberDetails extends BarberListItem {
   updatedAt: string | null;
 }
 
+/**
+ * GET /barbers/attendance?branchId → data[] — today's sheet (Cairo date) for the branch's ACTIVE
+ * barbers, ordered by name (suspended barbers are not listed).
+ */
+export interface BarberAttendanceRow {
+  /** Note: `barberId`, not `id`. */
+  barberId: number;
+  fullName: string;
+  imageUrl: string | null;
+  /** False until the barber has been marked present today. Only present barbers are bookable. */
+  isPresent: boolean;
+  /**
+   * Pending / confirmed bookings that haven't ended. While above 0 a present barber can't be
+   * marked absent (409), so the UI disables Absent and shows this count.
+   */
+  upcomingBookingsCount: number;
+}
+
+/** One barber's attendance for today, as sent to PUT /barbers/attendance. */
+export interface BarberAttendanceItem {
+  barberId: number;
+  isPresent: boolean;
+}
+
+/**
+ * PUT /barbers/attendance body. Always applies to today; only the barbers sent change; each
+ * `barberId` at most once; all-or-nothing (404 unknown id, 409 absent-with-bookings).
+ */
+export interface SetBarberAttendanceRequest {
+  barbers: BarberAttendanceItem[];
+}
+
 /** GET /barbers query. All optional on the backend (defaults: page 1, size 20, max 100). */
 export interface BarbersQuery {
   pageNumber: number;

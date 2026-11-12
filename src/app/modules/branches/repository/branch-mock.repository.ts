@@ -114,6 +114,8 @@ export class BranchMockRepository implements IBranchRepository {
       nameEn: branch.nameEn,
       address: branch.address,
       mapUrl: branch.mapUrl,
+      instaPayAccount: branch.instaPayAccount,
+      walletNumber: branch.walletNumber,
       phone: branch.phone,
       allowsRegular: branch.allowsRegular,
       allowsVip: branch.allowsVip,
@@ -166,6 +168,8 @@ export class BranchMockRepository implements IBranchRepository {
       vipChairsCount: 0,
 
       mapUrl: payload.mapUrl,
+      instaPayAccount: payload.instaPayAccount,
+      walletNumber: payload.walletNumber,
       workingHours: payload.workingHours.map((hour) => ({ ...hour })),
 
       createdAt: new Date().toISOString(),
@@ -209,6 +213,8 @@ export class BranchMockRepository implements IBranchRepository {
       nameEn: payload.nameEn,
       address: payload.address,
       mapUrl: payload.mapUrl,
+      instaPayAccount: payload.instaPayAccount,
+      walletNumber: payload.walletNumber,
       phone: payload.phone,
       allowsRegular: payload.allowsRegular,
       allowsVip: payload.allowsVip,

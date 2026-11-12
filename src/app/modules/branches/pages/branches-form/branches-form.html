@@ -50,6 +50,24 @@
         </div>
       </section>
 
+      <!-- Payment methods -->
+      <section class="odl-card form-section payment" formGroupName="payment" aria-labelledby="sec-payment">
+        <header class="section-header">
+          <span class="section-icon" aria-hidden="true"><i class="pi pi-wallet"></i></span>
+          <div class="section-heading">
+            <h2 id="sec-payment">{{ 'BRANCHES.FORM.PAYMENT' | translate }}</h2>
+            <p>{{ 'BRANCHES.FORM.PAYMENT_HINT' | translate }}</p>
+          </div>
+        </header>
+
+        <div class="form-grid">
+          <app-float-label-input label="BRANCHES.FORM.INSTAPAY_ACCOUNT" iconLeft="pi pi-at" [ltr]="true"
+            hint="BRANCHES.FORM.INSTAPAY_HINT" [errorMessage]="error('payment.instaPayAccount')" formControlName="instaPayAccount" />
+          <app-float-label-input label="BRANCHES.FORM.WALLET_NUMBER" type="tel" iconLeft="pi pi-mobile" [ltr]="true"
+            hint="BRANCHES.FORM.WALLET_HINT" [errorMessage]="error('payment.walletNumber')" formControlName="walletNumber" />
+        </div>
+      </section>
+
       <!-- Booking types -->
       <section class="odl-card form-section booking-types" formGroupName="bookingTypes" aria-labelledby="sec-booking">
         <header class="section-header">

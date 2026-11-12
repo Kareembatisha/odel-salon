@@ -53,7 +53,7 @@ src/
       roles/              list · role details (permission matrix)
       branches/           cards · create/edit pages · details · visibility switch
       chairs/             cards + summary · create/edit drawer · status switch
-      barbers/            table + filters + bulk delete · create/edit drawer with photo · status switch
+      barbers/            table + filters + bulk delete · create/edit drawer with photo · status switch · daily attendance page
       services/           price table per branch + summary · create/edit page (price card per branch) · bulk tools
       packages/           cards per branch + summary · create/edit drawer (service picker, "Before discount") · status switch
       offers/             status tabs + cards per branch · create/edit drawer (banner, dates, service picker, "Before discount") · stop / resume
@@ -160,6 +160,7 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 | Branches | `/main/branches` | `Branch.View` (+ `Create` / `Edit` / `Delete` for the actions) |
 | Chairs | `/main/chairs` | `Chair.View` (+ `Create` / `Edit` / `ToggleStatus` / `Delete` for the actions) |
 | Barbers | `/main/barbers` | `Barber.View` (+ `Create` / `Edit` / `Delete` for the actions) |
+| Barber attendance | `/main/barbers/attendance` | `Barber.Attendance` only (not `Barber.View`) |
 | Services (Menu & services) | `/main/services` | `Service.View` (+ `Edit` for the status switch and bulk tools, `Delete` for delete) |
 | New service | `/main/services/new` | `Service.Create` |
 | Edit service | `/main/services/:id/edit` | `Service.Edit` |
@@ -207,7 +208,19 @@ Implements `API Contract — Barbers` (all 6 endpoints) in `modules/barbers/`, b
 - **Delete** — one barber from the row, or select several for one bulk `DELETE /barbers` with `{ ids }`. All-or-nothing, permanent (photos too), always behind a confirmation.
 - **Last active barber rule** — in a *visible* branch the last active barber can't be suspended, deleted or moved (409 "…is the last active barber in a visible branch. Hide the branch first"); the check covers the whole bulk request. Hidden branches have no such restriction. The backend's message is shown as-is.
 - **Mock backend** — `core/mock/mock-db.ts` seeds each branch with as many barbers as its `barbersCount` (a few suspended), and the mock repository enforces the same rules (valid + unique phone, photo type/size, the 409 lock, all-or-nothing delete) and keeps `barbersCount` on the Branches screen in sync. In mock mode, "showing" a hidden branch also needs an *active* barber.
-- **Permissions** — `Barber.View` opens the page; `Create`, `Edit` (also the status switch) and `Delete` show or hide their actions. The mock `BranchManager` role has `Barber.View` only; `SuperAdmin` has everything.
+- **Permissions** — `Barber.View` opens the page; `Create`, `Edit` (also the status switch) and `Delete` show or hide their actions. The mock `BranchManager` role has `Barber.View` and `Barber.Attendance`; `SuperAdmin` has everything.
+
+### Barber attendance (`/main/barbers/attendance`)
+
+Implements `API Contract — Barber Attendance` (`GET` / `PUT /barbers/attendance`) as its own page with its own sidebar item, gated by `Barber.Attendance` **only**.
+
+- **One branch, today.** The sheet is today's (Cairo date) for the ACTIVE barbers of ONE branch, ordered by name. The first branch is selected by default (no "all branches"), like Offers and Packages. The page shows the sheet's date and "N of M present".
+- **Saves immediately.** Each row has a Present / Absent switch; flipping it sends one single-item `PUT` and then reloads the sheet. There is **no success toast** (the switch is the feedback); a polite live region tells screen-reader users what was saved. Only the barber being saved is disabled; different barbers can be saved at the same time.
+- **Bookings lock.** A present barber with upcoming bookings can't be marked absent (the API answers `409`), so that switch is disabled and the row says why, with the booking count. If the sheet was stale and the server answers `409` / `404` anyway, the server's message is shown and the sheet reloads.
+- **Day change.** When the tab regains focus, the sheet reloads if the Cairo day changed while the page was open.
+- **States.** Loading skeleton, no branches, no active barbers in the branch, failed load with retry (rows stay on screen when only a *reload* fails).
+- **Mock backend.** Same rules as the API: `400` empty list / repeated id, `404` unknown barber or branch, `409` absent-with-bookings, all-or-nothing, a mark counts only on today's date. Seed: the barber with 3 upcoming bookings starts **present**, so the lock shows on first open; another barber has 1 booking. The mock `BranchManager` role has `Barber.Attendance`.
+- **Code.** `BarberAttendanceService` (signals, stale-response guard, in-flight counter) → `pages/barbers-attendance/`; `utils/barber-attendance-date.util.ts` formats the date.
 
 ## Services (Menu & services)
 
@@ -268,6 +281,8 @@ An offer discounts a bundle of **at least ONE service of ONE branch** for a peri
 
 ## Notes and assumptions
 
+- Branch payment methods: `instaPayAccount` (max 100 characters, trimmed) and `walletNumber` (Egyptian mobile in international format) are optional on the branch form; an empty field is sent as an explicit `null` because the API removes a value that is not sent. The branch **list** does not return them.
+- Attendance: responses are assumed to match the contract PDF; the localized "has upcoming bookings" message is built from the sheet (`BARBERS.ERRORS.ATTENDANCE_HAS_BOOKINGS`) instead of the server's English text. The page has no success toast on purpose (one line in `BarberAttendanceService.setPresent` if you want one).
 - The AlSalam README says Angular 22 / PrimeNG 19; its `package.json` and lockfile say Angular 21 / PrimeNG 21. The latter were followed.
 - The reference had no `fileReplacements`, so production builds silently used the dev environment. Fixed here.
 - Build-time font inlining is off (it needs network access to Google Fonts and breaks offline CI); fonts load from the `<link>` in `index.html`.
