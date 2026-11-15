@@ -12,6 +12,10 @@ import { PackageApiRepository } from "@modules/packages/repository/package-api.r
 import { PACKAGE_REPOSITORY } from "@modules/packages/repository/package.repository";
 import { OfferApiRepository } from "@modules/offers/repository/offer-api.repository";
 import { OFFER_REPOSITORY } from "@modules/offers/repository/offer.repository";
+import { BookingApiRepository } from "@modules/bookings/repository/booking-api.repository";
+import { BOOKING_REPOSITORY } from "@modules/bookings/repository/booking.repository";
+import { PaymentReviewApiRepository } from "@modules/payment-reviews/repository/payment-review-api.repository";
+import { PAYMENT_REVIEW_REPOSITORY } from "@modules/payment-reviews/repository/payment-review.repository";
 import { UserApiRepository } from "@modules/users/repository/user-api.repository";
 import { USER_REPOSITORY } from "@modules/users/repository/user.repository";
 import { RoleApiRepository } from "@modules/roles/repository/role-api.repository";
@@ -36,6 +40,8 @@ export const DATA_PROVIDERS: Provider[] = [
   { provide: SERVICE_REPOSITORY, useClass: ServiceApiRepository },
   { provide: PACKAGE_REPOSITORY, useClass: PackageApiRepository },
   { provide: OFFER_REPOSITORY, useClass: OfferApiRepository },
+  { provide: BOOKING_REPOSITORY, useClass: BookingApiRepository },
+  { provide: PAYMENT_REVIEW_REPOSITORY, useClass: PaymentReviewApiRepository },
   { provide: USER_REPOSITORY, useClass: UserApiRepository },
   { provide: ROLE_REPOSITORY, useClass: RoleApiRepository },
   { provide: PROFILE_REPOSITORY, useClass: ProfileApiRepository },

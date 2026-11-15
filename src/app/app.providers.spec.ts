@@ -13,18 +13,20 @@ const asClass = (p: Provider) => p as unknown as ClassProvider;
  * `npm run check:providers` (scripts/check-providers.mjs), because the build swaps the module.
  */
 describe("production repository providers", () => {
-  it("register one provider for each of the 10 repository tokens", () => {
+  it("register one provider for each of the 12 repository tokens", () => {
     const tokens = DATA_PROVIDERS.map((p) => asClass(p).provide._desc);
 
-    expect(new Set(tokens).size).toBe(10);
+    expect(new Set(tokens).size).toBe(12);
     expect([...tokens].sort()).toEqual(
       [
         "AUTH_REPOSITORY",
         "BARBER_REPOSITORY",
+        "BOOKING_REPOSITORY",
         "BRANCH_REPOSITORY",
         "CHAIR_REPOSITORY",
         "OFFER_REPOSITORY",
         "PACKAGE_REPOSITORY",
+        "PAYMENT_REVIEW_REPOSITORY",
         "PROFILE_REPOSITORY",
         "ROLE_REPOSITORY",
         "SERVICE_REPOSITORY",

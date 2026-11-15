@@ -19,6 +19,12 @@ import { PACKAGE_REPOSITORY } from "@modules/packages/repository/package.reposit
 import { OfferApiRepository } from "@modules/offers/repository/offer-api.repository";
 import { OfferMockRepository } from "@modules/offers/repository/offer-mock.repository";
 import { OFFER_REPOSITORY } from "@modules/offers/repository/offer.repository";
+import { BookingApiRepository } from "@modules/bookings/repository/booking-api.repository";
+import { BookingMockRepository } from "@modules/bookings/repository/booking-mock.repository";
+import { BOOKING_REPOSITORY } from "@modules/bookings/repository/booking.repository";
+import { PaymentReviewApiRepository } from "@modules/payment-reviews/repository/payment-review-api.repository";
+import { PaymentReviewMockRepository } from "@modules/payment-reviews/repository/payment-review-mock.repository";
+import { PAYMENT_REVIEW_REPOSITORY } from "@modules/payment-reviews/repository/payment-review.repository";
 import { UserApiRepository } from "@modules/users/repository/user-api.repository";
 import { UserMockRepository } from "@modules/users/repository/user-mock.repository";
 import { USER_REPOSITORY } from "@modules/users/repository/user.repository";
@@ -64,6 +70,14 @@ export const DATA_PROVIDERS: Provider[] = [
   {
     provide: OFFER_REPOSITORY,
     useClass: environment.useMock ? OfferMockRepository : OfferApiRepository,
+  },
+  {
+    provide: BOOKING_REPOSITORY,
+    useClass: environment.useMock ? BookingMockRepository : BookingApiRepository,
+  },
+  {
+    provide: PAYMENT_REVIEW_REPOSITORY,
+    useClass: environment.useMock ? PaymentReviewMockRepository : PaymentReviewApiRepository,
   },
   {
     provide: USER_REPOSITORY,

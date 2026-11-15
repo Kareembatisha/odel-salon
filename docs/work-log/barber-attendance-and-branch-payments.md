@@ -30,7 +30,7 @@ Tests 108 files, **1458 passed**, 4 expected fail (unchanged). `tsc` (app + spec
 | Contract | `IBarberRepository.getAttendance(branchId)` and `setAttendance(payload)` |
 | API repository | `GET /barbers/attendance?branchId=…`, `PUT /barbers/attendance` (JSON body, explicit list) |
 | Mock repository | Same rules as the API: sheet = ACTIVE barbers of the branch ordered by name; unmarked = absent; a mark counts only on today's Cairo date; `400` empty list / repeated id; `404` unknown barber (or branch, as a `status:false` body); `409` marking a PRESENT barber with upcoming bookings absent; all-or-nothing; barbers not sent keep their state |
-| Mock data | `barberAttendance` (daily state) and `barberUpcomingBookings` (two seeded barbers with 3 and 1 upcoming bookings, so the 409 can be reproduced in dev: mark present, then absent) |
+| Mock data | `barberAttendance` (daily state) and upcoming bookings (since the Bookings module: derived from the mock bookings via `MockDb.upcomingBookingsCount`; before it, a stored per-barber count) |
 | i18n | `BARBERS.ERRORS.ATTENDANCE_REQUIRED / _DUPLICATE / _HAS_BOOKINGS` (the last takes `name` and `count` and will also be used for the localized 409 message in the UI), `VALIDATION_FIELDS.Barbers`, `PERMISSIONS.ACTIONS.Attendance` — EN + AR |
 | Tests | API repository (GET params, PUT body), mock repository (18 cases: ordering, suspended excluded, branch isolation, bookings count, "today only", 404 branch; set whole sheet / only sent barbers change / present with bookings OK / 409 and nothing saved / absent-without-ever-present OK / absent after bookings gone / 400 empty / 400 duplicate / 404 all-or-nothing), permission catalog, i18n label parity |
 
@@ -73,7 +73,7 @@ See the run for this step: tests, `tsc` (app + spec), ESLint, Prettier, developm
 
 ## Step 5 — Polish and delivery (done)
 
-- Mock: the barber with 3 upcoming bookings now starts **present today**, so the locked switch is visible on first open (`MockDb.seedAttendance`, tested). Everything else starts absent.
+- Mock: the first active barber (with upcoming bookings) now starts **present today**, so the locked switch is visible on first open (`MockDb.seedAttendance`, tested). Everything else starts absent.
 - README: route map, new "Barber attendance" section, manager role permissions, notes (payment methods, attendance assumptions).
 - QA checklist: `AT-01…AT-10` (attendance) and `BR-06 / BR-07` (payment methods).
 

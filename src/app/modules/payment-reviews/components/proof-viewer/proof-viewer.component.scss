@@ -1,0 +1,119 @@
+@use "styles/variables" as v;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: v.$z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: v.$space-4;
+  background: v.$overlay;
+  backdrop-filter: blur(2px);
+  animation: fade 0.16s ease-out;
+}
+
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+  width: 100%;
+  max-width: 560px;
+  max-height: 100%;
+  padding: v.$space-4;
+  background: v.$surface-raised;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-xl;
+  box-shadow: v.$shadow-lg;
+  animation: pop 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$space-3;
+  }
+  &__text {
+    min-width: 0;
+  }
+  &__title {
+    margin: 0;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+  }
+  &__caption {
+    margin: v.$space-1 0 0;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    overflow-wrap: anywhere;
+  }
+
+  &__close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid v.$border-strong;
+    border-radius: v.$radius-md;
+    color: v.$text-secondary;
+    cursor: pointer;
+    transition:
+      color v.$transition-normal,
+      border-color v.$transition-normal;
+
+    &:hover {
+      color: v.$text;
+      border-color: v.$text-muted;
+    }
+    &:focus-visible {
+      outline: 0;
+      border-color: v.$primary;
+      box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+    }
+  }
+
+  // The screenshot is tall: it scrolls inside the box instead of pushing the dialog off-screen.
+  &__body {
+    min-height: 0;
+    overflow: auto;
+    border-radius: v.$radius-md;
+    background: v.$surface-sunken;
+  }
+  &__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  &__open {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: v.$space-2;
+    color: v.$primary-text;
+    font-size: v.$text-sm;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+    i {
+      font-size: v.$text-xs;
+    }
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}

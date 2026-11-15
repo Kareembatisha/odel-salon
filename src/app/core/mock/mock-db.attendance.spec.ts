@@ -6,28 +6,30 @@ import { MOCK_MANAGER_PERMISSIONS, MockDb } from "./mock-db";
 
 describe("MockDb attendance seed", () => {
   const db = () => TestBed.inject(MockDb);
+  const firstActiveBarber = () => db().barbers.find((b) => b.isActive)!;
 
-  it("starts the barber with the most bookings present today, so the lock shows right away", () => {
-    const [id] = Object.entries(db().barberUpcomingBookings)
-      .sort(([, a], [, b]) => b - a)
-      .map(([barberId]) => Number(barberId));
+  it("starts the first active barber present today, so the lock shows right away", () => {
+    expect(db().barberAttendance[firstActiveBarber().id]).toEqual({
+      date: cairoToday(),
+      isPresent: true,
+    });
+  });
 
-    expect(db().barberUpcomingBookings[id]).toBe(3);
-    expect(db().barberAttendance[id]).toEqual({ date: cairoToday(), isPresent: true });
+  it("gives that barber upcoming bookings (they are the ones that lock the switch)", () => {
+    expect(db().upcomingBookingsCount(firstActiveBarber().id)).toBeGreaterThan(0);
   });
 
   it("marks only that one barber present; everybody else starts absent", () => {
     expect(Object.values(db().barberAttendance)).toHaveLength(1);
   });
 
-  it("seeds bookings for an active barber of the first branch (the one the page opens on)", () => {
+  it("leaves a barber of the first branch free of upcoming bookings (to toggle freely)", () => {
     const firstBranchId = Math.min(...db().branches.map((b) => b.id));
-    const seeded = Object.keys(db().barberUpcomingBookings).map(Number);
-    const inFirst = db().barbers.filter(
-      (b) => b.branchId === firstBranchId && b.isActive && seeded.includes(b.id),
+    const free = db().barbers.filter(
+      (b) => b.branchId === firstBranchId && b.isActive && db().upcomingBookingsCount(b.id) === 0,
     );
 
-    expect(inFirst.length).toBeGreaterThan(0);
+    expect(free.length).toBeGreaterThan(0);
   });
 
   it("gives the branch manager role the attendance permission", () => {

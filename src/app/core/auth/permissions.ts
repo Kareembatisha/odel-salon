@@ -8,7 +8,7 @@
  * routes and nav config — never a raw string.
  */
 const SPEC = {
-  Booking: ["View", "Cancel"],
+  Booking: ["View", "Review", "Manage", "Cancel"],
   Session: ["View", "Manage"],
   Availability: ["View"],
   Branch: ["View", "Create", "Edit", "Delete"],

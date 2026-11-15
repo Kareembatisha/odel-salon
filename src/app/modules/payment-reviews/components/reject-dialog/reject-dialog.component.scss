@@ -1,0 +1,124 @@
+@use "styles/variables" as v;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: v.$z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: v.$space-4;
+  background: v.$overlay;
+  backdrop-filter: blur(2px);
+  animation: fade 0.16s ease-out;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 480px;
+  padding: v.$space-8 v.$space-6 v.$space-6;
+  background: v.$surface-raised;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-xl;
+  box-shadow: v.$shadow-lg;
+  text-align: center;
+  animation: pop 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: v.$radius-full;
+    background: v.$danger-bg;
+    color: v.$danger-text;
+    font-size: v.$text-xl;
+  }
+  &__title {
+    margin: v.$space-4 0 0;
+    font-size: v.$text-xl;
+    font-weight: v.$fw-semibold;
+  }
+  &__hint {
+    margin: v.$space-2 0 v.$space-4;
+    color: v.$text-secondary;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: v.$space-3;
+    margin-top: v.$space-1;
+    font-size: v.$text-sm;
+    text-align: start;
+  }
+  &__error {
+    color: v.$danger-text;
+  }
+  &__counter {
+    margin-inline-start: auto;
+    color: v.$text-muted;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: v.$space-3;
+    margin-top: v.$space-5;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  text-align: start;
+
+  &__label {
+    font-size: v.$text-sm;
+    font-weight: v.$fw-semibold;
+  }
+  &__input {
+    width: 100%;
+    padding: v.$space-3;
+    background: v.$surface;
+    border: 1px solid v.$border-strong;
+    border-radius: v.$radius-md;
+    color: v.$text;
+    font: inherit;
+    resize: vertical;
+    min-height: 96px;
+    transition: border-color v.$transition-normal;
+
+    &::placeholder {
+      color: v.$text-muted;
+    }
+    &:hover {
+      border-color: v.$text-muted;
+    }
+    &:focus-visible {
+      outline: 0;
+      border-color: v.$primary;
+      box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+    }
+    &--invalid,
+    &--invalid:hover {
+      border-color: v.$danger;
+    }
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}

@@ -1,0 +1,204 @@
+<div class="odl-page">
+  <app-page-header [title]="'PAYMENT_REVIEWS.TITLE' | translate" [subtitle]="'PAYMENT_REVIEWS.SUBTITLE' | translate" />
+
+  @if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state
+        [title]="'PAYMENT_REVIEWS.NO_BRANCHES_TITLE' | translate"
+        [description]="'PAYMENT_REVIEWS.NO_BRANCHES_TEXT' | translate"
+        icon="pi pi-building"
+      />
+    </div>
+  } @else {
+    <!-- Status tabs: every tab carries the selected branch's count. -->
+    <app-tabs
+      [tabs]="tabs()"
+      [value]="'' + tab()"
+      [ariaLabel]="'PAYMENT_REVIEWS.TABS_LABEL' | translate"
+      idPrefix="reviews-tab"
+      [panelId]="panelId"
+      (changed)="onTab($event)"
+    />
+
+    <div class="toolbar">
+      <app-filter-select
+        [label]="'PAYMENT_REVIEWS.BRANCH' | translate"
+        [options]="branchOptions()"
+        [value]="branchId() !== null ? '' + branchId() : ''"
+        (changed)="onBranch($event)"
+      />
+
+      @if (reviewTarget()) {
+        <span class="target"><i class="pi pi-clock" aria-hidden="true"></i>{{ reviewTarget() }}</span>
+      }
+
+      <span class="toolbar__spacer"></span>
+
+      @if (updatedLabel()) {
+        <span class="updated">{{ updatedLabel() }}</span>
+      }
+      <app-button variant="ghost" size="sm" [iconClass]="refreshing() ? 'pi pi-spin pi-refresh' : 'pi pi-refresh'" (clicked)="refresh()">
+        {{ 'PAYMENT_REVIEWS.REFRESH' | translate }}
+      </app-button>
+    </div>
+
+    <!-- Polite live region: says what the queue shows after every load or refresh. -->
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</p>
+
+    <div [id]="panelId" role="tabpanel" tabindex="-1" class="panel" [attr.aria-labelledby]="'reviews-tab-' + tab()">
+      @if (busy()) {
+        <div class="grid" aria-busy="true">
+          @for (n of skeletons; track n) {
+            <div class="odl-card review">
+              <app-skeleton width="40%" height="20px" />
+              <div class="review__body">
+                <app-skeleton width="128px" height="180px" />
+                <div class="review__facts"><app-skeleton height="16px" /><app-skeleton height="16px" /><app-skeleton height="16px" /></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (hasError() && !items().length) {
+        <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+      } @else if (!items().length) {
+        <div class="odl-card">
+          <app-empty-state [title]="emptyTitle()" [description]="emptyText()" icon="pi pi-inbox" />
+        </div>
+      } @else {
+        <!-- A reload failed but the last queue is still on screen: say so, keep the cards. -->
+        @if (hasError()) {
+          <div class="odl-card stale"><app-failed-state [compact]="true" (retry)="reload()" /></div>
+        }
+
+        <ul class="grid" [attr.aria-label]="'PAYMENT_REVIEWS.TITLE' | translate" [attr.aria-busy]="loading()">
+          @for (card of cards(); track card.id) {
+            <li class="odl-card review" [class.review--late]="card.isLate" [attr.aria-labelledby]="'review-' + card.id">
+              <header class="review__head">
+                <h3 class="review__id" [id]="'review-' + card.id">{{ card.idLabel }}</h3>
+                @if (card.typeLabel) {
+                  <app-status-badge [variant]="card.typeVariant" [dot]="false">{{ card.typeLabel }}</app-status-badge>
+                }
+                <span class="review__spacer"></span>
+                @if (card.waiting !== null) {
+                  <span class="wait" [class.wait--late]="card.isLate">
+                    <i class="pi pi-clock" aria-hidden="true"></i>{{ waitingLabel(card) }}
+                  </span>
+                  @if (card.isLate) {
+                    <app-status-badge variant="danger" [dot]="false">{{ 'PAYMENT_REVIEWS.LATE' | translate }}</app-status-badge>
+                  }
+                } @else {
+                  <app-status-badge [variant]="card.statusVariant">{{ card.statusLabel }}</app-status-badge>
+                }
+              </header>
+
+              <div class="review__body">
+                <button
+                  type="button"
+                  class="proof"
+                  [attr.aria-label]="'PAYMENT_REVIEWS.VIEW_PROOF' | translate: { id: card.idLabel }"
+                  (click)="proofTarget.set(card)"
+                >
+                  <img [src]="card.proofUrl" [alt]="proofAlt(card)" loading="lazy" />
+                  <span class="proof__zoom" aria-hidden="true"><i class="pi pi-search-plus"></i></span>
+                </button>
+
+                <dl class="review__facts">
+                  <div class="fact fact--amount">
+                    <dt>{{ 'PAYMENT_REVIEWS.CARD.AMOUNT_DUE' | translate }}</dt>
+                    <dd class="amount u-num">{{ card.amount }}</dd>
+                  </div>
+                  <div class="fact">
+                    <dt>{{ 'PAYMENT_REVIEWS.CARD.METHOD' | translate }}</dt>
+                    <dd class="method"><i [class]="card.methodIcon" aria-hidden="true"></i>{{ card.methodLabel }}</dd>
+                  </div>
+                  <div class="fact">
+                    <dt>{{ 'PAYMENT_REVIEWS.CARD.CUSTOMER' | translate }}</dt>
+                    <dd>
+                      <span class="cell-text">{{ card.customerName }}</span>
+                      <a class="phone" dir="ltr" [attr.href]="'tel:' + card.customerPhone">{{ card.customerPhone }}</a>
+                    </dd>
+                  </div>
+                  <div class="fact">
+                    <dt>{{ 'PAYMENT_REVIEWS.CARD.SERVICES' | translate }}</dt>
+                    <dd>{{ card.services }}</dd>
+                  </div>
+                  <div class="fact">
+                    <dt>{{ 'PAYMENT_REVIEWS.CARD.STARTS' | translate }}</dt>
+                    <dd>{{ card.startDate }} · <span class="u-num">{{ card.startTime }}</span></dd>
+                  </div>
+                </dl>
+              </div>
+
+              @if (canReview() && tab() === ToReview) {
+                <footer class="review__actions">
+                  <app-button
+                    variant="danger"
+                    iconClass="pi pi-times"
+                    [disabled]="isPending(card.id)"
+                    [ariaLabel]="'PAYMENT_REVIEWS.REJECT_LABEL' | translate: { id: card.idLabel }"
+                    (clicked)="askReject(card)"
+                  >
+                    {{ 'PAYMENT_REVIEWS.REJECT' | translate }}
+                  </app-button>
+                  <app-button
+                    variant="primary"
+                    iconClass="pi pi-check"
+                    [loading]="isPending(card.id)"
+                    [ariaLabel]="'PAYMENT_REVIEWS.APPROVE_LABEL' | translate: { id: card.idLabel }"
+                    (clicked)="askApprove(card)"
+                  >
+                    {{ 'PAYMENT_REVIEWS.APPROVE' | translate }}
+                  </app-button>
+                </footer>
+              }
+            </li>
+          }
+        </ul>
+
+        <app-pagination
+          [page]="meta()?.currentPage ?? 1"
+          [pageSize]="meta()?.pageSize ?? 20"
+          [totalRecords]="meta()?.totalCount ?? 0"
+          (pageChange)="onPage($event)"
+        />
+      }
+    </div>
+
+    <app-proof-viewer
+      [src]="proofTarget()?.proofUrl ?? null"
+      [alt]="proofTarget() ? proofAlt(proofTarget()!) : ''"
+      [title]="'PAYMENT_REVIEWS.PROOF_TITLE' | translate"
+      [caption]="proofTarget() ? proofCaption(proofTarget()!) : ''"
+      [closeLabel]="'PAYMENT_REVIEWS.CLOSE' | translate"
+      [openLabel]="'PAYMENT_REVIEWS.OPEN_ORIGINAL' | translate"
+      (closed)="proofTarget.set(null)"
+    />
+
+    <app-confirm-modal
+      [isOpen]="approveTarget() !== null"
+      variant="primary"
+      [title]="'PAYMENT_REVIEWS.APPROVE_TITLE' | translate"
+      [message]="approveMessage()"
+      [confirmLabel]="'PAYMENT_REVIEWS.APPROVE_CONFIRM' | translate"
+      [cancelLabel]="'COMMON.CANCEL' | translate"
+      [busy]="approveTarget() !== null && isPending(approveTarget()!.id)"
+      (confirm)="confirmApprove()"
+      (cancel)="approveTarget.set(null)"
+    />
+
+    <app-reject-dialog
+      [isOpen]="rejectTarget() !== null"
+      [title]="'PAYMENT_REVIEWS.REJECT_TITLE' | translate"
+      [hint]="'PAYMENT_REVIEWS.REJECT_HINT' | translate"
+      [label]="'PAYMENT_REVIEWS.REJECT_REASON' | translate"
+      [placeholder]="'PAYMENT_REVIEWS.REJECT_PLACEHOLDER' | translate"
+      [confirmLabel]="'PAYMENT_REVIEWS.REJECT_CONFIRM' | translate"
+      [cancelLabel]="'COMMON.CANCEL' | translate"
+      [requiredMessage]="'PAYMENT_REVIEWS.ERRORS.REASON_REQUIRED' | translate"
+      [maxLength]="rejectMaxLength"
+      [busy]="rejectTarget() !== null && isPending(rejectTarget()!.id)"
+      (confirm)="confirmReject($event)"
+      (cancel)="rejectTarget.set(null)"
+    />
+  }
+</div>

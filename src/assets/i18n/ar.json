@@ -144,7 +144,8 @@
     "SECTIONS": {
       "ACCESS": "التحكم في الوصول",
       "SALON": "الصالون",
-      "DEVELOPER": "المطوّر"
+      "DEVELOPER": "المطوّر",
+      "BOOKINGS": "الحجوزات"
     },
     "NAV": {
       "USERS": "المستخدمون",
@@ -156,7 +157,9 @@
       "SERVICES": "القائمة والخدمات",
       "PACKAGES": "الباقات",
       "OFFERS": "العروض",
-      "BARBER_ATTENDANCE": "الحضور"
+      "BARBER_ATTENDANCE": "الحضور",
+      "BOOKINGS": "الحجوزات",
+      "PAYMENT_REVIEWS": "مراجعة الدفع"
     }
   },
   "BOOKING_STATUS": {
@@ -224,7 +227,8 @@
       "Manage": "إدارة",
       "Moderate": "مراجعة",
       "Export": "تصدير",
-      "Attendance": "الحضور"
+      "Attendance": "الحضور",
+      "Review": "مراجعة الدفع"
     }
   },
   "ROLES": {
@@ -1064,6 +1068,182 @@
     "RoleId": "الدور",
     "Permissions": "الصلاحيات",
     "Code": "رمز التحقق",
-    "Token": "رمز إعادة التعيين"
+    "Token": "رمز إعادة التعيين",
+    "Reason": "السبب",
+    "DateTo": "إلى تاريخ"
+  },
+  "BOOKINGS": {
+    "TITLE": "الحجوزات",
+    "SUBTITLE": "كل حجوزات الفرع مع الدفع والاسترداد.",
+    "SEARCH": "ابحث برقم الحجز أو العميل أو الموبايل",
+    "TABS_LABEL": "الحجوزات حسب الفترة",
+    "NO_BRANCHES_TITLE": "لا توجد فروع بعد",
+    "NO_BRANCHES_TEXT": "أنشئ فرعًا لتظهر حجوزاته هنا.",
+    "EMPTY_TITLE": "لا توجد حجوزات بعد",
+    "EMPTY_TEXT": "ستظهر هنا الحجوزات التي يجريها العملاء.",
+    "NO_RESULTS_TITLE": "لا توجد حجوزات مطابقة",
+    "NO_RESULTS_TEXT": "جرّب تبويبًا آخر أو امسح الفلاتر.",
+    "CLEAR_FILTERS": "مسح الفلاتر",
+    "RESULTS": "عرض {{count}} من {{total}} حجز",
+    "RESULTS_NONE": "لا توجد حجوزات",
+    "DATE_RANGE_ERROR": "تاريخ النهاية لا يمكن أن يسبق تاريخ البداية.",
+    "FILTER": {
+      "BRANCH": "الفرع",
+      "BARBER": "الحلاق",
+      "ALL_BARBERS": "كل الحلاقين",
+      "TYPE": "نوع الحجز",
+      "ALL_TYPES": "كل الأنواع",
+      "STATUS": "الحالة",
+      "ALL_STATUSES": "كل الحالات",
+      "FROM": "من",
+      "TO": "إلى",
+      "REFUND_WAITING": "استرداد معلّق"
+    },
+    "COL": {
+      "BOOKING": "الحجز",
+      "WHEN": "التاريخ والوقت",
+      "CUSTOMER": "العميل",
+      "SERVICES": "الخدمات",
+      "BARBER": "الحلاق",
+      "PAYMENT": "الدفع",
+      "STATUS": "الحالة"
+    },
+    "REFUND_LINE": "{{status}} · {{amount}}",
+    "FEE": "رسوم {{amount}}",
+    "TAB": {
+      "ALL": "الكل",
+      "TODAY": "اليوم",
+      "UPCOMING": "القادمة",
+      "PAST": "السابقة"
+    },
+    "STATUS": {
+      "PENDING_REVIEW": "بانتظار الفرع",
+      "CONFIRMED": "مؤكد",
+      "STARTED": "بدأ",
+      "REJECTED": "مرفوض",
+      "EXPIRED": "منتهي",
+      "COMPLETED": "مكتمل",
+      "NO_SHOW": "لم يحضر",
+      "CANCELLED": "ملغي",
+      "UNKNOWN": "غير معروف"
+    },
+    "TYPE": {
+      "REGULAR": "عادي",
+      "VIP": "VIP",
+      "HOME": "منزلي",
+      "UNKNOWN": "غير معروف"
+    },
+    "PAYMENT_METHOD": {
+      "INSTAPAY": "إنستا باي",
+      "WALLET": "محفظة إلكترونية",
+      "UNKNOWN": "غير معروف"
+    },
+    "REFUND": {
+      "WAITING": "استرداد معلّق",
+      "SENT": "تم الاسترداد",
+      "UNKNOWN": "غير معروف"
+    },
+    "ERRORS": {
+      "NOT_FOUND": "هذا الحجز لم يعد موجودًا.",
+      "NOT_STARTED": "لم يبدأ هذا الحجز بعد.",
+      "NOT_ALLOWED": "هذا الإجراء غير مسموح به في حالة الحجز الحالية.",
+      "INVALID_DATE_RANGE": "تاريخ النهاية لا يمكن أن يسبق تاريخ البداية."
+    },
+    "SESSION_ENDED": "تم إنهاء الجلسة.",
+    "DETAILS": {
+      "BREADCRUMB": "تفاصيل الحجز",
+      "BACK": "العودة إلى الحجوزات",
+      "NOT_FOUND_TITLE": "هذا الحجز غير موجود",
+      "NOT_FOUND_TEXT": "ربما تمت إزالته. عُد إلى قائمة الحجوزات.",
+      "APPOINTMENT": "الموعد",
+      "SERVICES_PAYMENT": "الخدمات والدفع",
+      "CUSTOMER": "العميل",
+      "REFUND": "الاسترداد",
+      "DATE": "التاريخ",
+      "TIME": "الوقت",
+      "DURATION": "المدة",
+      "BARBER": "الحلاق",
+      "RATING": "التقييم",
+      "NO_REVIEWS": "لا توجد تقييمات بعد",
+      "CHAIR": "الكرسي",
+      "BRANCH": "الفرع",
+      "HOME_ADDRESS": "عنوان المنزل",
+      "SERVICES_LIST": "الخدمات",
+      "SUBTOTAL": "الإجمالي الفرعي",
+      "TOTAL": "الإجمالي",
+      "METHOD": "طريقة الدفع",
+      "NAME": "الاسم",
+      "PHONE": "الموبايل",
+      "CALL": "اتصال",
+      "VISITS": "الزيارات المكتملة",
+      "MISSED": "الحجوزات الفائتة",
+      "REFUND_STATUS": "الحالة",
+      "REFUND_AMOUNT": "المبلغ المسترد",
+      "REFUND_FEE": "رسوم الحجز الفائت",
+      "END_SESSION": "إنهاء الجلسة",
+      "END_TITLE": "إنهاء هذه الجلسة؟",
+      "END_MESSAGE": "سيتم تسجيل الحجز {{number}} الخاص بـ {{name}} كمكتمل.",
+      "END_AFTER_START": "يمكنك إنهاء الجلسة بعد أن تبدأ."
+    }
+  },
+  "PAYMENT_REVIEWS": {
+    "TITLE": "مراجعة الدفع",
+    "SUBTITLE": "قارن صورة كل تحويل بالمبلغ المطلوب، ثم اقبل الحجز أو ارفضه.",
+    "BREADCRUMB": "مراجعة الدفع",
+    "TABS_LABEL": "مراجعات الدفع حسب الحالة",
+    "NO_BRANCHES_TITLE": "لا توجد فروع بعد",
+    "NO_BRANCHES_TEXT": "أنشئ فرعًا لتراجع مدفوعاته هنا.",
+    "EMPTY": {
+      "TO_REVIEW_TITLE": "لا شيء للمراجعة",
+      "TO_REVIEW_TEXT": "تمت مراجعة كل إثباتات الدفع في هذا الفرع.",
+      "APPROVED_TITLE": "لا توجد موافقات اليوم بعد",
+      "APPROVED_TEXT": "الحجوزات التي تقبلها اليوم تظهر هنا.",
+      "REJECTED_TITLE": "لا توجد رفوض اليوم",
+      "REJECTED_TEXT": "الحجوزات التي ترفضها اليوم تظهر هنا."
+    },
+    "BRANCH": "الفرع",
+    "REVIEW_TARGET": "زمن المراجعة {{minutes}} دقيقة",
+    "UPDATED_AT": "آخر تحديث {{time}}",
+    "REFRESH": "تحديث",
+    "WAITING": "بالانتظار {{time}}",
+    "LATE": "متأخر",
+    "CARD": {
+      "AMOUNT_DUE": "المبلغ المطلوب",
+      "METHOD": "طريقة الدفع",
+      "CUSTOMER": "العميل",
+      "SERVICES": "الخدمات",
+      "STARTS": "يبدأ"
+    },
+    "VIEW_PROOF": "عرض إثبات الدفع للحجز {{id}}",
+    "PROOF_ALT": "إثبات الدفع للحجز {{id}}",
+    "PROOF_TITLE": "إثبات الدفع",
+    "PROOF_CAPTION": "{{id}} · المطلوب {{amount}} · {{method}}",
+    "CLOSE": "إغلاق",
+    "OPEN_ORIGINAL": "فتح الصورة الأصلية",
+    "APPROVE": "قبول",
+    "REJECT": "رفض",
+    "APPROVE_LABEL": "قبول الحجز {{id}}",
+    "REJECT_LABEL": "رفض الحجز {{id}}",
+    "APPROVE_TITLE": "قبول هذا الحجز؟",
+    "APPROVE_MESSAGE": "سيتم تأكيد الحجز {{id}} الخاص بـ {{name}}. المبلغ المطلوب: {{amount}} عبر {{method}}.",
+    "APPROVE_CONFIRM": "قبول وتأكيد الحجز",
+    "REJECT_TITLE": "رفض هذا الحجز؟",
+    "REJECT_HINT": "سيرى العميل هذا السبب، وسيُحرَّر وقت الحلاق.",
+    "REJECT_REASON": "السبب",
+    "REJECT_PLACEHOLDER": "مثال: المبلغ المحوَّل لا يطابق إجمالي الحجز.",
+    "REJECT_CONFIRM": "رفض الحجز",
+    "APPROVED": "تم قبول الحجز.",
+    "REJECTED": "تم رفض الحجز.",
+    "RESULTS": "عرض {{count}} من {{total}} دفعة",
+    "RESULTS_NONE": "لا توجد مدفوعات هنا",
+    "TAB": {
+      "TO_REVIEW": "قيد المراجعة",
+      "APPROVED_TODAY": "تمت الموافقة اليوم",
+      "REJECTED_TODAY": "مرفوضة اليوم"
+    },
+    "ERRORS": {
+      "REASON_REQUIRED": "اكتب سبب رفض هذا الحجز.",
+      "REASON_TOO_LONG": "السبب لا يمكن أن يزيد عن 500 حرف."
+    }
   }
 }

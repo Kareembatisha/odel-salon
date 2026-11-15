@@ -92,6 +92,9 @@ describe("Sidebar", () => {
       ["/main/branches/new", "branches"],
       ["/main/barbers", "barbers"],
       ["/main/barbers/attendance", "barber-attendance"],
+      ["/main/bookings", "bookings"],
+      ["/main/bookings/482", "bookings"],
+      ["/main/bookings/payment-reviews", "payment-reviews"],
     ])("%s highlights %s", (url, id) => {
       router.url = url;
       expect(create().activeItemId()).toBe(id);

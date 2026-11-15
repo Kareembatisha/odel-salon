@@ -1,0 +1,188 @@
+<div class="odl-page">
+  <a class="back" routerLink="/main/bookings">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.BACK' | translate }}
+  </a>
+
+  @if (state() === 'notFound') {
+    <div class="odl-card">
+      <app-empty-state
+        [title]="'BOOKINGS.DETAILS.NOT_FOUND_TITLE' | translate"
+        [description]="'BOOKINGS.DETAILS.NOT_FOUND_TEXT' | translate"
+        icon="pi pi-calendar-times"
+      />
+    </div>
+  } @else if (state() === 'failed') {
+    <div class="odl-card"><app-failed-state (retry)="load()" /></div>
+  } @else if (state() === 'loading' || !view()) {
+    <div class="skeletons" aria-busy="true">
+      <app-skeleton width="40%" height="36px" />
+      <app-skeleton width="25%" height="16px" />
+      <div class="layout">
+        <div class="odl-card sk-card"><app-skeleton height="160px" /></div>
+        <div class="odl-card sk-card"><app-skeleton height="160px" /></div>
+      </div>
+    </div>
+  } @else {
+    <app-page-header [title]="view()!.number" [subtitle]="view()!.dateLong + ' · ' + view()!.time">
+      @if (canManage() && view()!.canEnd) {
+        <app-button variant="primary" iconClass="pi pi-check-circle" [disabled]="saving()" (clicked)="askEnd()">
+          {{ 'BOOKINGS.DETAILS.END_SESSION' | translate }}
+        </app-button>
+      }
+    </app-page-header>
+
+    <div class="summary">
+      <app-status-badge [variant]="view()!.statusVariant">{{ view()!.statusLabel }}</app-status-badge>
+      <app-status-badge [variant]="view()!.typeVariant" [dot]="false">{{ view()!.typeLabel }}</app-status-badge>
+      <span class="summary__duration"><i class="pi pi-clock" aria-hidden="true"></i>{{ view()!.duration }}</span>
+      @if (canManage() && view()!.endsAfterStart) {
+        <span class="hint">{{ 'BOOKINGS.DETAILS.END_AFTER_START' | translate }}</span>
+      }
+    </div>
+
+    <div class="layout">
+      <div class="stack">
+        <!-- Appointment -->
+        <section class="odl-card panel" aria-labelledby="sec-appointment">
+          <h2 class="panel__title" id="sec-appointment">{{ 'BOOKINGS.DETAILS.APPOINTMENT' | translate }}</h2>
+
+          <dl class="facts">
+            <div class="fact">
+              <dt><i class="pi pi-user" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.BARBER' | translate }}</dt>
+              <dd>
+                {{ view()!.barber }}
+                <span class="rating">
+                  @if (view()!.rating) {
+                    <i class="pi pi-star-fill" aria-hidden="true"></i>
+                    <span class="sr-only">{{ 'BOOKINGS.DETAILS.RATING' | translate }}</span>
+                    <span class="u-num">{{ view()!.rating }}</span>
+                  } @else {
+                    <span class="muted">{{ 'BOOKINGS.DETAILS.NO_REVIEWS' | translate }}</span>
+                  }
+                </span>
+              </dd>
+            </div>
+
+            @if (view()!.chair) {
+              <div class="fact">
+                <dt><i class="pi pi-bookmark" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.CHAIR' | translate }}</dt>
+                <dd>{{ view()!.chair }}</dd>
+              </div>
+            }
+
+            <div class="fact">
+              <dt><i class="pi pi-building" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.BRANCH' | translate }}</dt>
+              <dd>{{ view()!.branch }}</dd>
+            </div>
+
+            @if (view()!.homeAddress) {
+              <div class="fact">
+                <dt><i class="pi pi-home" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.HOME_ADDRESS' | translate }}</dt>
+                <dd dir="auto">{{ view()!.homeAddress }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <!-- Services & payment -->
+        <section class="odl-card panel" aria-labelledby="sec-payment">
+          <h2 class="panel__title" id="sec-payment">{{ 'BOOKINGS.DETAILS.SERVICES_PAYMENT' | translate }}</h2>
+
+          <ul class="items" [attr.aria-label]="'BOOKINGS.DETAILS.SERVICES_LIST' | translate">
+            @for (item of view()!.items; track $index) {
+              <li class="item">
+                <span class="item__name">{{ item.name }}</span>
+                <span class="item__duration muted">{{ item.duration }}</span>
+                <span class="item__price u-num">{{ item.price }}</span>
+              </li>
+            }
+          </ul>
+
+          <dl class="totals">
+            <div class="totals__row">
+              <dt>{{ 'BOOKINGS.DETAILS.SUBTOTAL' | translate }}</dt>
+              <dd class="u-num">{{ view()!.subtotal }}</dd>
+            </div>
+            <div class="totals__row">
+              <dt>{{ 'BOOKINGS.DETAILS.METHOD' | translate }}</dt>
+              <dd class="method"><i [class]="view()!.methodIcon" aria-hidden="true"></i>{{ view()!.methodLabel }}</dd>
+            </div>
+            <div class="totals__row totals__row--total">
+              <dt>{{ 'BOOKINGS.DETAILS.TOTAL' | translate }}</dt>
+              <dd class="u-num">{{ view()!.total }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- Refund (Cancelled / Expired / Missed bookings only) -->
+        @if (view()!.refund; as refund) {
+          <section class="odl-card panel" aria-labelledby="sec-refund">
+            <h2 class="panel__title" id="sec-refund">{{ 'BOOKINGS.DETAILS.REFUND' | translate }}</h2>
+
+            <dl class="facts facts--inline">
+              <div class="fact">
+                <dt>{{ 'BOOKINGS.DETAILS.REFUND_STATUS' | translate }}</dt>
+                <dd><app-status-badge [variant]="refund.statusVariant">{{ refund.statusLabel }}</app-status-badge></dd>
+              </div>
+              <div class="fact">
+                <dt>{{ 'BOOKINGS.DETAILS.REFUND_AMOUNT' | translate }}</dt>
+                <dd class="u-num">{{ refund.amount }}</dd>
+              </div>
+              @if (refund.fee) {
+                <div class="fact">
+                  <dt>{{ 'BOOKINGS.DETAILS.REFUND_FEE' | translate }}</dt>
+                  <dd class="u-num">{{ refund.fee }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+        }
+      </div>
+
+      <!-- Customer -->
+      <section class="odl-card panel" aria-labelledby="sec-customer">
+        <h2 class="panel__title" id="sec-customer">{{ 'BOOKINGS.DETAILS.CUSTOMER' | translate }}</h2>
+
+        <dl class="facts">
+          <div class="fact">
+            <dt><i class="pi pi-user" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.NAME' | translate }}</dt>
+            <dd>{{ view()!.customerName }}</dd>
+          </div>
+
+          <div class="fact">
+            <dt><i class="pi pi-phone" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.PHONE' | translate }}</dt>
+            <dd>
+              <a class="link u-num" dir="ltr" [attr.href]="'tel:' + view()!.customerPhone">{{ view()!.customerPhone }}</a>
+            </dd>
+          </div>
+
+          <div class="fact">
+            <dt><i class="pi pi-check-circle" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.VISITS' | translate }}</dt>
+            <dd class="u-num">{{ view()!.visits }}</dd>
+          </div>
+
+          <div class="fact">
+            <dt><i class="pi pi-exclamation-circle" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.MISSED' | translate }}</dt>
+            <dd class="u-num">{{ view()!.missed }}</dd>
+          </div>
+        </dl>
+
+        <a class="call" [attr.href]="'tel:' + view()!.customerPhone">
+          <i class="pi pi-phone" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.CALL' | translate }}
+        </a>
+      </section>
+    </div>
+
+    <app-confirm-modal
+      [isOpen]="confirmOpen()"
+      variant="primary"
+      [title]="'BOOKINGS.DETAILS.END_TITLE' | translate"
+      [message]="endMessage()"
+      [confirmLabel]="'BOOKINGS.DETAILS.END_SESSION' | translate"
+      [cancelLabel]="'COMMON.CANCEL' | translate"
+      [busy]="saving()"
+      (confirm)="confirmEnd()"
+      (cancel)="confirmOpen.set(false)"
+    />
+  }
+</div>

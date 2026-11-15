@@ -3,6 +3,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { Observable, firstValueFrom } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { upcomingBookingsFor } from "@core/mock/mock-bookings";
 import { MockBarber, MockDb } from "@core/mock/mock-db";
 import { NotificationService } from "@core/services/notification.service";
 import { cairoToday } from "../../offers/utils/offer-dates.util";
@@ -492,7 +493,7 @@ describe("BarberMockRepository", () => {
     /** Three barbers in branch 1: Ali (active), Omar (active), Zed (suspended). */
     function sheetOf3() {
       db.barberAttendance = {};
-      db.barberUpcomingBookings = {};
+      db.bookings = [];
       arrange([
         ["Omar", true],
         ["Ali", true],
@@ -530,7 +531,7 @@ describe("BarberMockRepository", () => {
 
       it("reports the upcoming bookings count per barber", async () => {
         const { ali, omar } = sheetOf3();
-        db.barberUpcomingBookings = { [ali.id]: 3 };
+        db.bookings = upcomingBookingsFor(ali.id, 3);
 
         const rows = (await settle(repo.getAttendance(1))).data!;
 
@@ -598,7 +599,7 @@ describe("BarberMockRepository", () => {
 
       it("lets a barber with upcoming bookings be marked PRESENT", async () => {
         const { ali } = sheetOf3();
-        db.barberUpcomingBookings = { [ali.id]: 3 };
+        db.bookings = upcomingBookingsFor(ali.id, 3);
 
         await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: true }] }));
 
@@ -607,7 +608,7 @@ describe("BarberMockRepository", () => {
 
       it("answers 409 when a present barber with upcoming bookings is marked absent — and saves nothing", async () => {
         const { ali, omar } = sheetOf3();
-        db.barberUpcomingBookings = { [ali.id]: 3 };
+        db.bookings = upcomingBookingsFor(ali.id, 3);
         await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: true }] }));
 
         const error = await failure(
@@ -629,7 +630,7 @@ describe("BarberMockRepository", () => {
 
       it("allows marking absent a barber with bookings who was never marked present", async () => {
         const { ali } = sheetOf3();
-        db.barberUpcomingBookings = { [ali.id]: 3 };
+        db.bookings = upcomingBookingsFor(ali.id, 3);
 
         const res = await settle(
           repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: false }] }),
@@ -640,9 +641,9 @@ describe("BarberMockRepository", () => {
 
       it("allows marking absent once the bookings are gone", async () => {
         const { ali } = sheetOf3();
-        db.barberUpcomingBookings = { [ali.id]: 3 };
+        db.bookings = upcomingBookingsFor(ali.id, 3);
         await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: true }] }));
-        db.barberUpcomingBookings = {};
+        db.bookings = [];
 
         await settle(repo.setAttendance({ barbers: [{ barberId: ali.id, isPresent: false }] }));
 

@@ -144,7 +144,8 @@
     "SECTIONS": {
       "ACCESS": "Access control",
       "SALON": "Salon",
-      "DEVELOPER": "Developer"
+      "DEVELOPER": "Developer",
+      "BOOKINGS": "Bookings"
     },
     "NAV": {
       "USERS": "Users",
@@ -156,7 +157,9 @@
       "SERVICES": "Menu & services",
       "PACKAGES": "Packages",
       "OFFERS": "Offers",
-      "BARBER_ATTENDANCE": "Attendance"
+      "BARBER_ATTENDANCE": "Attendance",
+      "BOOKINGS": "Bookings",
+      "PAYMENT_REVIEWS": "Payment reviews"
     }
   },
   "BOOKING_STATUS": {
@@ -224,7 +227,8 @@
       "Manage": "Manage",
       "Moderate": "Moderate",
       "Export": "Export",
-      "Attendance": "Attendance"
+      "Attendance": "Attendance",
+      "Review": "Review payments"
     }
   },
   "ROLES": {
@@ -1064,6 +1068,182 @@
     "RoleId": "Role",
     "Permissions": "Permissions",
     "Code": "Verification code",
-    "Token": "Reset token"
+    "Token": "Reset token",
+    "Reason": "Reason",
+    "DateTo": "To date"
+  },
+  "BOOKINGS": {
+    "TITLE": "Bookings",
+    "SUBTITLE": "Every booking of the branch, with its payment and refund.",
+    "SEARCH": "Search booking number, customer or phone",
+    "TABS_LABEL": "Bookings by period",
+    "NO_BRANCHES_TITLE": "No branches yet",
+    "NO_BRANCHES_TEXT": "Create a branch to see its bookings here.",
+    "EMPTY_TITLE": "No bookings yet",
+    "EMPTY_TEXT": "Bookings made by customers will appear here.",
+    "NO_RESULTS_TITLE": "No bookings match",
+    "NO_RESULTS_TEXT": "Try another tab or clear the filters.",
+    "CLEAR_FILTERS": "Clear filters",
+    "RESULTS": "Showing {{count}} of {{total}} bookings",
+    "RESULTS_NONE": "No bookings found",
+    "DATE_RANGE_ERROR": "The end date can’t be before the start date.",
+    "FILTER": {
+      "BRANCH": "Branch",
+      "BARBER": "Barber",
+      "ALL_BARBERS": "All barbers",
+      "TYPE": "Booking type",
+      "ALL_TYPES": "All types",
+      "STATUS": "Status",
+      "ALL_STATUSES": "All statuses",
+      "FROM": "From",
+      "TO": "To",
+      "REFUND_WAITING": "Refund waiting"
+    },
+    "COL": {
+      "BOOKING": "Booking",
+      "WHEN": "Date & time",
+      "CUSTOMER": "Customer",
+      "SERVICES": "Services",
+      "BARBER": "Barber",
+      "PAYMENT": "Payment",
+      "STATUS": "Status"
+    },
+    "REFUND_LINE": "{{status}} · {{amount}}",
+    "FEE": "{{amount}} fee",
+    "TAB": {
+      "ALL": "All",
+      "TODAY": "Today",
+      "UPCOMING": "Upcoming",
+      "PAST": "Past"
+    },
+    "STATUS": {
+      "PENDING_REVIEW": "Waiting for branch",
+      "CONFIRMED": "Confirmed",
+      "STARTED": "Started",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "COMPLETED": "Completed",
+      "NO_SHOW": "Missed",
+      "CANCELLED": "Cancelled",
+      "UNKNOWN": "Unknown"
+    },
+    "TYPE": {
+      "REGULAR": "Regular",
+      "VIP": "VIP",
+      "HOME": "Home",
+      "UNKNOWN": "Unknown"
+    },
+    "PAYMENT_METHOD": {
+      "INSTAPAY": "InstaPay",
+      "WALLET": "Mobile wallet",
+      "UNKNOWN": "Unknown"
+    },
+    "REFUND": {
+      "WAITING": "Refund waiting",
+      "SENT": "Refund sent",
+      "UNKNOWN": "Unknown"
+    },
+    "ERRORS": {
+      "NOT_FOUND": "This booking no longer exists.",
+      "NOT_STARTED": "This booking hasn’t started yet.",
+      "NOT_ALLOWED": "This action isn’t allowed for the booking’s current status.",
+      "INVALID_DATE_RANGE": "The end date can’t be before the start date."
+    },
+    "SESSION_ENDED": "Session ended.",
+    "DETAILS": {
+      "BREADCRUMB": "Booking details",
+      "BACK": "Back to bookings",
+      "NOT_FOUND_TITLE": "This booking doesn’t exist",
+      "NOT_FOUND_TEXT": "It may have been removed. Go back to the bookings list.",
+      "APPOINTMENT": "Appointment",
+      "SERVICES_PAYMENT": "Services & payment",
+      "CUSTOMER": "Customer",
+      "REFUND": "Refund",
+      "DATE": "Date",
+      "TIME": "Time",
+      "DURATION": "Duration",
+      "BARBER": "Barber",
+      "RATING": "Rating",
+      "NO_REVIEWS": "No reviews yet",
+      "CHAIR": "Chair",
+      "BRANCH": "Branch",
+      "HOME_ADDRESS": "Home address",
+      "SERVICES_LIST": "Services",
+      "SUBTOTAL": "Subtotal",
+      "TOTAL": "Total",
+      "METHOD": "Payment method",
+      "NAME": "Name",
+      "PHONE": "Phone",
+      "CALL": "Call",
+      "VISITS": "Completed visits",
+      "MISSED": "Missed bookings",
+      "REFUND_STATUS": "Status",
+      "REFUND_AMOUNT": "Amount to refund",
+      "REFUND_FEE": "Missed-booking fee",
+      "END_SESSION": "End session",
+      "END_TITLE": "End this session?",
+      "END_MESSAGE": "{{number}} for {{name}} will be marked as completed.",
+      "END_AFTER_START": "You can end the session once it starts."
+    }
+  },
+  "PAYMENT_REVIEWS": {
+    "TITLE": "Payment reviews",
+    "SUBTITLE": "Check each transfer screenshot against the amount due, then approve or reject the booking.",
+    "BREADCRUMB": "Payment reviews",
+    "TABS_LABEL": "Payment reviews by status",
+    "NO_BRANCHES_TITLE": "No branches yet",
+    "NO_BRANCHES_TEXT": "Create a branch to review its payments here.",
+    "EMPTY": {
+      "TO_REVIEW_TITLE": "Nothing to review",
+      "TO_REVIEW_TEXT": "Every payment proof of this branch has been reviewed.",
+      "APPROVED_TITLE": "No approvals today yet",
+      "APPROVED_TEXT": "Bookings you approve today appear here.",
+      "REJECTED_TITLE": "No rejections today",
+      "REJECTED_TEXT": "Bookings you reject today appear here."
+    },
+    "BRANCH": "Branch",
+    "REVIEW_TARGET": "Review time {{minutes}} min",
+    "UPDATED_AT": "Updated {{time}}",
+    "REFRESH": "Refresh",
+    "WAITING": "Waiting {{time}}",
+    "LATE": "Late",
+    "CARD": {
+      "AMOUNT_DUE": "Amount due",
+      "METHOD": "Payment method",
+      "CUSTOMER": "Customer",
+      "SERVICES": "Services",
+      "STARTS": "Starts"
+    },
+    "VIEW_PROOF": "View payment proof of {{id}}",
+    "PROOF_ALT": "Payment proof of {{id}}",
+    "PROOF_TITLE": "Payment proof",
+    "PROOF_CAPTION": "{{id}} · {{amount}} due · {{method}}",
+    "CLOSE": "Close",
+    "OPEN_ORIGINAL": "Open original",
+    "APPROVE": "Approve",
+    "REJECT": "Reject",
+    "APPROVE_LABEL": "Approve booking {{id}}",
+    "REJECT_LABEL": "Reject booking {{id}}",
+    "APPROVE_TITLE": "Approve this booking?",
+    "APPROVE_MESSAGE": "{{id}} for {{name}} will be confirmed. Amount due: {{amount}} via {{method}}.",
+    "APPROVE_CONFIRM": "Approve and confirm booking",
+    "REJECT_TITLE": "Reject this booking?",
+    "REJECT_HINT": "The customer will see this reason. The barber’s time is freed.",
+    "REJECT_REASON": "Reason",
+    "REJECT_PLACEHOLDER": "e.g. The transferred amount doesn’t match the booking total.",
+    "REJECT_CONFIRM": "Reject booking",
+    "APPROVED": "Booking approved.",
+    "REJECTED": "Booking rejected.",
+    "RESULTS": "Showing {{count}} of {{total}} payments",
+    "RESULTS_NONE": "No payments here",
+    "TAB": {
+      "TO_REVIEW": "To review",
+      "APPROVED_TODAY": "Approved today",
+      "REJECTED_TODAY": "Rejected today"
+    },
+    "ERRORS": {
+      "REASON_REQUIRED": "Write the reason for rejecting this booking.",
+      "REASON_TOO_LONG": "The reason can’t be longer than 500 characters."
+    }
   }
 }

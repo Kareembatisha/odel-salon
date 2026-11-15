@@ -3,6 +3,7 @@ import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { firstValueFrom, of } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { upcomingBookingsFor } from "@core/mock/mock-bookings";
 import { MockDb } from "@core/mock/mock-db";
 import { NotificationService } from "@core/services/notification.service";
 import { BranchesService } from "../branches/service/branches.service";
@@ -93,7 +94,7 @@ describe("barber attendance (service + mock repository)", () => {
     await mark;
     expect(find(barber.barberId).upcomingBookingsCount).toBe(0); // the UI thinks it's safe
 
-    db.barberUpcomingBookings[barber.barberId] = 2; // …but a booking was just made elsewhere
+    db.bookings.push(...upcomingBookingsFor(barber.barberId, 2)); // …but a booking was just made elsewhere
 
     const result = firstValueFrom(service.setPresent(find(barber.barberId), false));
     await settle();

@@ -1,0 +1,54 @@
+@use "styles/variables" as v;
+
+:host {
+  display: block;
+}
+
+.df {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  min-width: 170px;
+  height: 42px;
+  padding-inline: v.$space-3;
+  background: v.$surface;
+  border: 1px solid v.$border-strong;
+  border-radius: v.$radius-md;
+  color: v.$text;
+  cursor: text;
+  transition: border-color v.$transition-normal;
+
+  &:hover {
+    border-color: v.$text-muted;
+  }
+  &:focus-within {
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+  }
+  &--invalid,
+  &--invalid:hover {
+    border-color: v.$danger;
+  }
+
+  &__label {
+    flex: none;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    font-weight: v.$fw-medium;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    font-size: v.$text-base;
+    font-variant-numeric: tabular-nums;
+    outline: 0;
+    color-scheme: light dark;
+  }
+}

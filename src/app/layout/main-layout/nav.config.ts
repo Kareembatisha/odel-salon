@@ -105,6 +105,26 @@ export const NAV_SECTIONS: NavSection[] = [
       },
     ],
   },
+  {
+    id: "bookings",
+    labelKey: "LAYOUT.SECTIONS.BOOKINGS",
+    items: [
+      {
+        id: "bookings",
+        labelKey: "LAYOUT.NAV.BOOKINGS",
+        icon: "pi pi-calendar",
+        route: "/main/bookings",
+        permission: PERMISSIONS.Booking.View,
+      },
+      {
+        id: "payment-reviews",
+        labelKey: "LAYOUT.NAV.PAYMENT_REVIEWS",
+        icon: "pi pi-credit-card",
+        route: "/main/bookings/payment-reviews",
+        permission: PERMISSIONS.Booking.View,
+      },
+    ],
+  },
   // Developer reference — never shipped to production (environment.showDesignSystem = false).
   ...(environment.showDesignSystem
     ? [

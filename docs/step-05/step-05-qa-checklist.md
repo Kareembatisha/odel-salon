@@ -89,14 +89,69 @@
 |---|---|---|---|
 | AT-01 | Sign in as `manager@odel.com` (has `Barber.Attendance`), open **Attendance** in the sidebar | Page opens on the **first branch**, today's date shown, "N of M present"; sidebar highlights Attendance (not Barbers) | |
 | AT-02 | Flip a barber to Present | Row turns Present at once, no toast, only that switch is disabled while saving; the counter updates | |
-| AT-03 | The barber seeded with 3 bookings (present on open) | Switch is **disabled**, the row shows "3 upcoming bookings" and why it can't be marked absent | |
-| AT-04 | Mark the barber with 1 booking present, then try Absent | Absent is blocked (disabled + explanation); nothing is sent | |
+| AT-03 | The first barber (present on open, upcoming bookings) | Switch is **disabled**, the row shows "5 upcoming bookings" and why it can't be marked absent | |
+| AT-04 | Mark the third barber (upcoming bookings) present, then try Absent. Then reject / end their bookings in Payment reviews / Bookings and try again | Absent is blocked (disabled + explanation) while bookings are open and nothing is sent; it works once none are left | |
 | AT-05 | Change branch | Old rows disappear at once, the new branch's sheet loads; a slow answer for the old branch never overwrites it | |
 | AT-06 | Role without `Barber.Attendance` (e.g. a custom role with `Barber.View` only) | No sidebar item; `/main/barbers/attendance` lands on *No access*; the Barbers page is unaffected | |
 | AT-07 | Arabic + dark mode, then a 375px viewport | RTL layout, date and counts in Arabic, no horizontal scroll, switch and badge stay on the row | |
 | AT-08 | Keyboard + screen reader | Switches reachable with Tab, named "Mark <name> present/absent"; the live region announces each save | |
 | AT-09 | Leave the tab open past midnight (Cairo), return to it | Sheet reloads on focus and shows the new date; yesterday's marks don't count | |
 | AT-10 | **Real API:** mark absent a barber who got a booking after the page loaded | Server's `409` message shown once, sheet refreshes with the new count | |
+
+### Bookings (`/main/bookings`)
+| ID | Steps | Expected | Result |
+|---|---|---|---|
+| BK-01 | Open **Bookings** in the sidebar (mock: `manager@odel.com` or `admin@odel.com`) | Opens on the **first branch**, tab *All*, 20 rows of 42, newest first; the *Today* tab shows a count; the **Refund waiting** chip shows a count; sidebar highlights Bookings | |
+| BK-02 | Click *Today*, *Upcoming*, *Past* | Today / Upcoming soonest first, Past newest first; Upcoming = waiting + confirmed that haven't ended; the *Today* count and the chip count don't change | |
+| BK-03 | Search `OD-000401`, `#OD-000401`, `401`, a customer name, a phone with and without `+20` | Each finds the booking; clearing the search brings the list back | |
+| BK-04 | Filter by barber, type, status (try *Waiting for branch* = value 0 and *Regular* = value 0), then combine two | Rows match; the counters don't move; *Clear filters* appears and resets everything including the tab | |
+| BK-05 | Click the **Refund waiting** chip, click it again | First click: only bookings with a refund still owed (all show *Refund waiting*); `aria-pressed` toggles; second click removes the filter | |
+| BK-06 | Pick **From** later than **To** (type it by hand if the picker blocks it) | Red field + message, no request is sent; a later *From* drops the old *To* | |
+| BK-07 | Switch branch | Old rows and counters disappear at once; the barber filter is cleared and lists the new branch's barbers; other filters stay | |
+| BK-08 | Look at a missed (NoShow) and a cancelled row | *Refund waiting · EGP …* (amber) or *Refund sent · …*; the missed one also shows *EGP … fee*; the in-progress one says **Started** | |
+| BK-09 | Page 2 and 3, then change a filter while on page 3 | Pager works; a filter change returns to page 1 | |
+| BK-10 | Click a row, and Tab to a booking number and press Enter | Both open the details; clicking the number doesn't navigate twice | |
+| BK-11 | **Real API:** compare the *Today* count, the *Refund waiting* count and `totalCount` with the numbers in DevTools → Network (`meta.additionalData`) | They match; with a search active they still match the unfiltered counters | |
+| BK-12 | Pick a tab, a search, filters, a date range and page 2, open another sidebar page (or a booking), then come back to **Bookings** | Starts clean: tab *All*, empty search and selects, no dates, chip off, page 1, no *Clear filters*; the branch you chose is still selected; no filtered rows flash while it reloads | |
+
+### Booking details (`/main/bookings/:id`)
+| ID | Steps | Expected | Result |
+|---|---|---|---|
+| BD-01 | Open a Confirmed, started booking (mock: the one marked **Started**) | Header, Appointment (barber + rating, chair, branch), Services & payment (rows add up to Total), Customer (call link, visits, missed); **End session** is visible | |
+| BD-02 | Open a Home booking (Nasr City) | Home address instead of a chair; Home badge | |
+| BD-03 | Open a barber with no reviews | *No reviews yet* instead of a rating | |
+| BD-04 | Open a Cancelled / Missed / Expired booking | A **Refund** card with status and amount (and the fee for missed); no *End session*; **no** "Refund sent" button (not in the contract) | |
+| BD-05 | **End session** → *Cancel* | Dialog closes, nothing changes | |
+| BD-06 | **End session** → confirm | Toast *Session ended*, status becomes *Completed*, the button disappears; the barber's upcoming count in Attendance drops by one | |
+| BD-07 | Open a Confirmed booking that hasn't started | No button; the text *You can end the session once it starts.* | |
+| BD-08 | Open a booking in one tab, end it from another tab, then press *End session* in the first | The error explains why (409), the page re-reads and shows the real status | |
+| BD-09 | `/main/bookings/999999`, `/main/bookings/abc` | 999999: *This booking doesn't exist* with a way back, no retry button; abc: goes back to the list | |
+| BD-10 | Sign in as the view-only user (mock: `receptionist@odel.com`; real API: a role with only `Booking.View`) | Details open; no *End session*; sidebar shows Bookings and Payment reviews | |
+| BD-11 | Arabic + dark mode, then 375px | RTL; the long date, amounts and the back arrow read correctly; the booking number and phone stay left-to-right; no horizontal scroll; items stack their duration under the name | |
+| BD-12 | **Real API:** the booking's `startAt` has no offset | The shown time equals the salon (Cairo) time whatever the browser's time zone (try changing the OS time zone) | |
+
+### Payment reviews (`/main/bookings/payment-reviews`)
+| ID | Steps | Expected | Result |
+|---|---|---|---|
+| PR-01 | Open **Payment reviews** | First branch, *To review* with 5 cards (mock); tabs show 5 / 2 / 1; *Review time 30 min* and *Updated …* are shown | |
+| PR-02 | Look at the waiting times | *Waiting N min*; the two late ones also have a red edge and a **Late** badge; the soonest-starting card is first | |
+| PR-03 | Click a screenshot | Opens large with *#id · EGP … due · method*; scrolls inside if tall; Escape, the backdrop and the close button close it; focus returns to the screenshot button | |
+| PR-04 | Compare the amount due with the screenshot of the card whose proof is short (mock: the VIP *Classic shave* one) | The image shows less than the amount due → reject it | |
+| PR-05 | **Reject** with an empty reason, then with spaces only | *Write the reason…* and nothing is sent | |
+| PR-06 | **Reject** with a 500-character reason, then try to type or paste more | Counter reaches 500/500 and stops; the request goes through | |
+| PR-07 | **Reject** with a real reason | Toast *Booking rejected*, the card leaves *To review*, *Rejected today* count +1; in Bookings the booking is *Rejected*; the barber's upcoming count in Attendance drops | |
+| PR-08 | **Approve** → read the dialog → confirm | The dialog repeats amount and method; toast *Booking approved*; card moves to *Approved today*; in Bookings the booking is *Confirmed* | |
+| PR-09 | While a save is slow (DevTools → throttle), watch the cards | Only that card's buttons are locked; others still work | |
+| PR-10 | Let an unreviewed booking pass its start time (or approve it in another tab first), then approve it here | A 409 explains; the queue reloads without it | |
+| PR-11 | Leave the page open | The queue refreshes by itself about every minute (watch Network) and when you come back to the tab; *Updated …* changes; the cards don't flash; unplug the network: no error banner appears for background refreshes | |
+| PR-12 | Press **Refresh** | The icon spins while it loads; the cards stay on screen | |
+| PR-13 | Switch to *Approved today* / *Rejected today* | Cards show the booking status, no waiting time and no buttons; empty tabs say so | |
+| PR-14 | Switch branch | Old cards and counts go at once; the other branch's queue loads | |
+| PR-15 | The view-only user (mock: `receptionist@odel.com`) — `Booking.View` but not `Booking.Review` | Queue and screenshots visible; no Approve / Reject buttons | |
+| PR-16 | Screen reader / keyboard | Tabs ↔ panel; each button is named with the booking (*Approve booking #489*); the screenshot button and image have text; the live region says *Showing N of M payments* after a load; both dialogs trap focus and Escape closes them | |
+| PR-17 | Arabic + dark mode, then 375px | RTL; cards stack (screenshot above the facts), buttons share the width; amounts and phones read correctly | |
+| PR-18 | **Real API:** the screenshot URL | Loads directly in the `<img>` (public URL); *Open original* opens it in a new tab | |
+| PR-19 | Open *Rejected today* (or page 2), go to another page, come back to **Payment reviews** | Starts on *To review*, page 1; the branch you chose is kept; cards of the other tab don't flash | |
 
 ### Branches
 | ID | Steps | Expected | Result |

@@ -16,7 +16,7 @@ import {
   VerifyPasswordCodeResponseData,
 } from "../model/auth.model";
 import { ALL_PERMISSIONS, Permission } from "@core/auth/permissions";
-import { MOCK_MANAGER_PERMISSIONS } from "@core/mock/mock-db";
+import { MOCK_MANAGER_PERMISSIONS, MOCK_RECEPTIONIST_PERMISSIONS } from "@core/mock/mock-db";
 import { IAuthRepository } from "./auth.repository";
 
 /**
@@ -25,9 +25,12 @@ import { IAuthRepository } from "./auth.repository";
  *   admin@odel.com    → SuperAdmin   (everything)
  *   manager@odel.com  → BranchManager (operations only: no catalog edits,
  *                        reports export, settings, users or roles)
- * Any email starting with "manager" gets the manager session. Password: 6+ chars.
+ *   receptionist@odel.com → Receptionist (can look at bookings, cannot review payments
+ *                        or end sessions — a view-only user)
+ * Any email starting with "manager" / "receptionist" gets that session. Password: 6+ chars.
  */
 const MANAGER_PERMISSIONS: Permission[] = MOCK_MANAGER_PERMISSIONS as Permission[];
+const RECEPTIONIST_PERMISSIONS: Permission[] = MOCK_RECEPTIONIST_PERMISSIONS as Permission[];
 
 let MOCK_EMAIL = "admin@odel.com";
 
@@ -42,9 +45,21 @@ function persistedEmail(): string {
 }
 
 function sessionFor(email: string): { role: string; permissions: string[] } {
-  return email.toLowerCase().startsWith("manager")
-    ? { role: "BranchManager", permissions: MANAGER_PERMISSIONS }
-    : { role: "SuperAdmin", permissions: ALL_PERMISSIONS };
+  const name = email.toLowerCase();
+  if (name.startsWith("manager"))
+    return { role: "BranchManager", permissions: MANAGER_PERMISSIONS };
+  if (name.startsWith("receptionist")) {
+    return { role: "Receptionist", permissions: RECEPTIONIST_PERMISSIONS };
+  }
+  return { role: "SuperAdmin", permissions: ALL_PERMISSIONS };
+}
+
+/** Name shown for each demo identity. */
+function displayName(email: string): string {
+  const name = email.toLowerCase();
+  if (name.startsWith("manager")) return "Layla Hassan";
+  if (name.startsWith("receptionist")) return "Nour Elsayed";
+  return "Omar Khaled";
 }
 
 /** Simulated network latency so loading/skeleton states are visible during dev. */
@@ -84,9 +99,7 @@ export class AuthMockRepository implements IAuthRepository {
       data: {
         user: {
           id: 1,
-          fullName: payload.email.toLowerCase().startsWith("manager")
-            ? "Layla Hassan"
-            : "Omar Khaled",
+          fullName: displayName(payload.email),
           email: payload.email,
           imageUrl: null,
         },

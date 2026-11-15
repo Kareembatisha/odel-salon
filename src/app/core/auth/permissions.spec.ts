@@ -21,4 +21,19 @@ describe("permission catalog", () => {
     const barber = PERMISSION_MODULES.find((m) => m.module === "Barber");
     expect(barber?.actions).toContain("Attendance");
   });
+
+  it("has the booking permissions of the Admin Bookings contract", () => {
+    expect(PERMISSIONS.Booking.View).toBe("Booking.View");
+    expect(PERMISSIONS.Booking.Review).toBe("Booking.Review");
+    expect(PERMISSIONS.Booking.Manage).toBe("Booking.Manage");
+    expect(ALL_PERMISSIONS).toEqual(
+      expect.arrayContaining(["Booking.View", "Booking.Review", "Booking.Manage"]),
+    );
+  });
+
+  it("keeps Booking.Cancel and lists View first in the Booking module of the role matrix", () => {
+    const booking = PERMISSION_MODULES.find((m) => m.module === "Booking");
+    expect(booking?.actions[0]).toBe("View");
+    expect(booking?.actions).toEqual(expect.arrayContaining(["Review", "Manage", "Cancel"]));
+  });
 });

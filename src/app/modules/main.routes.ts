@@ -155,6 +155,39 @@ export const MAIN_ROUTES: Routes = [
     },
     loadComponent: () => import("./offers/pages/offers-list/offers-list").then((m) => m.OffersList),
   },
+  {
+    path: "bookings",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Booking.View,
+      breadcrumb: "LAYOUT.NAV.BOOKINGS",
+    },
+    loadComponent: () =>
+      import("./bookings/pages/bookings-list/bookings-list").then((m) => m.BookingsList),
+  },
+  // Declared BEFORE `bookings/:id`, or `:id` would swallow "payment-reviews".
+  {
+    path: "bookings/payment-reviews",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Booking.View,
+      breadcrumb: ["LAYOUT.NAV.BOOKINGS", "PAYMENT_REVIEWS.BREADCRUMB"],
+    },
+    loadComponent: () =>
+      import("./payment-reviews/pages/payment-reviews/payment-reviews").then(
+        (m) => m.PaymentReviewsPage,
+      ),
+  },
+  {
+    path: "bookings/:id",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Booking.View,
+      breadcrumb: ["LAYOUT.NAV.BOOKINGS", "BOOKINGS.DETAILS.BREADCRUMB"],
+    },
+    loadComponent: () =>
+      import("./bookings/pages/booking-details/booking-details").then((m) => m.BookingDetailsPage),
+  },
 
   {
     path: "services/new",

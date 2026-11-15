@@ -1,0 +1,211 @@
+<div class="odl-page">
+  <app-page-header [title]="'BOOKINGS.TITLE' | translate" [subtitle]="'BOOKINGS.SUBTITLE' | translate" />
+
+  @if (noBranches()) {
+    <div class="odl-card">
+      <app-empty-state
+        [title]="'BOOKINGS.NO_BRANCHES_TITLE' | translate"
+        [description]="'BOOKINGS.NO_BRANCHES_TEXT' | translate"
+        icon="pi pi-building"
+      />
+    </div>
+  } @else {
+    <!-- Period tabs: the "Today" count is the selected branch's and ignores the other filters. -->
+    <app-tabs
+      [tabs]="tabs()"
+      [value]="'' + tab()"
+      [ariaLabel]="'BOOKINGS.TABS_LABEL' | translate"
+      idPrefix="bookings-tab"
+      [panelId]="panelId"
+      (changed)="onTab($event)"
+    />
+
+    <div class="toolbar">
+      <app-filter-select
+        [label]="'BOOKINGS.FILTER.BRANCH' | translate"
+        [options]="branchOptions()"
+        [value]="branchId() !== null ? '' + branchId() : ''"
+        (changed)="onBranch($event)"
+      />
+      <app-search-input
+        [placeholder]="'BOOKINGS.SEARCH' | translate"
+        [clearLabel]="'COMMON.CLEAR' | translate"
+        (search)="onSearch($event)"
+      />
+      <app-filter-select
+        [label]="'BOOKINGS.FILTER.BARBER' | translate"
+        [options]="barberOptions()"
+        [value]="barberValue()"
+        (changed)="onBarber($event)"
+      />
+      <app-filter-select
+        [label]="'BOOKINGS.FILTER.TYPE' | translate"
+        [options]="typeOptions()"
+        [value]="typeValue()"
+        (changed)="onType($event)"
+      />
+      <app-filter-select
+        [label]="'BOOKINGS.FILTER.STATUS' | translate"
+        [options]="statusOptions()"
+        [value]="statusValue()"
+        (changed)="onStatus($event)"
+      />
+    </div>
+
+    <div class="toolbar toolbar--second">
+      <app-date-filter
+        [label]="'BOOKINGS.FILTER.FROM' | translate"
+        [value]="query().dateFrom ?? ''"
+        [max]="query().dateTo ?? ''"
+        (changed)="onFrom($event)"
+      />
+      <app-date-filter
+        [label]="'BOOKINGS.FILTER.TO' | translate"
+        [value]="query().dateTo ?? ''"
+        [min]="query().dateFrom ?? ''"
+        [invalid]="rangeError()"
+        (changed)="onTo($event)"
+      />
+
+      <!-- One-click shortcut for the refund filter; the number is the branch's refunds still owed. -->
+      <button
+        type="button"
+        class="chip"
+        [class.chip--active]="refundWaitingActive()"
+        [attr.aria-pressed]="refundWaitingActive()"
+        (click)="toggleRefundWaiting()"
+      >
+        <i class="pi pi-wallet" aria-hidden="true"></i>
+        {{ 'BOOKINGS.FILTER.REFUND_WAITING' | translate }}
+        @if (refundWaitingCount() !== null) {
+          <span class="chip__count u-num">{{ refundWaitingCount() }}</span>
+        }
+      </button>
+
+      @if (isFiltered()) {
+        <app-button variant="ghost" size="sm" iconClass="pi pi-filter-slash" (clicked)="clearFilters()">
+          {{ 'BOOKINGS.CLEAR_FILTERS' | translate }}
+        </app-button>
+      }
+    </div>
+
+    @if (rangeError()) {
+      <p class="field-error" role="alert">{{ 'BOOKINGS.DATE_RANGE_ERROR' | translate }}</p>
+    }
+
+    <!-- Polite live region: says what the list shows after every tab / filter / branch change. -->
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</p>
+
+    <div [id]="panelId" role="tabpanel" tabindex="-1" class="panel" [attr.aria-labelledby]="'bookings-tab-' + tab()">
+      @if (hasError() && !rows().length) {
+        <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+      } @else {
+        <!-- A reload failed but the last page is still on screen: say so, keep the rows. -->
+        @if (hasError()) {
+          <div class="odl-card stale"><app-failed-state [compact]="true" (retry)="reload()" /></div>
+        }
+
+        <app-data-table
+          [data]="tableRows()"
+          [totalRecords]="meta()?.totalCount ?? 0"
+          [page]="meta()?.currentPage ?? 1"
+          [pageSize]="meta()?.pageSize ?? 20"
+          [loading]="busy()"
+          [caption]="'BOOKINGS.TITLE' | translate"
+          [emptyTitle]="(isFiltered() ? 'BOOKINGS.NO_RESULTS_TITLE' : 'BOOKINGS.EMPTY_TITLE') | translate"
+          [emptyDescription]="(isFiltered() ? 'BOOKINGS.NO_RESULTS_TEXT' : 'BOOKINGS.EMPTY_TEXT') | translate"
+          emptyIcon="pi pi-calendar"
+          (pageChange)="onPage($event)"
+          (rowClick)="open($event)"
+        >
+          <ng-template odlCol="booking" [label]="'BOOKINGS.COL.BOOKING' | translate" width="150px" let-row>
+            <span class="stack">
+              <a class="number" [routerLink]="['/main/bookings', row.id]" (click)="$event.stopPropagation()">{{ row.number }}</a>
+              @if (row.typeLabel) {
+                <app-status-badge [variant]="row.typeVariant" [dot]="false">{{ row.typeLabel }}</app-status-badge>
+              }
+            </span>
+          </ng-template>
+          <ng-template odlCol="when" [label]="'BOOKINGS.COL.WHEN' | translate" width="150px" let-row>
+            <span class="stack">
+              <span class="cell-text">{{ row.date }}</span>
+              <span class="muted u-num">{{ row.time }}</span>
+            </span>
+          </ng-template>
+          <ng-template odlCol="customer" [label]="'BOOKINGS.COL.CUSTOMER' | translate" width="190px" let-row>
+            <span class="stack">
+              <span class="cell-text strong" [attr.title]="row.customerName">{{ row.customerName }}</span>
+              <a class="phone muted" dir="ltr" [attr.href]="'tel:' + row.customerPhone" (click)="$event.stopPropagation()">{{ row.customerPhone }}</a>
+            </span>
+          </ng-template>
+          <ng-template odlCol="services" [label]="'BOOKINGS.COL.SERVICES' | translate" width="22%" let-row>
+            <span class="cell-text" [attr.title]="row.services">{{ row.services }}</span>
+          </ng-template>
+          <ng-template odlCol="barber" [label]="'BOOKINGS.COL.BARBER' | translate" width="140px" let-row>
+            <span class="cell-text" [attr.title]="row.barber">{{ row.barber }}</span>
+          </ng-template>
+          <ng-template odlCol="payment" [label]="'BOOKINGS.COL.PAYMENT' | translate" width="140px" let-row>
+            <span class="stack">
+              <span class="strong u-num">{{ row.amount }}</span>
+              <span class="muted method"><i [class]="row.methodIcon" aria-hidden="true"></i>{{ row.methodLabel }}</span>
+            </span>
+          </ng-template>
+          <ng-template odlCol="status" [label]="'BOOKINGS.COL.STATUS' | translate" width="190px" let-row>
+            <span class="stack">
+              <app-status-badge [variant]="row.statusVariant">{{ row.statusLabel }}</app-status-badge>
+              @if (row.refundText) {
+                <span class="refund" [class.refund--waiting]="row.refundWaiting">{{ row.refundText }}</span>
+              }
+              @if (row.feeText) {
+                <span class="muted fee">{{ row.feeText }}</span>
+              }
+            </span>
+          </ng-template>
+
+          <!-- Narrow viewport (< 768px): same data, laid out as a card. -->
+          <ng-template odlCard let-row>
+            <div class="card__top">
+              <a class="number" [routerLink]="['/main/bookings', row.id]" (click)="$event.stopPropagation()">{{ row.number }}</a>
+              @if (row.typeLabel) {
+                <app-status-badge [variant]="row.typeVariant" [dot]="false">{{ row.typeLabel }}</app-status-badge>
+              }
+              <span class="card__spacer"></span>
+              <app-status-badge [variant]="row.statusVariant">{{ row.statusLabel }}</app-status-badge>
+            </div>
+
+            <div class="card__who">
+              <span class="strong">{{ row.customerName }}</span>
+              <a class="phone muted" dir="ltr" [attr.href]="'tel:' + row.customerPhone" (click)="$event.stopPropagation()">{{ row.customerPhone }}</a>
+            </div>
+
+            <div class="card__meta">
+              <span><i class="pi pi-calendar" aria-hidden="true"></i>{{ row.date }} · <span class="u-num">{{ row.time }}</span></span>
+              <span><i class="pi pi-user" aria-hidden="true"></i>{{ row.barber }}</span>
+              <span class="card__services"><i class="pi pi-list" aria-hidden="true"></i>{{ row.services }}</span>
+            </div>
+
+            <div class="card__bottom">
+              <span class="strong u-num">{{ row.amount }}</span>
+              <span class="muted method"><i [class]="row.methodIcon" aria-hidden="true"></i>{{ row.methodLabel }}</span>
+            </div>
+
+            @if (row.refundText) {
+              <div class="card__refund">
+                <span class="refund" [class.refund--waiting]="row.refundWaiting">{{ row.refundText }}</span>
+                @if (row.feeText) {
+                  <span class="muted fee">{{ row.feeText }}</span>
+                }
+              </div>
+            }
+          </ng-template>
+
+          @if (isFiltered()) {
+            <app-button empty-action variant="secondary" size="sm" (clicked)="clearFilters()">
+              {{ 'BOOKINGS.CLEAR_FILTERS' | translate }}
+            </app-button>
+          }
+        </app-data-table>
+      }
+    </div>
+  }
+</div>

@@ -254,7 +254,7 @@ export class BarberMockRepository implements IBarberRepository {
         fullName: b.fullName,
         imageUrl: b.imageUrl,
         isPresent: this.isPresent(b.id, today),
-        upcomingBookingsCount: this.db.barberUpcomingBookings[b.id] ?? 0,
+        upcomingBookingsCount: this.db.upcomingBookingsCount(b.id),
       }));
 
     return this.reply(rows, "Operation completed successfully");
@@ -282,7 +282,7 @@ export class BarberMockRepository implements IBarberRepository {
       const barber = this.db.barbers.find((b) => b.id === item.barberId);
       if (!barber) return this.notFound();
 
-      const upcoming = this.db.barberUpcomingBookings[barber.id] ?? 0;
+      const upcoming = this.db.upcomingBookingsCount(barber.id);
       if (!item.isPresent && this.isPresent(barber.id, today) && upcoming > 0) {
         return this.fail(
           this.translate.instant("BARBERS.ERRORS.ATTENDANCE_HAS_BOOKINGS", {

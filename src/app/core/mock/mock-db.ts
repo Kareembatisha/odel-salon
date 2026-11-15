@@ -8,6 +8,13 @@ import {
 } from "@modules/branches/model/branch.model";
 import { ChairDetails, ChairType } from "@modules/chairs/model/chair.model";
 import { BarberDetails } from "@modules/barbers/model/barber.model";
+import {
+  BookingRefund,
+  BookingStatus,
+  BookingType,
+  PaymentMethod,
+} from "@modules/bookings/model/booking.model";
+import { buildMockBookingSeed, settleBookings, upcomingBookingsCount } from "./mock-bookings";
 import { ServiceBranchPayload } from "@modules/services/model/service.model";
 import { addDays, cairoToday } from "../../modules/offers/utils/offer-dates.util";
 
@@ -103,6 +110,57 @@ export interface MockOffer {
   updatedAt: string | null;
 }
 
+/** One service of a booking, snapshotted at booking time (later price edits don't change it). */
+export interface MockBookingItem {
+  serviceId: number;
+  nameAr: string;
+  nameEn: string;
+  durationMinutes: number;
+  price: number;
+}
+
+/** A customer of the salon (only what the booking screens show). */
+export interface MockCustomer {
+  id: number;
+  fullName: string;
+  phoneNumber: string;
+}
+
+/**
+ * A booking stored in the mock database. Only what the backend stores — the booking number's
+ * total, duration, end time, "Started" flag, waiting minutes and the allowed actions are derived
+ * when it is read (see `mock-bookings.ts`).
+ */
+export interface MockBooking {
+  id: number;
+  bookingNumber: string;
+  branchId: number;
+  barberId: number;
+  /** Null for Home bookings. */
+  chairId: number | null;
+  customerId: number;
+  type: BookingType;
+  status: BookingStatus;
+  /** Salon-local (Cairo) wall clock, no offset: `yyyy-MM-ddTHH:mm:00`. */
+  startAt: string;
+  items: MockBookingItem[];
+  paymentMethod: PaymentMethod;
+  /** How much LESS than the total the transfer screenshot shows (0 = the exact amount). */
+  proofShortfall: number;
+  /** Home bookings only. */
+  homeAddress: string | null;
+  /** UTC ISO — when the customer sent the payment proof (the "waiting" clock of the review queue). */
+  submittedAt: string;
+  /** UTC ISO — when an admin approved it, else null. */
+  approvedAt: string | null;
+  /** UTC ISO — when an admin rejected it, else null. */
+  rejectedAt: string | null;
+  /** Shown to the customer; set with `rejectedAt`. */
+  rejectionReason: string | null;
+  /** Cancelled / Expired / NoShow bookings only. */
+  refund: BookingRefund | null;
+}
+
 // ============================================================
 // Constants
 // ============================================================
@@ -110,6 +168,8 @@ export interface MockOffer {
 /** Permissions granted to the `BranchManager` role. */
 export const MOCK_MANAGER_PERMISSIONS: string[] = [
   "Booking.View",
+  "Booking.Review",
+  "Booking.Manage",
   "Booking.Cancel",
   "Session.View",
   "Session.Manage",
@@ -124,6 +184,18 @@ export const MOCK_MANAGER_PERMISSIONS: string[] = [
   "Offer.View",
   "Review.View",
   "Report.View",
+];
+
+/**
+ * The mock Receptionist: can look at bookings (and cancel them), never review payments or end
+ * sessions — handy to try a user who can see the queue but not act on it. Sign in as
+ * `receptionist@…` in the mock.
+ */
+export const MOCK_RECEPTIONIST_PERMISSIONS: string[] = [
+  "Booking.View",
+  "Booking.Cancel",
+  "Session.View",
+  "Availability.View",
 ];
 
 /**
@@ -184,7 +256,7 @@ export class MockDb {
     {
       id: 3,
       name: "Receptionist",
-      permissions: ["Booking.View", "Booking.Cancel", "Session.View", "Availability.View"],
+      permissions: [...MOCK_RECEPTIONIST_PERMISSIONS],
     },
   ];
 
@@ -381,12 +453,6 @@ export class MockDb {
    */
   barberAttendance: Record<number, { date: string; isPresent: boolean }> = this.seedAttendance();
 
-  /**
-   * Pending / confirmed bookings that haven't ended, per barber. The mock has no bookings module,
-   * so a couple of barbers are seeded with some — enough to try the "can't be marked absent" rule.
-   */
-  barberUpcomingBookings: Record<number, number> = this.seedUpcomingBookings();
-
   // ----------------------------------------------------------
   // Services (menu & pricing)
   // ----------------------------------------------------------
@@ -419,6 +485,34 @@ export class MockDb {
    * relative to today (Cairo), so every status shows up: Active, Scheduled, Ended and Stopped.
    */
   offers: MockOffer[] = this.seedOffers();
+
+  // ----------------------------------------------------------
+  // Customers and bookings
+  // ----------------------------------------------------------
+
+  private readonly bookingSeed = buildMockBookingSeed(this, new Date());
+
+  customers: MockCustomer[] = this.bookingSeed.customers;
+
+  /**
+   * Seeded after barbers, chairs and services (it needs them), with dates relative to NOW in Cairo
+   * so every tab and status shows up: pending payment reviews waiting different times (some late),
+   * confirmed bookings, one in progress, completed / cancelled / missed / rejected / expired ones
+   * with their refunds, and Home bookings in the branches that allow them. Every read and write goes
+   * through {@link settleBookings} first, so unreviewed bookings expire at their start time and open
+   * Confirmed ones complete 2 hours after they end — like the real backend.
+   */
+  bookings: MockBooking[] = this.bookingSeed.bookings;
+
+  /** Pending / confirmed bookings of a barber that haven't ended — what blocks marking them absent. */
+  upcomingBookingsCount(barberId: number, now: Date = new Date()): number {
+    return upcomingBookingsCount(this.bookings, barberId, now);
+  }
+
+  /** Apply the time-driven status changes (expire unreviewed, auto-complete open ones). */
+  settleBookings(now: Date = new Date()): void {
+    settleBookings(this.bookings, now);
+  }
 
   // ----------------------------------------------------------
   // Lookups
@@ -751,20 +845,13 @@ export class MockDb {
   }
 
   /**
-   * The barber seeded with 3 upcoming bookings starts the day PRESENT, so the locked switch
-   * ("can't be marked absent") shows on the attendance page the moment it opens.
+   * The first active barber (who has upcoming bookings in the seeded bookings) starts the day
+   * PRESENT, so the locked switch ("can't be marked absent") shows on the attendance page the
+   * moment it opens.
    */
   private seedAttendance(): Record<number, { date: string; isPresent: boolean }> {
     const first = this.barbers.find((b) => b.isActive);
     return first ? { [first.id]: { date: cairoToday(), isPresent: true } } : {};
-  }
-
-  private seedUpcomingBookings(): Record<number, number> {
-    const active = this.barbers.filter((b) => b.isActive);
-    const bookings: Record<number, number> = {};
-    if (active[0]) bookings[active[0].id] = 3;
-    if (active[2]) bookings[active[2].id] = 1;
-    return bookings;
   }
 
   private seedBarbers(): MockBarber[] {

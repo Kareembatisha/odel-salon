@@ -1,0 +1,175 @@
+@use "styles/variables" as v;
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-3;
+  min-height: 42px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+  outline: 0;
+}
+
+.stale {
+  padding: 0;
+}
+
+.field-error {
+  margin: 0;
+  color: v.$danger-text;
+  font-size: v.$text-sm;
+}
+
+// "Refund waiting 6" — a one-click shortcut for the refund filter.
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  height: 42px;
+  padding-inline: v.$space-3;
+  background: v.$surface;
+  border: 1px solid v.$border-strong;
+  border-radius: v.$radius-md;
+  color: v.$text;
+  font: inherit;
+  font-size: v.$text-base;
+  cursor: pointer;
+  transition:
+    border-color v.$transition-normal,
+    background v.$transition-normal;
+
+  .pi {
+    color: v.$text-muted;
+  }
+  &:hover {
+    border-color: v.$text-muted;
+  }
+  &:focus-visible {
+    outline: 0;
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+  }
+
+  &__count {
+    min-width: 22px;
+    padding: 1px v.$space-2;
+    border-radius: v.$radius-full;
+    background: v.$warning-bg;
+    color: v.$warning-text;
+    font-size: v.$text-xs;
+    font-weight: v.$fw-semibold;
+    text-align: center;
+  }
+
+  &--active {
+    background: v.$primary-soft;
+    border-color: v.$primary-soft-border;
+    color: v.$primary-text;
+    .pi {
+      color: v.$primary-text;
+    }
+  }
+}
+
+// Two-line cells: the main value, then a muted detail.
+.stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+  line-height: v.$lh-snug;
+}
+.strong {
+  font-weight: v.$fw-semibold;
+}
+.muted {
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+}
+
+// Booking numbers and phones stay left-to-right (and readable) inside an RTL page.
+.number {
+  color: inherit;
+  font-weight: v.$fw-semibold;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  unicode-bidi: isolate;
+}
+a.number:hover {
+  color: v.$primary-text;
+  text-decoration: underline;
+}
+a.number:focus-visible {
+  outline: 2px solid v.$primary;
+  outline-offset: 2px;
+  border-radius: v.$radius-xs;
+}
+.phone {
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  unicode-bidi: isolate;
+  &:hover {
+    color: v.$primary-text;
+    text-decoration: underline;
+  }
+}
+
+.method {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+}
+
+.refund {
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+  &--waiting {
+    color: v.$warning-text;
+    font-weight: v.$fw-medium;
+  }
+}
+
+// ── Card layout (narrow viewport) ─────────────────────
+.card__top,
+.card__bottom,
+.card__refund {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-2;
+}
+.card__spacer {
+  flex: 1;
+}
+.card__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-block: v.$space-2;
+}
+.card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+
+  .pi {
+    margin-inline-end: v.$space-2;
+    color: v.$text-muted;
+  }
+}
+.card__bottom {
+  justify-content: space-between;
+  margin-top: v.$space-2;
+}
+.card__refund {
+  margin-top: v.$space-1;
+}
