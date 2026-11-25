@@ -11,10 +11,12 @@ import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse } from "@shared/model/api_response.model";
 import { BreadcrumbService } from "../../../../layout/main-layout/components/header/breadcrumb.service";
 import { AuthService } from "../../../auth/service/auth.service";
+import { BARBER_REPOSITORY } from "../../../barbers/repository/barber.repository";
 import {
   BookingDetails,
   BookingStatus,
   BookingType,
+  CancelReason,
   PaymentMethod,
   RefundStatus,
 } from "../../model/booking.model";
@@ -32,9 +34,9 @@ function details(over: Partial<BookingDetails> = {}): BookingDetails {
     type: BookingType.Vip,
     startAt: "2026-11-13T19:00:00",
     durationMinutes: 50,
-    barber: { fullName: "Karim Adel", averageRating: 4.9 },
-    chair: { name: "VIP 1" },
-    branch: { nameAr: "مدينة نصر", nameEn: "Nasr City" },
+    barber: { id: 7, fullName: "Karim Adel", averageRating: 4.9 },
+    chair: { id: 3, name: "VIP 1" },
+    branch: { id: 1, nameAr: "مدينة نصر", nameEn: "Nasr City" },
     homeAddress: null,
     items: [
       { nameAr: "قص شعر", nameEn: "Haircut", durationMinutes: 30, price: 200 },
@@ -49,7 +51,8 @@ function details(over: Partial<BookingDetails> = {}): BookingDetails {
       noShowCount: 1,
     },
     refund: null,
-    actions: { canComplete: true, canMarkRefunded: false },
+    cancellation: null,
+    actions: { canComplete: true, canMarkRefunded: false, canCancel: false, canReassign: false },
     ...over,
   };
 }
@@ -66,8 +69,32 @@ const ok = <T>(data: T): ApiResponse<T> => ({
 class FakeRepo {
   reads: number[] = [];
   completes: number[] = [];
+  noShows: number[] = [];
+  refunds: number[] = [];
+  cancels: Array<{ id: number; reason: string }> = [];
+  reassigns: Array<{ id: number; barberId: number }> = [];
   read: () => Observable<ApiResponse<BookingDetails>> = () => of(ok(details()));
   complete: () => Observable<ApiResponse<null>> = () => of(ok(null));
+  noShow: () => Observable<ApiResponse<null>> = () => of(ok(null));
+  refund: () => Observable<ApiResponse<null>> = () => of(ok(null));
+  cancel: () => Observable<ApiResponse<null>> = () => of(ok(null));
+  reassign: () => Observable<ApiResponse<null>> = () => of(ok(null));
+  markRefunded(id: number) {
+    this.refunds.push(id);
+    return this.refund();
+  }
+  markNoShow(id: number) {
+    this.noShows.push(id);
+    return this.noShow();
+  }
+  cancelBooking(id: number, reason: string) {
+    this.cancels.push({ id, reason });
+    return this.cancel();
+  }
+  reassignBarber(id: number, barberId: number) {
+    this.reassigns.push({ id, barberId });
+    return this.reassign();
+  }
   getBookingById(id: number) {
     this.reads.push(id);
     return this.read();
@@ -120,7 +147,7 @@ describe("BookingDetailsPage", () => {
 
   beforeEach(() => {
     repo = new FakeRepo();
-    granted = ["Booking.View", "Booking.Manage"];
+    granted = ["Booking.View", "Booking.Manage", "Customer.View"];
     routeId = "482";
     success = vi.fn();
 
@@ -129,6 +156,19 @@ describe("BookingDetailsPage", () => {
       providers: [
         provideRouter([]),
         { provide: BOOKING_REPOSITORY, useValue: repo },
+        {
+          provide: BARBER_REPOSITORY,
+          useValue: {
+            // Two active barbers of the booking's branch (one is the booking's own) + another branch's.
+            getBarbers: () =>
+              of(
+                ok([
+                  { id: 7, fullName: "Karim Adel", branchId: 1 },
+                  { id: 8, fullName: "Youssef Samir", branchId: 1 },
+                ]),
+              ),
+          },
+        },
         { provide: AuthService, useValue: { hasPermission: (p: string) => granted.includes(p) } },
         { provide: NotificationService, useValue: { success, warning: vi.fn() } },
         {
@@ -218,7 +258,7 @@ describe("BookingDetailsPage", () => {
 
     it("says 'No reviews yet' while the barber has no rating", async () => {
       repo.read = () =>
-        of(ok(details({ barber: { fullName: "Karim Adel", averageRating: null } })));
+        of(ok(details({ barber: { id: 7, fullName: "Karim Adel", averageRating: null } })));
       await open();
 
       expect(card("sec-appointment")).toContain("No reviews yet");
@@ -295,12 +335,24 @@ describe("BookingDetailsPage", () => {
       expect(plain(el().querySelector("a.call")?.textContent)).toBe("Call");
     });
 
-    it("has no customer-profile link (there is no Customers module)", async () => {
+    it("links to the customer's profile", async () => {
+      await open();
+
+      const link = Array.from(el().querySelectorAll("a")).find((a) =>
+        a.getAttribute("href")?.startsWith("/main/customers/"),
+      );
+
+      expect(link?.getAttribute("href")).toBe("/main/customers/1203");
+      expect(plain(link?.textContent)).toBe("Customer profile");
+    });
+
+    it("hides the profile link without Customer.View", async () => {
+      granted = ["Booking.View", "Booking.Manage"];
       await open();
 
       expect(
         Array.from(el().querySelectorAll("a")).some((a) =>
-          /profile|customers/i.test(a.getAttribute("href") ?? ""),
+          (a.getAttribute("href") ?? "").startsWith("/main/customers"),
         ),
       ).toBe(false);
     });
@@ -321,7 +373,12 @@ describe("BookingDetailsPage", () => {
               status: BookingStatus.NoShow,
               isInProgress: false,
               refund: { status: RefundStatus.Waiting, amount: 96, feeAmount: 24 },
-              actions: { canComplete: false, canMarkRefunded: true },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: true,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -334,7 +391,7 @@ describe("BookingDetailsPage", () => {
       expect(text).toContain("EGP 24");
     });
 
-    it("leaves out the fee when there is none, and doesn't offer 'Refund sent' (no endpoint yet)", async () => {
+    it("leaves out the fee when there is none", async () => {
       repo.read = () =>
         of(
           ok(
@@ -342,7 +399,12 @@ describe("BookingDetailsPage", () => {
               status: BookingStatus.Cancelled,
               isInProgress: false,
               refund: { status: RefundStatus.Sent, amount: 340, feeAmount: null },
-              actions: { canComplete: false, canMarkRefunded: true },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -350,7 +412,115 @@ describe("BookingDetailsPage", () => {
 
       expect(card("sec-refund")).toContain("Refund sent");
       expect(card("sec-refund")).not.toContain("Missed-booking fee");
-      expect(text()).not.toMatch(/mark.*refund/i);
+    });
+  });
+
+  describe("Refund sent", () => {
+    const owed = (over: Partial<BookingDetails> = {}) =>
+      details({
+        status: BookingStatus.Cancelled,
+        isInProgress: false,
+        refund: { status: RefundStatus.Waiting, amount: 340, feeAmount: null },
+        actions: {
+          canComplete: false,
+          canMarkRefunded: true,
+          canCancel: false,
+          canReassign: false,
+        },
+        ...over,
+      });
+    const refundButton = () =>
+      Array.from(
+        el().querySelectorAll<HTMLButtonElement>(
+          'section[aria-labelledby="sec-refund"] app-button button',
+        ),
+      ).find((b) => plain(b.textContent).includes("Refund sent"));
+
+    it("is offered in the refund card while a refund is owed (canMarkRefunded)", async () => {
+      repo.read = () => of(ok(owed()));
+      await open();
+
+      expect(refundButton()).toBeDefined();
+      expect(card("sec-refund")).toContain("outside the app");
+    });
+
+    it("is hidden when the server doesn't allow it, or without Booking.Manage", async () => {
+      repo.read = () =>
+        of(
+          ok(
+            owed({
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
+            }),
+          ),
+        );
+      await open();
+      expect(refundButton()).toBeUndefined();
+
+      granted = ["Booking.View"];
+      repo.read = () => of(ok(owed()));
+      await open();
+      expect(refundButton()).toBeUndefined();
+    });
+
+    it("asks first, naming the amount and the customer, and records nothing until confirmed", async () => {
+      repo.read = () => of(ok(owed()));
+      await open();
+
+      refundButton()!.click();
+      fixture.detectChanges();
+
+      expect(plain(dialog()!.querySelector("h2")?.textContent)).toBe("Mark the refund as sent?");
+      expect(plain(dialog()!.textContent)).toContain("EGP 340");
+      expect(plain(dialog()!.textContent)).toContain("Ahmed Hassan");
+      expect(plain(dialog()!.textContent)).toContain("OD-000482");
+      expect(repo.refunds).toEqual([]);
+    });
+
+    it("records the refund, toasts, closes the dialog and re-reads the booking", async () => {
+      repo.read = () => of(ok(owed()));
+      await open();
+      refundButton()!.click();
+      fixture.detectChanges();
+
+      dialogButtons()[1].click();
+      await settle();
+
+      expect(repo.refunds).toEqual([482]);
+      expect(repo.reads).toEqual([482, 482]);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.REFUND_MARKED");
+      expect(dialog()).toBeNull();
+    });
+
+    it("re-reads after a failure too (409: already marked)", async () => {
+      repo.read = () => of(ok(owed()));
+      await open();
+      repo.refund = () => throwError(() => ({ status: 409 }));
+      refundButton()!.click();
+      fixture.detectChanges();
+
+      dialogButtons()[1].click();
+      await settle();
+
+      expect(success).not.toHaveBeenCalled();
+      expect(repo.reads).toEqual([482, 482]);
+    });
+
+    it("keeps the refund owed when the dialog is dismissed", async () => {
+      repo.read = () => of(ok(owed()));
+      await open();
+      refundButton()!.click();
+      fixture.detectChanges();
+
+      dialogButtons()[0].click();
+      fixture.detectChanges();
+
+      expect(dialog()).toBeNull();
+      expect(repo.refunds).toEqual([]);
     });
   });
 
@@ -366,7 +536,7 @@ describe("BookingDetailsPage", () => {
       await open();
 
       expect(endButton()).toBeUndefined();
-      expect(text()).not.toContain("You can end the session once it starts.");
+      expect(text()).not.toContain("You can end the session or mark it as missed once it starts.");
     });
 
     it("is hidden when the server doesn't allow it", async () => {
@@ -376,7 +546,12 @@ describe("BookingDetailsPage", () => {
             details({
               status: BookingStatus.Completed,
               isInProgress: false,
-              actions: { canComplete: false, canMarkRefunded: false },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -391,7 +566,12 @@ describe("BookingDetailsPage", () => {
           ok(
             details({
               isInProgress: false,
-              actions: { canComplete: false, canMarkRefunded: false },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -399,7 +579,7 @@ describe("BookingDetailsPage", () => {
 
       expect(endButton()).toBeUndefined();
       expect(plain(el().querySelector(".hint")?.textContent)).toBe(
-        "You can end the session once it starts.",
+        "You can end the session or mark it as missed once it starts.",
       );
     });
 
@@ -410,7 +590,12 @@ describe("BookingDetailsPage", () => {
             details({
               status: BookingStatus.PendingReview,
               isInProgress: false,
-              actions: { canComplete: false, canMarkRefunded: false },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -453,7 +638,12 @@ describe("BookingDetailsPage", () => {
             details({
               status: BookingStatus.Completed,
               isInProgress: false,
-              actions: { canComplete: false, canMarkRefunded: false },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -494,7 +684,12 @@ describe("BookingDetailsPage", () => {
           ok(
             details({
               isInProgress: false,
-              actions: { canComplete: false, canMarkRefunded: false },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
             }),
           ),
         );
@@ -617,6 +812,258 @@ describe("BookingDetailsPage", () => {
       expect(card("sec-payment")).toContain("إنستا باي");
       expect(endButton()).toBeUndefined(); // its label is Arabic now
       expect(text()).toContain("إنهاء الجلسة");
+    });
+  });
+
+  // ── The branch's other actions ─────────────────────────────────────────
+  const cancellable = (over: Partial<BookingDetails> = {}) =>
+    details({
+      status: BookingStatus.PendingReview,
+      isInProgress: false,
+      actions: { canComplete: false, canMarkRefunded: false, canCancel: true, canReassign: true },
+      ...over,
+    });
+  const headerButton = (label: string) =>
+    Array.from(el().querySelectorAll<HTMLButtonElement>("app-page-header app-button button")).find(
+      (b) => plain(b.textContent).includes(label),
+    );
+  const dialogOf = () => el().querySelector<HTMLElement>('[role="dialog"]');
+  const dialogActions = () =>
+    Array.from(el().querySelectorAll<HTMLButtonElement>('[role="dialog"] .dialog__actions button'));
+  const typeReason = (value: string) => {
+    const box = el().querySelector<HTMLTextAreaElement>("textarea")!;
+    box.value = value;
+    box.dispatchEvent(new Event("input"));
+    fixture.detectChanges();
+  };
+
+  describe("mark as missed", () => {
+    it("is offered next to End session when the booking has started", async () => {
+      await open();
+
+      expect(headerButton("End session")).toBeDefined();
+      expect(headerButton("Mark as missed")).toBeDefined();
+    });
+
+    it("is hidden without Booking.Manage and when the server doesn't allow it", async () => {
+      granted = ["Booking.View"];
+      await open();
+      expect(headerButton("Mark as missed")).toBeUndefined();
+
+      granted = ["Booking.View", "Booking.Manage"];
+      repo.read = () => of(ok(cancellable()));
+      await open();
+      expect(headerButton("Mark as missed")).toBeUndefined();
+    });
+
+    it("asks first, then marks it missed and re-reads", async () => {
+      await open();
+      headerButton("Mark as missed")!.click();
+      fixture.detectChanges();
+
+      expect(plain(dialog()!.querySelector("h2")?.textContent)).toBe("Mark as missed?");
+      expect(repo.noShows).toEqual([]);
+
+      dialogButtons()[1].click();
+      await settle();
+
+      expect(repo.noShows).toEqual([482]);
+      expect(repo.reads).toEqual([482, 482]);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.MARKED_NO_SHOW");
+      expect(dialog()).toBeNull();
+    });
+
+    it("re-reads after a failure too (409)", async () => {
+      await open();
+      repo.noShow = () => throwError(() => ({ status: 409 }));
+      headerButton("Mark as missed")!.click();
+      fixture.detectChanges();
+
+      dialogButtons()[1].click();
+      await settle();
+
+      expect(success).not.toHaveBeenCalled();
+      expect(repo.reads).toEqual([482, 482]);
+    });
+  });
+
+  describe("cancel booking", () => {
+    it("is offered only while the server says canCancel and with Booking.Manage", async () => {
+      await open();
+      expect(headerButton("Cancel booking")).toBeUndefined();
+
+      repo.read = () => of(ok(cancellable()));
+      await open();
+      expect(headerButton("Cancel booking")).toBeDefined();
+
+      granted = ["Booking.View"];
+      await open();
+      expect(headerButton("Cancel booking")).toBeUndefined();
+    });
+
+    it("needs a reason, then cancels with it and re-reads", async () => {
+      repo.read = () => of(ok(cancellable()));
+      await open();
+      headerButton("Cancel booking")!.click();
+      fixture.detectChanges();
+
+      expect(plain(dialogOf()!.querySelector("h2")?.textContent)).toBe("Cancel this booking?");
+
+      dialogActions()[1].click(); // no reason yet
+      fixture.detectChanges();
+      expect(repo.cancels).toEqual([]);
+
+      typeReason("  The barber is sick  ");
+      dialogActions()[1].click();
+      await settle();
+
+      expect(repo.cancels).toEqual([{ id: 482, reason: "The barber is sick" }]);
+      expect(repo.reads).toEqual([482, 482]);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.CANCELLED");
+      expect(dialogOf()).toBeNull();
+    });
+
+    it("keeps the booking when the dialog is dismissed", async () => {
+      repo.read = () => of(ok(cancellable()));
+      await open();
+      headerButton("Cancel booking")!.click();
+      fixture.detectChanges();
+
+      dialogActions()[0].click(); // Keep booking
+      fixture.detectChanges();
+
+      expect(dialogOf()).toBeNull();
+      expect(repo.cancels).toEqual([]);
+    });
+  });
+
+  describe("change barber", () => {
+    it("lists the other active barbers of the booking's branch and moves the booking", async () => {
+      repo.read = () => of(ok(cancellable()));
+      await open();
+      headerButton("Change barber")!.click();
+      await settle();
+
+      const names = Array.from(el().querySelectorAll(".option__label")).map((n) =>
+        plain(n.textContent),
+      );
+      expect(names).toEqual(["Youssef Samir"]); // not Karim Adel (id 7): that's the booking's own barber
+
+      dialogActions()[1].click(); // nothing chosen yet: Confirm is off
+      expect(repo.reassigns).toEqual([]);
+
+      el().querySelector<HTMLInputElement>('input[type="radio"]')!.click();
+      fixture.detectChanges();
+      dialogActions()[1].click();
+      await settle();
+
+      expect(repo.reassigns).toEqual([{ id: 482, barberId: 8 }]);
+      expect(repo.reads).toEqual([482, 482]);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.BARBER_CHANGED");
+    });
+
+    it("is hidden when the booking can't be cancelled either (ended / not open)", async () => {
+      await open();
+
+      expect(headerButton("Change barber")).toBeUndefined();
+    });
+  });
+
+  describe("cancellation card", () => {
+    it("is not shown for a booking that wasn't cancelled", async () => {
+      await open();
+
+      expect(el().querySelector("#sec-cancellation")).toBeNull();
+    });
+
+    it("says the branch cancelled it, who, when and why", async () => {
+      repo.read = () =>
+        of(
+          ok(
+            details({
+              status: BookingStatus.Cancelled,
+              isInProgress: false,
+              refund: { status: RefundStatus.Waiting, amount: 340, feeAmount: null },
+              cancellation: {
+                cancelledAt: "2026-11-20T15:30:00",
+                cancelledByBranch: true,
+                cancelledByName: "Mona Ibrahim",
+                reason: null,
+                note: "The barber is sick and no other barber is available",
+              },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: true,
+                canCancel: false,
+                canReassign: false,
+              },
+            }),
+          ),
+        );
+      await open();
+
+      expect(facts("sec-cancellation")).toEqual([
+        "Cancelled by The branch · Mona Ibrahim",
+        "Cancelled on Nov 20, 2026, 5:30 PM", // UTC 15:30 → Cairo (UTC+2)
+        "Reason The barber is sick and no other barber is available",
+      ]);
+    });
+
+    it("says the customer cancelled it, with the reason they picked", async () => {
+      repo.read = () =>
+        of(
+          ok(
+            details({
+              status: BookingStatus.Cancelled,
+              isInProgress: false,
+              cancellation: {
+                cancelledAt: "2026-11-12T09:00:00",
+                cancelledByBranch: false,
+                cancelledByName: null,
+                reason: CancelReason.WantAnotherTime,
+                note: null,
+              },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
+            }),
+          ),
+        );
+      await open();
+
+      expect(facts("sec-cancellation")[0]).toBe("Cancelled by The customer");
+      expect(facts("sec-cancellation")[2]).toBe("Reason Wants another time");
+    });
+
+    it("leaves the reason out when the customer gave none", async () => {
+      repo.read = () =>
+        of(
+          ok(
+            details({
+              status: BookingStatus.Cancelled,
+              isInProgress: false,
+              cancellation: {
+                cancelledAt: "2026-11-12T09:00:00",
+                cancelledByBranch: false,
+                cancelledByName: null,
+                reason: null,
+                note: null,
+              },
+              actions: {
+                canComplete: false,
+                canMarkRefunded: false,
+                canCancel: false,
+                canReassign: false,
+              },
+            }),
+          ),
+        );
+      await open();
+
+      expect(facts("sec-cancellation")).toHaveLength(2);
     });
   });
 });

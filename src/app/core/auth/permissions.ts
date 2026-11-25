@@ -9,6 +9,7 @@
  */
 const SPEC = {
   Booking: ["View", "Review", "Manage", "Cancel"],
+  Customer: ["View"],
   Session: ["View", "Manage"],
   Availability: ["View"],
   Branch: ["View", "Create", "Edit", "Delete"],

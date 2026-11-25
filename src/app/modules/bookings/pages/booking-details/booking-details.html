@@ -24,10 +24,27 @@
     </div>
   } @else {
     <app-page-header [title]="view()!.number" [subtitle]="view()!.dateLong + ' · ' + view()!.time">
-      @if (canManage() && view()!.canEnd) {
-        <app-button variant="primary" iconClass="pi pi-check-circle" [disabled]="saving()" (clicked)="askEnd()">
-          {{ 'BOOKINGS.DETAILS.END_SESSION' | translate }}
-        </app-button>
+      @if (canManage()) {
+        @if (view()!.canEnd) {
+          <app-button variant="primary" iconClass="pi pi-check-circle" [disabled]="saving()" (clicked)="askEnd()">
+            {{ 'BOOKINGS.DETAILS.END_SESSION' | translate }}
+          </app-button>
+        }
+        @if (view()!.canNoShow) {
+          <app-button variant="secondary" iconClass="pi pi-user-minus" [disabled]="saving()" (clicked)="askNoShow()">
+            {{ 'BOOKINGS.DETAILS.NO_SHOW' | translate }}
+          </app-button>
+        }
+        @if (view()!.canReassign) {
+          <app-button variant="secondary" iconClass="pi pi-user-edit" [disabled]="saving()" (clicked)="askReassign()">
+            {{ 'BOOKINGS.DETAILS.CHANGE_BARBER' | translate }}
+          </app-button>
+        }
+        @if (view()!.canCancel) {
+          <app-button variant="danger" iconClass="pi pi-times-circle" [disabled]="saving()" (clicked)="askCancel()">
+            {{ 'BOOKINGS.DETAILS.CANCEL_BOOKING' | translate }}
+          </app-button>
+        }
       }
     </app-page-header>
 
@@ -114,6 +131,35 @@
           </dl>
         </section>
 
+        <!-- Cancellation (Cancelled bookings only): who cancelled it, when and why -->
+        @if (view()!.cancellation; as cancellation) {
+          <section class="odl-card panel" aria-labelledby="sec-cancellation">
+            <h2 class="panel__title" id="sec-cancellation">{{ 'BOOKINGS.DETAILS.CANCELLATION' | translate }}</h2>
+
+            <dl class="facts facts--inline">
+              <div class="fact">
+                <dt>{{ 'BOOKINGS.DETAILS.CANCELLED_BY' | translate }}</dt>
+                <dd>
+                  {{ (cancellation.byBranch ? 'BOOKINGS.DETAILS.BY_BRANCH' : 'BOOKINGS.DETAILS.BY_CUSTOMER') | translate }}
+                  @if (cancellation.by) {
+                    <span class="muted">· {{ cancellation.by }}</span>
+                  }
+                </dd>
+              </div>
+              <div class="fact">
+                <dt>{{ 'BOOKINGS.DETAILS.CANCELLED_AT' | translate }}</dt>
+                <dd>{{ cancellation.when }}</dd>
+              </div>
+              @if (cancellation.reason) {
+                <div class="fact">
+                  <dt>{{ 'BOOKINGS.DETAILS.CANCEL_REASON' | translate }}</dt>
+                  <dd dir="auto">{{ cancellation.reason }}</dd>
+                </div>
+              }
+            </dl>
+          </section>
+        }
+
         <!-- Refund (Cancelled / Expired / Missed bookings only) -->
         @if (view()!.refund; as refund) {
           <section class="odl-card panel" aria-labelledby="sec-refund">
@@ -135,6 +181,14 @@
                 </div>
               }
             </dl>
+
+            <!-- The money is returned outside the app; this only records that it was. -->
+            @if (canManage() && view()!.canRefund) {
+              <p class="muted refund-hint">{{ 'BOOKINGS.DETAILS.REFUND_HINT' | translate }}</p>
+              <app-button variant="primary" iconClass="pi pi-check" [disabled]="saving()" (clicked)="askRefund()">
+                {{ 'BOOKINGS.DETAILS.REFUND_SENT' | translate }}
+              </app-button>
+            }
           </section>
         }
       </div>
@@ -167,9 +221,16 @@
           </div>
         </dl>
 
-        <a class="call" [attr.href]="'tel:' + view()!.customerPhone">
-          <i class="pi pi-phone" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.CALL' | translate }}
-        </a>
+        <div class="customer-links">
+          <a class="call" [attr.href]="'tel:' + view()!.customerPhone">
+            <i class="pi pi-phone" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.CALL' | translate }}
+          </a>
+          @if (canViewCustomer()) {
+            <a class="call" [routerLink]="['/main/customers', view()!.customerId]">
+              <i class="pi pi-user" aria-hidden="true"></i>{{ 'BOOKINGS.DETAILS.CUSTOMER_PROFILE' | translate }}
+            </a>
+          }
+        </div>
       </section>
     </div>
 
@@ -183,6 +244,61 @@
       [busy]="saving()"
       (confirm)="confirmEnd()"
       (cancel)="confirmOpen.set(false)"
+    />
+
+    <app-confirm-modal
+      [isOpen]="refundOpen()"
+      variant="primary"
+      [title]="'BOOKINGS.DETAILS.REFUND_TITLE' | translate"
+      [message]="refundMessage()"
+      [confirmLabel]="'BOOKINGS.DETAILS.REFUND_SENT' | translate"
+      [cancelLabel]="'COMMON.CANCEL' | translate"
+      [busy]="saving()"
+      (confirm)="confirmRefund()"
+      (cancel)="refundOpen.set(false)"
+    />
+
+    <app-confirm-modal
+      [isOpen]="noShowOpen()"
+      variant="danger"
+      [title]="'BOOKINGS.DETAILS.NO_SHOW_TITLE' | translate"
+      [message]="noShowMessage()"
+      [confirmLabel]="'BOOKINGS.DETAILS.NO_SHOW' | translate"
+      [cancelLabel]="'COMMON.CANCEL' | translate"
+      [busy]="saving()"
+      (confirm)="confirmNoShow()"
+      (cancel)="noShowOpen.set(false)"
+    />
+
+    <app-reject-dialog
+      [isOpen]="cancelOpen()"
+      [title]="'BOOKINGS.DETAILS.CANCEL_TITLE' | translate"
+      [hint]="'BOOKINGS.DETAILS.CANCEL_HINT' | translate"
+      [label]="'BOOKINGS.DETAILS.CANCEL_REASON_LABEL' | translate"
+      [placeholder]="'BOOKINGS.DETAILS.CANCEL_REASON_PLACEHOLDER' | translate"
+      [requiredMessage]="'BOOKINGS.DETAILS.CANCEL_REASON_REQUIRED' | translate"
+      [confirmLabel]="'BOOKINGS.DETAILS.CANCEL_BOOKING' | translate"
+      [cancelLabel]="'BOOKINGS.DETAILS.KEEP_BOOKING' | translate"
+      [maxLength]="cancelReasonMax"
+      [busy]="saving()"
+      (confirm)="confirmCancel($event)"
+      (cancel)="cancelOpen.set(false)"
+    />
+
+    <app-reassign-barber-dialog
+      [isOpen]="reassignOpen()"
+      [title]="'BOOKINGS.DETAILS.REASSIGN_TITLE' | translate"
+      [hint]="'BOOKINGS.DETAILS.REASSIGN_HINT' | translate"
+      [label]="'BOOKINGS.DETAILS.REASSIGN_LABEL' | translate"
+      [loadingMessage]="'BOOKINGS.DETAILS.REASSIGN_LOADING' | translate"
+      [emptyMessage]="'BOOKINGS.DETAILS.REASSIGN_EMPTY' | translate"
+      [confirmLabel]="'BOOKINGS.DETAILS.REASSIGN_CONFIRM' | translate"
+      [cancelLabel]="'COMMON.CANCEL' | translate"
+      [options]="reassignOptions()"
+      [loading]="reassignLoading()"
+      [busy]="saving()"
+      (confirm)="confirmReassign($event)"
+      (cancel)="reassignOpen.set(false)"
     />
   }
 </div>

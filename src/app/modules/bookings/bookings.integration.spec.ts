@@ -67,26 +67,30 @@ describe("bookings, payment reviews and attendance share one database", () => {
   });
 
   it("attendance counts the seeded upcoming bookings of a barber", async () => {
-    const barberId = db.bookings.find((b) => b.id === 401)!.barberId;
+    const waiting = db.bookings.find((b) => b.id === 401)!.barberId; // 1 pending
+    const busy = db.bookings.find((b) => b.id === 403)!.barberId; // 1 to come + 1 in progress
 
-    expect((await attendanceRow(barberId)).upcomingBookingsCount).toBe(5);
+    expect((await attendanceRow(waiting)).upcomingBookingsCount).toBe(1);
+    expect((await attendanceRow(busy)).upcomingBookingsCount).toBe(2);
   });
 
   it("rejecting a waiting booking lowers the barber's upcoming count; approving does not", async () => {
     const barberId = db.bookings.find((b) => b.id === 401)!.barberId;
 
     await settle(reviews.approveBooking(401));
-    expect((await attendanceRow(barberId)).upcomingBookingsCount).toBe(5);
+    expect((await attendanceRow(barberId)).upcomingBookingsCount).toBe(1);
 
-    await settle(reviews.rejectBooking(403, { reason: "Wrong amount" }));
-    expect((await attendanceRow(barberId)).upcomingBookingsCount).toBe(4);
+    // Back to waiting, then rejected.
+    db.bookings.find((b) => b.id === 401)!.status = BookingStatus.PendingReview;
+    await settle(reviews.rejectBooking(401, { reason: "Wrong amount" }));
+    expect((await attendanceRow(barberId)).upcomingBookingsCount).toBe(0);
   });
 
   it("ending the session in progress frees the barber it was keeping", async () => {
-    const barberId = db.bookings.find((b) => b.id === 410)!.barberId;
+    const barberId = db.bookings.find((b) => b.id === 403)!.barberId;
     const before = (await attendanceRow(barberId)).upcomingBookingsCount;
 
-    await settle(bookings.completeBooking(410));
+    await settle(bookings.completeBooking(403));
 
     expect((await attendanceRow(barberId)).upcomingBookingsCount).toBe(before - 1);
   });
@@ -116,7 +120,7 @@ describe("bookings, payment reviews and attendance share one database", () => {
   });
 
   it("time passing expires unreviewed bookings everywhere at once", async () => {
-    vi.setSystemTime(new Date(NOW.getTime() + 60 * 60_000)); // 13:00
+    vi.setSystemTime(new Date(NOW.getTime() + 120 * 60_000)); // 14:00, after the 13:30 start
 
     expect((await detailsOf(401)).status).toBe(BookingStatus.Expired);
     const queue = await settle(

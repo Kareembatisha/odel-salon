@@ -188,6 +188,28 @@ export const MAIN_ROUTES: Routes = [
     loadComponent: () =>
       import("./bookings/pages/booking-details/booking-details").then((m) => m.BookingDetailsPage),
   },
+  {
+    path: "customers",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Customer.View,
+      breadcrumb: "LAYOUT.NAV.CUSTOMERS",
+    },
+    loadComponent: () =>
+      import("./customers/pages/customers-list/customers-list").then((m) => m.CustomersList),
+  },
+  {
+    path: "customers/:id",
+    canActivate: [permissionGuard],
+    data: {
+      permission: PERMISSIONS.Customer.View,
+      breadcrumb: ["LAYOUT.NAV.CUSTOMERS", "CUSTOMERS.PROFILE.BREADCRUMB"],
+    },
+    loadComponent: () =>
+      import("./customers/pages/customer-profile/customer-profile").then(
+        (m) => m.CustomerProfilePage,
+      ),
+  },
 
   {
     path: "services/new",

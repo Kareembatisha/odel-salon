@@ -53,6 +53,11 @@ export interface BookingBarberOption {
  * The counters come with every response (`meta.additionalData`) and don't depend on the other
  * filters, so they stay put while the user filters. They are `null` until a response brought them
  * (never a misleading 0).
+ *
+ * One customer's bookings (the "All bookings" link of the customer profile) are the exception to
+ * "one branch": with a `customerId` the list covers every branch the customer booked in, the branch
+ * is not sent, and the counters narrow to that customer. {@link clearCustomer} goes back to the
+ * selected branch.
  */
 @Injectable({ providedIn: "root" })
 export class BookingsService {
@@ -94,6 +99,8 @@ export class BookingsService {
   readonly hasError = this._hasError.asReadonly();
 
   readonly tab = computed(() => this._query().tab ?? BookingTab.All);
+  /** Set while the list shows one customer's bookings (all branches). */
+  readonly customerId = computed(() => this._query().customerId);
   readonly totalCount = computed(() => this._meta()?.totalCount ?? 0);
 
   /** "Today" and "Refund waiting" of the selected branch; `null` before the first response. */
@@ -104,7 +111,11 @@ export class BookingsService {
 
   /** Branches finished loading and there is none: nothing to select, nothing to list. */
   readonly noBranches = computed(
-    () => !this._branchesLoading() && this._branches().length === 0 && this._branchId() === null,
+    () =>
+      !this._branchesLoading() &&
+      this._branches().length === 0 &&
+      this._branchId() === null &&
+      this.customerId() === undefined,
   );
 
   // ----------------------------------------------------------
@@ -116,9 +127,11 @@ export class BookingsService {
    * empty, so the tab, search, filters and paging are RESET (what you see is what is applied); only
    * the selected branch is kept between visits. Then it loads the branch options once, falls back
    * to the oldest branch when the selected one is gone, and loads its barbers and bookings.
+   *
+   * With a `customerId` the list shows that customer's bookings instead (all branches).
    */
-  initialize(): void {
-    this.resetFilters();
+  initialize(customerId?: number): void {
+    this.resetFilters(customerId);
 
     if (this.branchesLoaded) {
       this.ensureBranchAndLoad();
@@ -137,9 +150,13 @@ export class BookingsService {
       });
   }
 
-  /** Request a page of the selected branch's bookings. Does nothing until a branch is selected. */
+  /**
+   * Request a page of the selected branch's bookings (or of the customer's, in every branch).
+   * Does nothing until a branch is selected, unless a customer is.
+   */
   load(): void {
-    const branchId = this._branchId();
+    const customerId = this._query().customerId;
+    const branchId = customerId === undefined ? this._branchId() : undefined;
     if (branchId === null) return;
 
     const currentRequest = ++this.requestId;
@@ -203,9 +220,21 @@ export class BookingsService {
     this.load();
   }
 
-  /** Back to the plain list of the branch: tab All, no filters, page 1. */
+  /** Back to the plain list: tab All, no filters, page 1 (a customer's list stays that customer's). */
   clearFilters(): void {
-    this._query.set(this.freshQuery());
+    this._query.set(this.freshQuery(this._query().customerId));
+    this.load();
+  }
+
+  /** Leave one customer's bookings: back to the selected branch's list, from page 1. */
+  clearCustomer(): void {
+    this._query.update((q) => ({
+      ...q,
+      customerId: undefined,
+      barberId: undefined,
+      pageNumber: 1,
+    }));
+    this.resetResults();
     this.load();
   }
 
@@ -213,14 +242,15 @@ export class BookingsService {
   // Private
   // ----------------------------------------------------------
 
-  private freshQuery(): BookingsQuery {
-    return { pageNumber: 1, pageSize: BOOKINGS_PAGE_SIZE, tab: BookingTab.All };
+  private freshQuery(customerId?: number): BookingsQuery {
+    return { pageNumber: 1, pageSize: BOOKINGS_PAGE_SIZE, tab: BookingTab.All, customerId };
   }
 
   /** Tab All, no filters, page 1. Rows loaded under the old filters go too, so they don't show under empty widgets. */
-  private resetFilters(): void {
+  private resetFilters(customerId?: number): void {
     const q = this._query();
     const wasFiltered =
+      q.customerId !== customerId ||
       q.pageNumber !== 1 ||
       (q.tab ?? BookingTab.All) !== BookingTab.All ||
       q.barberId !== undefined ||
@@ -231,7 +261,7 @@ export class BookingsService {
       q.refundStatus !== undefined ||
       !!q.search;
 
-    this._query.set(this.freshQuery());
+    this._query.set(this.freshQuery(customerId));
     // Only then: an unfiltered list can stay on screen while it refreshes, instead of flashing empty.
     if (wasFiltered) this._bookings.set([]);
   }
@@ -249,7 +279,9 @@ export class BookingsService {
 
     const branchId = this._branchId();
     if (branchId === null) {
-      this._loading.set(false);
+      // No branch to select, but one customer's bookings need none.
+      if (this._query().customerId !== undefined) this.load();
+      else this._loading.set(false);
       return;
     }
 

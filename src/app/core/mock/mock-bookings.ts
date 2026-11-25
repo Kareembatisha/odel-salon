@@ -1,6 +1,7 @@
 import {
   BookingStatus,
   BookingType,
+  CancelReason,
   PaymentMethod,
   RefundStatus,
 } from "@modules/bookings/model/booking.model";
@@ -33,6 +34,9 @@ export const REVIEW_TARGET_MINUTES = 30;
 
 /** Confirmed bookings left open are completed automatically this long after they end. */
 export const AUTO_COMPLETE_AFTER_MINUTES = 120;
+
+/** Share of the price a customer who doesn't show up loses (`AppSetting.NoShowFeePercent`). */
+export const NO_SHOW_FEE_PERCENT = 20;
 
 const FIRST_BOOKING_ID = 401;
 const FIRST_CUSTOMER_ID = 1001;
@@ -79,6 +83,17 @@ export function isBookingInProgress(b: MockBooking, now: Date): boolean {
 /** What the server allows: "End session" only for a Confirmed booking that has started. */
 export function canCompleteBooking(b: MockBooking, now: Date): boolean {
   return b.status === BookingStatus.Confirmed && b.startAt <= cairoNow(now);
+}
+
+/** What the server allows: staff can cancel a pending / confirmed booking until it ends. */
+export function canCancelBooking(b: MockBooking, now: Date): boolean {
+  return isUpcomingBooking(b, now);
+}
+
+/** A missed booking's refund: the price minus the no-show fee. */
+export function noShowRefund(total: number): { amount: number; feeAmount: number } {
+  const feeAmount = Math.round(total * NO_SHOW_FEE_PERCENT) / 100;
+  return { amount: Math.round((total - feeAmount) * 100) / 100, feeAmount };
 }
 
 /** Refund still owed — the "Waiting" counter and the "Refund sent" action. */
@@ -211,9 +226,9 @@ const CUSTOMERS: Array<[string, string]> = [
   ["Tarek Anwar", "+201112223344"],
   ["Yassin Maged", "+201551234567"],
   ["Karim Sherif", "+201066778899"],
-  ["Ziad Hany", "+201277889900"],
-  ["Mazen Ayman", "+201033445566"],
-  ["Hazem Saleh", "+201588990011"],
+  // Registered, never booked (the seed rows only use the first nine).
+  ["Mostafa Gamal", "+201201122334"],
+  ["Salma Adel", "+201144556677"],
 ];
 
 const HOME_ADDRESSES = [
@@ -249,11 +264,12 @@ interface SeedRow {
   refund?: RefundStatus;
   /** The proof shows this much less than the total. */
   short?: number;
+  /** Cancelled: the staff member who cancelled it (otherwise the customer did). */
+  byBranch?: string;
 }
 
 const R = BookingType.Regular;
 const V = BookingType.Vip;
-const H = BookingType.Home;
 const PR = BookingStatus.PendingReview;
 const CF = BookingStatus.Confirmed;
 const RJ = BookingStatus.Rejected;
@@ -277,110 +293,54 @@ const row = (
   extra: Partial<SeedRow> = {},
 ): SeedRow => ({ when, barber, type, status, services, method, customer, ...extra });
 
+/** A day in minutes. */
 const DAY = 24 * 60;
 
+/** Why the seeded customers cancelled (some gave none). */
+const CUSTOMER_REASONS: Array<CancelReason | null> = [
+  CancelReason.ChangeOfPlans,
+  CancelReason.BookedByMistake,
+  CancelReason.WantAnotherTime,
+  null,
+];
+
+/** What the staff wrote when the branch cancelled a seeded booking. */
+const BRANCH_CANCEL_NOTE = "The barber is sick and no other barber is available";
+
 /**
- * Branch 1 (the one the pages open on) has 42 bookings: 5 waiting for a review (two of them late,
- * one with a proof for LESS than the total), 2 approved and 1 rejected today, one in progress, and a
- * history of completed / cancelled / missed / expired / rejected ones. Its second barber has no
- * upcoming bookings, so attendance can be toggled freely for them.
+ * ONE booking per status, all in branch 1 (the one the pages open on), so every state is easy to
+ * find, review and test. In id order (401 …):
+ *
+ * - 401 PendingReview — waiting 39 min for a review (late), starts in 90 min;
+ * - 402 Confirmed (VIP) — approved today, starts in 2 hours;
+ * - 403 Confirmed and Started — began 25 min ago;
+ * - 404 Rejected — a proof for LESS than the total, rejected today;
+ * - 405 Expired — nobody reviewed it; a full refund is owed;
+ * - 406 Completed — earlier today;
+ * - 407 NoShow — the price minus the fee is owed;
+ * - 408 Cancelled by the customer — refund already sent;
+ * - 409 Cancelled by the branch (VIP) — a full refund is owed.
+ *
+ * The open ones (401-403) belong to the first and third barbers, so the second one has no upcoming
+ * bookings and its attendance can be toggled freely. The other branches have no bookings.
  */
 const SEED: ReadonlyArray<[number, SeedRow[]]> = [
   [
     1,
     [
-      // Waiting for a payment review (barbers 0 and 2)
-      row(45, 0, R, PR, [1, 2], INSTA, 0, { waiting: 12 }),
-      row(90, 2, V, PR, [1, 3], WALLET, 1, { waiting: 39 }),
-      row(150, 0, R, PR, [1], INSTA, 2, { waiting: 5 }),
-      row(240, 2, R, PR, [10], WALLET, 3, { waiting: 55 }),
-      row(330, 0, V, PR, [9], INSTA, 4, { waiting: 20, short: 40 }),
-      // Confirmed, still to come (two of them approved today)
-      row(60, 0, V, CF, [1, 2], INSTA, 5, { approvedAgo: 100 }),
-      row(120, 2, R, CF, [1], WALLET, 6, { approvedAgo: 45 }),
-      row("1@11:00", 0, R, CF, [4], INSTA, 7),
-      row("1@14:30", 2, V, CF, [5, 3], WALLET, 8),
-      // In progress right now (45 min, started 25 min ago)
-      row(-25, 2, R, CF, [1, 2], INSTA, 9),
-      // Earlier today
-      row(-150, 1, R, CP, [1], INSTA, 10),
-      row(-240, 0, R, CP, [10], WALLET, 0),
-      row(-300, 1, R, NS, [1], WALLET, 1, { refund: WAITING }),
-      row(-420, 2, V, CP, [1, 2], INSTA, 2),
-      // History
-      row("-1@10:30", 1, R, CP, [1], INSTA, 3),
-      row("-1@12:00", 0, V, CP, [1, 2], WALLET, 4),
-      row("-1@13:30", 2, R, CP, [2, 3], INSTA, 5),
-      row("-1@15:00", 1, R, CN, [1], INSTA, 6, { refund: SENT }),
-      row("-1@17:00", 0, R, NS, [1, 2], WALLET, 7, { refund: SENT }),
-      row("-1@19:00", 2, V, CP, [5], INSTA, 8),
-      row("-2@11:00", 1, R, CP, [4], WALLET, 9),
-      row("-2@13:00", 0, R, EX, [1], INSTA, 10, { refund: WAITING }),
-      row("-2@15:30", 2, V, CP, [1], INSTA, 11),
-      row("-2@18:00", 1, R, RJ, [10], WALLET, 0, { rejectedAgo: 2 * DAY, short: 30 }),
-      row("-3@10:00", 0, R, CP, [9], INSTA, 1),
-      row("-3@12:30", 1, V, CN, [1, 3], WALLET, 2, { refund: WAITING }),
-      row("-3@16:00", 2, R, CP, [1, 2], INSTA, 3),
-      row("-4@11:30", 1, R, CP, [3], INSTA, 4),
-      row("-4@14:00", 0, V, NS, [1], WALLET, 5, { refund: WAITING }),
-      row("-4@17:30", 2, R, CP, [10], INSTA, 6),
-      row("-5@10:30", 1, R, CP, [1, 2], WALLET, 7),
-      row("-5@13:00", 0, R, EX, [2], INSTA, 8, { refund: SENT }),
-      row("-5@15:00", 2, V, CP, [5], INSTA, 9),
-      row("-6@12:00", 1, R, CN, [1], INSTA, 10, { refund: SENT }),
-      row("-6@16:00", 0, R, CP, [4], WALLET, 11),
-      row("-7@11:00", 2, R, RJ, [1], INSTA, 0, { rejectedAgo: 7 * DAY }),
-      row("-7@14:30", 1, V, CP, [1, 2], INSTA, 1),
-      row("-8@10:00", 0, R, CP, [3], WALLET, 2),
-      row("-8@13:30", 2, R, CN, [10], INSTA, 3, { refund: WAITING }),
-      row("-9@12:00", 1, R, EX, [1], WALLET, 4, { refund: WAITING }),
-      row("-10@15:00", 0, R, CP, [1], INSTA, 5),
-      // Rejected today (a future booking whose proof was wrong)
-      row(200, 1, R, RJ, [1], INSTA, 6, {
+      row(90, 0, R, PR, [1, 3], WALLET, 0, { waiting: 39 }),
+      row(120, 2, V, CF, [1, 2], INSTA, 1, { approvedAgo: 100 }),
+      row(-25, 2, R, CF, [1, 2], INSTA, 2),
+      row(200, 1, R, RJ, [1], INSTA, 3, {
         rejectedAgo: 30,
         short: 60,
         reason: DEFAULT_REJECT_REASON,
       }),
-    ],
-  ],
-  [
-    2,
-    [
-      row(75, 0, R, PR, [1, 2], INSTA, 3, { waiting: 8 }),
-      row(180, 1, V, CF, [1], WALLET, 4, { approvedAgo: 60 }),
-      row(-200, 2, R, CP, [1], INSTA, 5),
-      row("-1@12:00", 3, R, CN, [1], INSTA, 6, { refund: WAITING }),
-      row("-2@16:00", 0, V, NS, [1, 2], WALLET, 7, { refund: SENT }),
-      row("-3@11:00", 1, R, CP, [4], INSTA, 8),
-    ],
-  ],
-  [
-    3,
-    [
-      row(100, 0, H, PR, [1], WALLET, 9, { waiting: 44 }),
-      row(210, 1, R, CF, [1, 2], INSTA, 10, { approvedAgo: 30 }),
-      row(50, 2, V, CF, [5], INSTA, 11, { approvedAgo: 200 }),
-      row("1@13:00", 3, H, CF, [4], WALLET, 0),
-      row(-90, 4, R, CP, [10], INSTA, 1),
-      row("-1@15:00", 0, H, CN, [1], INSTA, 2, { refund: SENT }),
-      row("-2@12:00", 5, R, EX, [1], WALLET, 3, { refund: WAITING }),
-    ],
-  ],
-  [
-    4,
-    [
-      row(130, 0, H, PR, [7], INSTA, 4, { waiting: 15, short: 50 }),
-      row("-1@11:30", 1, R, CP, [1], WALLET, 5),
-      row("-2@14:00", 2, H, NS, [9], INSTA, 6, { refund: WAITING }),
-      row(300, 1, R, CF, [3], INSTA, 7, { approvedAgo: 15 }),
-    ],
-  ],
-  [
-    5,
-    [
-      row(95, 0, V, PR, [1], WALLET, 8, { waiting: 31 }),
-      row("1@16:00", 1, R, CF, [1, 2], INSTA, 9),
-      row(-120, 2, H, CP, [1], WALLET, 10),
+      row("-2@13:00", 0, R, EX, [1], INSTA, 4, { refund: WAITING }),
+      row(-150, 1, R, CP, [1], INSTA, 5),
+      row(-300, 1, R, NS, [1], WALLET, 6, { refund: WAITING }),
+      row("-1@15:00", 1, R, CN, [1], INSTA, 7, { refund: SENT }),
+      row("-3@12:30", 1, V, CN, [1, 3], WALLET, 8, { refund: WAITING, byBranch: "Mona Ibrahim" }),
     ],
   ],
 ];
@@ -409,6 +369,8 @@ export function buildMockBookingSeed(
     id: FIRST_CUSTOMER_ID + index,
     fullName,
     phoneNumber,
+    email: `${fullName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+    createdAt: new Date(now.getTime() - (40 + index * 23) * DAY * MINUTE).toISOString(),
   }));
 
   const bookings: MockBooking[] = [];
@@ -497,6 +459,19 @@ export function buildMockBookingSeed(
         rejectedAt: seedRow.status === RJ ? ago(seedRow.rejectedAgo ?? 2 * DAY) : null,
         rejectionReason: seedRow.status === RJ ? (seedRow.reason ?? DEFAULT_REJECT_REASON) : null,
         refund,
+        cancellation:
+          seedRow.status === CN
+            ? {
+                // A few hours before the start (the start is salon-local; close enough for a mock).
+                cancelledAt: new Date(
+                  Date.parse(`${startAtOf(seedRow.when, now)}Z`) - 5 * 60 * MINUTE,
+                ).toISOString(),
+                cancelledByBranch: seedRow.byBranch !== undefined,
+                cancelledByName: seedRow.byBranch ?? null,
+                reason: seedRow.byBranch !== undefined ? null : CUSTOMER_REASONS[id % 4],
+                note: seedRow.byBranch !== undefined ? BRANCH_CANCEL_NOTE : null,
+              }
+            : null,
       });
     }
   }
@@ -533,5 +508,6 @@ export function upcomingBookingsFor(barberId: number, count: number, branchId = 
     rejectedAt: null,
     rejectionReason: null,
     refund: null,
+    cancellation: null,
   }));
 }

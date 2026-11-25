@@ -19,6 +19,7 @@ export function buildBookingsParams(q: BookingsQuery): HttpParams {
   if (q.dateFrom) params = params.set("dateFrom", q.dateFrom);
   if (q.dateTo) params = params.set("dateTo", q.dateTo);
   if (q.refundStatus !== undefined) params = params.set("refundStatus", q.refundStatus);
+  if (q.customerId !== undefined) params = params.set("customerId", q.customerId);
   const search = q.search?.trim();
   if (search) params = params.set("search", search);
   return params;

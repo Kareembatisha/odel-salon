@@ -159,7 +159,8 @@
       "OFFERS": "Offers",
       "BARBER_ATTENDANCE": "Attendance",
       "BOOKINGS": "Bookings",
-      "PAYMENT_REVIEWS": "Payment reviews"
+      "PAYMENT_REVIEWS": "Payment reviews",
+      "CUSTOMERS": "Customers"
     }
   },
   "BOOKING_STATUS": {
@@ -203,6 +204,7 @@
   "PERMISSIONS": {
     "MODULES": {
       "Booking": "Bookings",
+      "Customer": "Customers",
       "Session": "Live sessions",
       "Availability": "Availability",
       "Branch": "Branches",
@@ -1070,7 +1072,8 @@
     "Code": "Verification code",
     "Token": "Reset token",
     "Reason": "Reason",
-    "DateTo": "To date"
+    "DateTo": "To date",
+    "BarberId": "Barber"
   },
   "BOOKINGS": {
     "TITLE": "Bookings",
@@ -1147,7 +1150,13 @@
       "NOT_FOUND": "This booking no longer exists.",
       "NOT_STARTED": "This booking hasn’t started yet.",
       "NOT_ALLOWED": "This action isn’t allowed for the booking’s current status.",
-      "INVALID_DATE_RANGE": "The end date can’t be before the start date."
+      "INVALID_DATE_RANGE": "The end date can’t be before the start date.",
+      "ALREADY_ENDED": "This booking has already ended.",
+      "INVALID_REASON": "Write a reason of up to 500 characters.",
+      "BARBER_NOT_FOUND": "This barber doesn’t exist.",
+      "BARBER_OTHER_BRANCH": "The barber must work in the booking’s branch.",
+      "BARBER_UNAVAILABLE": "This barber isn’t available at this time. Please choose another barber or time.",
+      "REFUND_ALREADY_SENT": "This booking’s refund is already marked as paid."
     },
     "SESSION_ENDED": "Session ended.",
     "DETAILS": {
@@ -1183,8 +1192,49 @@
       "END_SESSION": "End session",
       "END_TITLE": "End this session?",
       "END_MESSAGE": "{{number}} for {{name}} will be marked as completed.",
-      "END_AFTER_START": "You can end the session once it starts."
-    }
+      "END_AFTER_START": "You can end the session or mark it as missed once it starts.",
+      "NO_SHOW": "Mark as missed",
+      "NO_SHOW_TITLE": "Mark as missed?",
+      "NO_SHOW_MESSAGE": "{{number}} for {{name}} will be marked as missed. A refund minus the missed-booking fee will be owed to the customer.",
+      "CHANGE_BARBER": "Change barber",
+      "CANCEL_BOOKING": "Cancel booking",
+      "KEEP_BOOKING": "Keep booking",
+      "CANCEL_TITLE": "Cancel this booking?",
+      "CANCEL_HINT": "The customer sees this reason and is owed a full refund. They aren’t notified automatically, so call them.",
+      "CANCEL_REASON_LABEL": "Reason",
+      "CANCEL_REASON_PLACEHOLDER": "e.g. The barber is sick and no other barber is available",
+      "CANCEL_REASON_REQUIRED": "Write the reason for cancelling.",
+      "REASSIGN_TITLE": "Change barber",
+      "REASSIGN_HINT": "The booking keeps its time, chair and price. The customer isn’t notified automatically, so call them.",
+      "REASSIGN_LABEL": "Barbers of this branch",
+      "REASSIGN_LOADING": "Loading barbers…",
+      "REASSIGN_EMPTY": "This branch has no other active barber.",
+      "REASSIGN_CONFIRM": "Change barber",
+      "CANCELLATION": "Cancellation",
+      "CANCELLED_BY": "Cancelled by",
+      "BY_CUSTOMER": "The customer",
+      "BY_BRANCH": "The branch",
+      "CANCELLED_AT": "Cancelled on",
+      "CANCEL_REASON": "Reason",
+      "CUSTOMER_PROFILE": "Customer profile",
+      "REFUND_SENT": "Refund sent",
+      "REFUND_HINT": "The money is returned to the customer outside the app. Press the button once you have sent it.",
+      "REFUND_TITLE": "Mark the refund as sent?",
+      "REFUND_MESSAGE": "Confirm that you already returned {{amount}} to {{name}} for booking {{number}}. This can’t be undone."
+    },
+    "MARKED_NO_SHOW": "Booking marked as missed.",
+    "CANCELLED": "Booking cancelled.",
+    "BARBER_CHANGED": "Barber changed.",
+    "CUSTOMER_FILTER": "Showing bookings of {{name}}",
+    "CUSTOMER_FILTER_CLEAR": "Show all",
+    "CANCEL_REASON": {
+      "CHANGE_OF_PLANS": "Change of plans",
+      "BOOKED_BY_MISTAKE": "Booked by mistake",
+      "WANT_ANOTHER_TIME": "Wants another time",
+      "OTHER": "Other",
+      "UNKNOWN": "Unknown"
+    },
+    "REFUND_MARKED": "Refund recorded as sent."
   },
   "PAYMENT_REVIEWS": {
     "TITLE": "Payment reviews",
@@ -1244,6 +1294,62 @@
     "ERRORS": {
       "REASON_REQUIRED": "Write the reason for rejecting this booking.",
       "REASON_TOO_LONG": "The reason can’t be longer than 500 characters."
+    }
+  },
+  "CUSTOMERS": {
+    "TITLE": "Customers",
+    "SUBTITLE": "The people who booked with the salon, and how often they came.",
+    "SEARCH": "Search name or phone",
+    "TABS_LABEL": "Customers by group",
+    "TAB": {
+      "ALL": "All",
+      "VISITED_THIS_MONTH": "Visited this month",
+      "HAS_MISSED": "Has missed bookings",
+      "NOT_BACK": "Not back in 60 days"
+    },
+    "FILTER": {
+      "BRANCH": "Branch",
+      "ALL_BRANCHES": "All branches"
+    },
+    "COL": {
+      "CUSTOMER": "Customer",
+      "PHONE": "Phone",
+      "VISITS": "Visits",
+      "LAST_VISIT": "Last visit",
+      "MISSED": "Missed"
+    },
+    "LAST_VISIT": {
+      "NEVER": "Never",
+      "TODAY": "Today",
+      "YESTERDAY": "Yesterday"
+    },
+    "EMPTY_TITLE": "No customers yet",
+    "EMPTY_TEXT": "Customers appear here once they sign up in the app.",
+    "NO_RESULTS_TITLE": "No customers match",
+    "NO_RESULTS_TEXT": "Try another tab or clear the search.",
+    "CLEAR_FILTERS": "Clear filters",
+    "RESULTS": "Showing {{count}} of {{total}} customers",
+    "RESULTS_NONE": "No customers found",
+    "PROFILE": {
+      "BREADCRUMB": "Customer profile",
+      "BACK": "Back to customers",
+      "NOT_FOUND_TITLE": "This customer doesn’t exist",
+      "NOT_FOUND_TEXT": "Go back to the customers list.",
+      "SINCE": "Customer since {{date}}",
+      "STATS": "Visits and missed bookings",
+      "VISITS": "Completed visits",
+      "MISSED": "Missed bookings",
+      "LAST_MISSED": "Last missed: {{date}}",
+      "BOOKINGS": "Latest bookings",
+      "ALL_BOOKINGS": "All bookings ({{count}})",
+      "NO_BOOKINGS": "This customer hasn’t booked yet.",
+      "BY_CUSTOMER": "Cancelled by the customer",
+      "BY_BRANCH": "Cancelled by the branch",
+      "RATING": "Rating",
+      "CONTACT": "Contact",
+      "PHONE": "Phone",
+      "EMAIL": "Email",
+      "CALL": "Call"
     }
   }
 }

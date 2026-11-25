@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from "@angular/core";
-import { Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 
 import { LanguageService } from "@core/services/language.service";
@@ -98,8 +98,12 @@ export interface BookingRow {
  * refunds still owed; both come from the backend and ignore the other filters, so they stay put
  * while the user filters. The chip is a one-click shortcut for the refund filter.
  *
- * Read-only: a row opens the details page, where the booking's one action (End session) lives.
- * The booking number is a real link too, so keyboard and screen-reader users can open it.
+ * Read-only: a row opens the details page, where the booking's actions (End session, Missed,
+ * Cancel, Change barber) live. The booking number is a real link too, so keyboard and screen-reader
+ * users can open it.
+ *
+ * `?customerId=` (the "All bookings" link of the customer profile) shows ONE customer's bookings in
+ * every branch: the branch and barber filters give way to a chip that leaves that view.
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -127,6 +131,7 @@ export interface BookingRow {
 export class BookingsList implements OnInit {
   private readonly service = inject(BookingsService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
   private readonly language = inject(LanguageService);
 
@@ -141,6 +146,14 @@ export class BookingsList implements OnInit {
   protected readonly branchId = this.service.branchId;
   protected readonly noBranches = this.service.noBranches;
   protected readonly counters = this.service.counters;
+  protected readonly customerId = this.service.customerId;
+
+  /** The customer being shown: the name on the first row, or `#id` until a row arrives. */
+  protected readonly customerLabel = computed(() => {
+    const id = this.customerId();
+    if (id === undefined) return "";
+    return this.rows()[0]?.customer.fullName ?? `#${id}`;
+  });
 
   /** The table shows its skeleton while the branches or the first page are on their way. */
   protected readonly busy = computed(() => this.loading() || this.service.branchesLoading());
@@ -248,7 +261,11 @@ export class BookingsList implements OnInit {
 
   ngOnInit(): void {
     this.rangeError.set(false);
-    this.service.initialize();
+
+    const customerId = Number(this.route.snapshot.queryParamMap.get("customerId"));
+    this.service.initialize(
+      Number.isInteger(customerId) && customerId > 0 ? customerId : undefined,
+    );
   }
 
   // ── Filtering / paging ───────────────────────────────
@@ -311,6 +328,17 @@ export class BookingsList implements OnInit {
   protected clearFilters(): void {
     this.rangeError.set(false);
     this.service.clearFilters();
+  }
+
+  /** Leave one customer's bookings: drop `?customerId=` and go back to the branch's list. */
+  protected clearCustomer(): void {
+    this.rangeError.set(false);
+    this.router.navigate([], {
+      queryParams: { customerId: null },
+      queryParamsHandling: "merge",
+      replaceUrl: true,
+    });
+    this.service.clearCustomer();
   }
 
   /** A row (or its booking number) opens the booking's details page. */

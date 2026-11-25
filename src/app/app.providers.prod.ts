@@ -14,6 +14,8 @@ import { OfferApiRepository } from "@modules/offers/repository/offer-api.reposit
 import { OFFER_REPOSITORY } from "@modules/offers/repository/offer.repository";
 import { BookingApiRepository } from "@modules/bookings/repository/booking-api.repository";
 import { BOOKING_REPOSITORY } from "@modules/bookings/repository/booking.repository";
+import { CustomerApiRepository } from "@modules/customers/repository/customer-api.repository";
+import { CUSTOMER_REPOSITORY } from "@modules/customers/repository/customer.repository";
 import { PaymentReviewApiRepository } from "@modules/payment-reviews/repository/payment-review-api.repository";
 import { PAYMENT_REVIEW_REPOSITORY } from "@modules/payment-reviews/repository/payment-review.repository";
 import { UserApiRepository } from "@modules/users/repository/user-api.repository";
@@ -41,6 +43,7 @@ export const DATA_PROVIDERS: Provider[] = [
   { provide: PACKAGE_REPOSITORY, useClass: PackageApiRepository },
   { provide: OFFER_REPOSITORY, useClass: OfferApiRepository },
   { provide: BOOKING_REPOSITORY, useClass: BookingApiRepository },
+  { provide: CUSTOMER_REPOSITORY, useClass: CustomerApiRepository },
   { provide: PAYMENT_REVIEW_REPOSITORY, useClass: PaymentReviewApiRepository },
   { provide: USER_REPOSITORY, useClass: UserApiRepository },
   { provide: ROLE_REPOSITORY, useClass: RoleApiRepository },

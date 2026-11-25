@@ -1,0 +1,100 @@
+<div class="odl-page">
+  <app-page-header [title]="'CUSTOMERS.TITLE' | translate" [subtitle]="'CUSTOMERS.SUBTITLE' | translate" />
+
+  <!-- Tabs: every count is the selected branch's (or all branches') and ignores the search. -->
+  <app-tabs
+    [tabs]="tabs()"
+    [value]="'' + tab()"
+    [ariaLabel]="'CUSTOMERS.TABS_LABEL' | translate"
+    idPrefix="customers-tab"
+    [panelId]="panelId"
+    (changed)="onTab($event)"
+  />
+
+  <div class="toolbar">
+    <app-filter-select
+      [label]="'CUSTOMERS.FILTER.BRANCH' | translate"
+      [options]="branchOptions()"
+      [value]="branchValue()"
+      (changed)="onBranch($event)"
+    />
+    <app-search-input
+      [placeholder]="'CUSTOMERS.SEARCH' | translate"
+      [clearLabel]="'COMMON.CLEAR' | translate"
+      (search)="onSearch($event)"
+    />
+
+    @if (isFiltered()) {
+      <app-button variant="ghost" size="sm" iconClass="pi pi-filter-slash" (clicked)="clearFilters()">
+        {{ 'CUSTOMERS.CLEAR_FILTERS' | translate }}
+      </app-button>
+    }
+  </div>
+
+  <!-- Polite live region: says what the list shows after every tab / search / branch change. -->
+  <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ announcement() }}</p>
+
+  <div [id]="panelId" role="tabpanel" tabindex="-1" class="panel" [attr.aria-labelledby]="'customers-tab-' + tab()">
+    @if (hasError() && !rows().length) {
+      <div class="odl-card"><app-failed-state (retry)="reload()" /></div>
+    } @else {
+      <!-- A reload failed but the last page is still on screen: say so, keep the rows. -->
+      @if (hasError()) {
+        <div class="odl-card stale"><app-failed-state [compact]="true" (retry)="reload()" /></div>
+      }
+
+      <app-data-table
+        [data]="tableRows()"
+        [totalRecords]="meta()?.totalCount ?? 0"
+        [page]="meta()?.currentPage ?? 1"
+        [pageSize]="meta()?.pageSize ?? 20"
+        [loading]="loading()"
+        [caption]="'CUSTOMERS.TITLE' | translate"
+        [emptyTitle]="(isFiltered() ? 'CUSTOMERS.NO_RESULTS_TITLE' : 'CUSTOMERS.EMPTY_TITLE') | translate"
+        [emptyDescription]="(isFiltered() ? 'CUSTOMERS.NO_RESULTS_TEXT' : 'CUSTOMERS.EMPTY_TEXT') | translate"
+        emptyIcon="pi pi-users"
+        (pageChange)="onPage($event)"
+        (rowClick)="open($event)"
+      >
+        <ng-template odlCol="customer" [label]="'CUSTOMERS.COL.CUSTOMER' | translate" width="28%" let-row>
+          <span class="who">
+            <app-avatar size="md" [name]="row.name" />
+            <span class="cell-text strong" [attr.title]="row.name">{{ row.name }}</span>
+          </span>
+        </ng-template>
+        <ng-template odlCol="phone" [label]="'CUSTOMERS.COL.PHONE' | translate" width="180px" let-row>
+          <a class="phone" dir="ltr" [attr.href]="'tel:' + row.phone" (click)="$event.stopPropagation()">{{ row.phone }}</a>
+        </ng-template>
+        <ng-template odlCol="visits" [label]="'CUSTOMERS.COL.VISITS' | translate" width="110px" let-row>
+          <span class="u-num">{{ row.visits }}</span>
+        </ng-template>
+        <ng-template odlCol="lastVisit" [label]="'CUSTOMERS.COL.LAST_VISIT' | translate" width="160px" let-row>
+          <span class="cell-text">{{ row.lastVisit }}</span>
+        </ng-template>
+        <ng-template odlCol="missed" [label]="'CUSTOMERS.COL.MISSED' | translate" width="110px" let-row>
+          <span class="u-num" [class.missed]="row.hasMissed">{{ row.missed }}</span>
+        </ng-template>
+
+        <!-- Narrow viewport (< 768px): same data, laid out as a card. -->
+        <ng-template odlCard let-row>
+          <div class="card__top">
+            <app-avatar size="md" [name]="row.name" />
+            <span class="strong">{{ row.name }}</span>
+          </div>
+          <a class="phone card__phone" dir="ltr" [attr.href]="'tel:' + row.phone" (click)="$event.stopPropagation()">{{ row.phone }}</a>
+          <div class="card__meta">
+            <span>{{ 'CUSTOMERS.COL.VISITS' | translate }}: <span class="u-num">{{ row.visits }}</span></span>
+            <span>{{ 'CUSTOMERS.COL.LAST_VISIT' | translate }}: {{ row.lastVisit }}</span>
+            <span>{{ 'CUSTOMERS.COL.MISSED' | translate }}: <span class="u-num" [class.missed]="row.hasMissed">{{ row.missed }}</span></span>
+          </div>
+        </ng-template>
+
+        @if (isFiltered()) {
+          <app-button empty-action variant="secondary" size="sm" (clicked)="clearFilters()">
+            {{ 'CUSTOMERS.CLEAR_FILTERS' | translate }}
+          </app-button>
+        }
+      </app-data-table>
+    }
+  </div>
+</div>

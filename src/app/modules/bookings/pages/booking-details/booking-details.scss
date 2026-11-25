@@ -166,6 +166,16 @@
   }
 }
 
+.refund-hint {
+  margin: v.$space-3 0;
+}
+
+.customer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: v.$space-3;
+}
+
 .call {
   display: inline-flex;
   align-items: center;

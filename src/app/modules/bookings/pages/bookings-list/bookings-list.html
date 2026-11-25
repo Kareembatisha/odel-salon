@@ -20,24 +20,39 @@
       (changed)="onTab($event)"
     />
 
+    <!-- One customer's bookings (every branch): say whose, and offer the way back. -->
+    @if (customerId() !== undefined) {
+      <div class="customer-filter" role="status">
+        <i class="pi pi-user" aria-hidden="true"></i>
+        <span>{{ 'BOOKINGS.CUSTOMER_FILTER' | translate: { name: customerLabel() } }}</span>
+        <app-button variant="ghost" size="sm" iconClass="pi pi-times" (clicked)="clearCustomer()">
+          {{ 'BOOKINGS.CUSTOMER_FILTER_CLEAR' | translate }}
+        </app-button>
+      </div>
+    }
+
     <div class="toolbar">
-      <app-filter-select
-        [label]="'BOOKINGS.FILTER.BRANCH' | translate"
-        [options]="branchOptions()"
-        [value]="branchId() !== null ? '' + branchId() : ''"
-        (changed)="onBranch($event)"
-      />
+      @if (customerId() === undefined) {
+        <app-filter-select
+          [label]="'BOOKINGS.FILTER.BRANCH' | translate"
+          [options]="branchOptions()"
+          [value]="branchId() !== null ? '' + branchId() : ''"
+          (changed)="onBranch($event)"
+        />
+      }
       <app-search-input
         [placeholder]="'BOOKINGS.SEARCH' | translate"
         [clearLabel]="'COMMON.CLEAR' | translate"
         (search)="onSearch($event)"
       />
-      <app-filter-select
-        [label]="'BOOKINGS.FILTER.BARBER' | translate"
-        [options]="barberOptions()"
-        [value]="barberValue()"
-        (changed)="onBarber($event)"
-      />
+      @if (customerId() === undefined) {
+        <app-filter-select
+          [label]="'BOOKINGS.FILTER.BARBER' | translate"
+          [options]="barberOptions()"
+          [value]="barberValue()"
+          (changed)="onBarber($event)"
+        />
+      }
       <app-filter-select
         [label]="'BOOKINGS.FILTER.TYPE' | translate"
         [options]="typeOptions()"

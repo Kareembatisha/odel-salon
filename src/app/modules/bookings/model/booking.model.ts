@@ -1,8 +1,10 @@
 /**
  * booking.model.ts — data contracts for the Bookings feature.
  * Mirrors API Contract — Admin Bookings (GET /bookings, GET /bookings/{id},
- * PATCH /bookings/{id}/complete). The payment-review queue shares these enums and building blocks
- * (see `modules/payment-reviews`).
+ * PATCH /bookings/{id}/complete) and its additions: Admin Booking Cancellation (PATCH
+ * /bookings/{id}/cancel) and Admin Booking Actions (PATCH /bookings/{id}/no-show, PUT
+ * /bookings/{id}/barber). The payment-review queue shares these enums and building blocks (see
+ * `modules/payment-reviews`).
  *
  * `startAt` is salon-local (Cairo) time WITHOUT an offset (`yyyy-MM-ddTHH:mm:ss`): never feed it to
  * `new Date()` — use `utils/booking-dates.util.ts`.
@@ -33,7 +35,7 @@ export enum BookingStatus {
   Completed = 4,
   /** "Missed" — the customer didn't come. */
   NoShow = 5,
-  /** Cancelled by the customer before the start time. */
+  /** Cancelled — by the customer before the start time, or by the branch (see `cancellation`). */
   Cancelled = 6,
 }
 
@@ -132,6 +134,11 @@ export interface BookingsQuery {
   refundStatus?: RefundStatus;
   /** Booking number (`#OD-000482`, `OD-000482` or `482`), customer name or phone. */
   search?: string;
+  /**
+   * Only this customer's bookings (the "All bookings" link of the customer profile). Also narrows
+   * `meta.additionalData` to that customer.
+   */
+  customerId?: number;
 }
 
 export interface BookingDetailsItem extends BookingItemName {
@@ -154,12 +161,38 @@ export interface BookingDetailsCustomer extends BookingCustomerSummary {
   noShowCount: number;
 }
 
+/** CancellationReasonEnum — why a CUSTOMER cancelled from the app (may be null). */
+export enum CancelReason {
+  ChangeOfPlans = 0,
+  BookedByMistake = 1,
+  WantAnotherTime = 2,
+  Other = 3,
+}
+
+/** Set for Cancelled bookings only. */
+export interface BookingCancellation {
+  /** UTC ISO (an audit timestamp, unlike the salon-local `startAt`). */
+  cancelledAt: string;
+  /** true = staff cancelled it (show `note` and `cancelledByName`); false = the customer did. */
+  cancelledByBranch: boolean;
+  /** The staff member who cancelled; null when the customer did. */
+  cancelledByName: string | null;
+  /** Customer cancellations only (may be null). */
+  reason: CancelReason | null;
+  /** The reason the staff wrote — branch cancellations only. */
+  note: string | null;
+}
+
 /** What the admin may do with the booking right now — computed by the server. */
 export interface BookingActions {
-  /** Shows "End session" (Complete Booking). */
+  /** Shows "End session" (Complete Booking) and "Missed" (Mark Booking No-Show). */
   canComplete: boolean;
-  /** Shows "Refund sent". The contract has no endpoint for it yet. */
+  /** Shows "Refund sent" (Mark Booking Refunded): a refund is owed (`refund.status` is Waiting). */
   canMarkRefunded: boolean;
+  /** Shows "Cancel booking": PendingReview / Confirmed and not ended yet. */
+  canCancel: boolean;
+  /** Shows "Change barber" (Reassign Booking Barber): PendingReview / Confirmed and not ended yet. */
+  canReassign: boolean;
 }
 
 /** GET /bookings/{id} (404 when the booking doesn't exist). */
@@ -173,16 +206,19 @@ export interface BookingDetails {
   startAt: string;
   /** Sum of the services' durations. */
   durationMinutes: number;
-  /** `averageRating` is null while the barber has no reviews. */
-  barber: { fullName: string; averageRating: number | null };
+  /** `id` is what "Change barber" excludes and sends; `averageRating` is null until the barber has reviews. */
+  barber: { id: number; fullName: string; averageRating: number | null };
   /** Null for Home bookings. */
-  chair: { name: string } | null;
-  branch: { nameAr: string; nameEn: string };
+  chair: { id: number; name: string } | null;
+  /** `id` is the branch whose barbers "Change barber" lists. */
+  branch: { id: number; nameAr: string; nameEn: string };
   /** Home bookings only. The contract only shows `null`; read as free text. */
   homeAddress: string | null;
   items: BookingDetailsItem[];
   payment: BookingDetailsPayment;
   customer: BookingDetailsCustomer;
   refund: BookingRefund | null;
+  /** Cancelled bookings only. */
+  cancellation: BookingCancellation | null;
   actions: BookingActions;
 }

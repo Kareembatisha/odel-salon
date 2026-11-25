@@ -1,0 +1,297 @@
+@use "styles/variables" as v;
+
+:host {
+  display: block;
+  width: 100%;
+  color: v.$text;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  align-self: flex-start;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  text-decoration: none;
+
+  &:hover {
+    color: v.$text;
+  }
+  i {
+    font-size: v.$text-xs;
+  }
+}
+:host-context([dir="rtl"]) .back i {
+  transform: scaleX(-1);
+}
+
+.skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+}
+.sk-card {
+  padding: v.$space-5;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+
+  &__text {
+    min-width: 0;
+  }
+  &__name {
+    margin: 0;
+    font-size: v.$text-2xl;
+    font-weight: v.$fw-bold;
+    overflow-wrap: anywhere;
+  }
+  &__since {
+    margin: v.$space-1 0 0;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+  }
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: v.$space-5;
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-5;
+  min-width: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: v.$space-4;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  padding: v.$space-4 v.$space-5;
+
+  &__label {
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+  }
+  &__value {
+    font-size: v.$text-2xl;
+    font-weight: v.$fw-bold;
+  }
+  &__hint {
+    color: v.$text-muted;
+    font-size: v.$text-xs;
+  }
+}
+
+.panel {
+  min-width: 0;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: v.$space-3;
+  }
+  &__title {
+    margin: 0;
+    font-size: v.$text-lg;
+    font-weight: v.$fw-semibold;
+  }
+  &__title + .facts {
+    margin-top: v.$space-4;
+  }
+}
+
+.muted {
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+}
+.strong {
+  font-weight: v.$fw-semibold;
+}
+.empty {
+  margin: v.$space-4 0 0;
+}
+
+.link {
+  color: v.$primary-text;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  text-decoration: none;
+  unicode-bidi: isolate;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ── Latest bookings ─────────────────────────────────────
+.bookings {
+  display: flex;
+  flex-direction: column;
+  margin: v.$space-4 0 0;
+  padding: 0;
+  list-style: none;
+}
+.booking {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  padding-block: v.$space-3;
+  border-top: 1px solid v.$border;
+
+  &:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  &__top,
+  &__notes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: v.$space-2;
+  }
+  &__spacer {
+    flex: 1;
+  }
+  &__body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: v.$space-3;
+  }
+  &__services {
+    overflow-wrap: anywhere;
+  }
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: v.$space-1 v.$space-3;
+  }
+}
+
+// Booking numbers stay left-to-right (and readable) inside an RTL page.
+.number {
+  color: inherit;
+  font-weight: v.$fw-semibold;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  unicode-bidi: isolate;
+  &:hover {
+    color: v.$primary-text;
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 2px solid v.$primary;
+    outline-offset: 2px;
+    border-radius: v.$radius-xs;
+  }
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-1;
+
+  .pi-star-fill {
+    color: v.$warning;
+    font-size: v.$text-sm;
+  }
+}
+
+.refund {
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+  &--waiting {
+    color: v.$warning-text;
+    font-weight: v.$fw-medium;
+  }
+}
+
+// ── Contact ─────────────────────────────────────────────
+.facts {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  min-width: 0;
+  padding-block: v.$space-3;
+  border-top: 1px solid v.$border;
+
+  &:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: v.$space-2;
+    color: v.$text-secondary;
+    font-size: v.$text-sm;
+    i {
+      color: v.$text-muted;
+    }
+  }
+  dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: v.$space-2;
+    margin: 0;
+    font-size: v.$text-base;
+    font-weight: v.$fw-medium;
+    overflow-wrap: anywhere;
+  }
+}
+
+.call {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  margin-top: v.$space-4;
+  padding: v.$space-2 v.$space-4;
+  border: 1px solid v.$border-strong;
+  border-radius: v.$radius-md;
+  color: v.$text;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-semibold;
+  text-decoration: none;
+  transition: border-color v.$transition-normal;
+
+  &:hover {
+    border-color: v.$text-muted;
+  }
+  &:focus-visible {
+    outline: 0;
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+  }
+}
+
+@media (max-width: v.$bp-xl) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

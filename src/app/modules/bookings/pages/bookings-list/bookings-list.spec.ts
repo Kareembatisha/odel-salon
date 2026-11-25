@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { Router, provideRouter } from "@angular/router";
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from "@angular/router";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
 import { Observable, Subject, of, throwError } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -88,6 +88,8 @@ describe("BookingsList", () => {
   let repo: FakeBookingRepo;
   let fixture: ComponentFixture<BookingsList>;
   let branches: Array<{ id: number; nameAr: string; nameEn: string }>;
+  /** The page's query string (`?customerId=` is the only parameter it reads). */
+  let query: Record<string, string>;
 
   const el = () => fixture.nativeElement as HTMLElement;
   const text = () => plain(el().textContent);
@@ -126,6 +128,7 @@ describe("BookingsList", () => {
 
   beforeEach(() => {
     repo = new FakeBookingRepo();
+    query = {};
     branches = [
       { id: 2, nameAr: "فرع ب", nameEn: "Branch B" },
       { id: 1, nameAr: "فرع أ", nameEn: "Branch A" },
@@ -135,6 +138,16 @@ describe("BookingsList", () => {
       providers: [
         provideRouter([{ path: "main/bookings/:id", component: DetailsStub }]),
         { provide: BOOKING_REPOSITORY, useValue: repo },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              get queryParamMap() {
+                return convertToParamMap(query);
+              },
+            },
+          },
+        },
         {
           provide: BARBER_REPOSITORY,
           useValue: {
@@ -165,6 +178,63 @@ describe("BookingsList", () => {
     localStorage.removeItem("odl_lang");
     document.documentElement.removeAttribute("lang");
     document.documentElement.removeAttribute("dir");
+  });
+
+  describe("one customer's bookings (?customerId=)", () => {
+    const withCustomer = (value: string) => (query = { customerId: value });
+
+    it("lists that customer's bookings in every branch and says whose they are", async () => {
+      withCustomer("1203");
+      await open(
+        envelope([
+          booking(482, { customer: { fullName: "Ahmed Hassan", phoneNumber: "+201001234567" } }),
+        ]),
+      );
+
+      expect(repo.last).toMatchObject({ customerId: 1203, tab: 0, pageNumber: 1 });
+      expect(repo.last.branchId).toBeUndefined();
+      expect(plain(el().querySelector(".customer-filter")?.textContent)).toContain(
+        "Showing bookings of Ahmed Hassan",
+      );
+    });
+
+    it("gives way: the branch and barber filters are hidden", async () => {
+      withCustomer("1203");
+      await open();
+
+      expect(select("Branch")).toBeNull();
+      expect(select("Barber")).toBeNull();
+      expect(select("Booking type")).not.toBeNull(); // the other filters stay
+    });
+
+    it("'Show all' goes back to the selected branch's list", async () => {
+      withCustomer("1203");
+      await open();
+      const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+
+      el().querySelector<HTMLButtonElement>(".customer-filter button")!.click();
+      await settle();
+
+      expect(navigate).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ queryParams: { customerId: null } }),
+      );
+      expect(repo.last).toMatchObject({ branchId: 1, pageNumber: 1 });
+      expect(repo.last.customerId).toBeUndefined();
+      expect(el().querySelector(".customer-filter")).toBeNull();
+      expect(select("Branch")).not.toBeNull();
+    });
+
+    it("ignores a customerId that isn't a positive whole number", async () => {
+      for (const value of ["abc", "0", "-3", "1.5"]) {
+        withCustomer(value);
+        repo.queries = [];
+        await open();
+
+        expect(repo.last.customerId).toBeUndefined();
+        expect(el().querySelector(".customer-filter")).toBeNull();
+      }
+    });
   });
 
   describe("opening", () => {

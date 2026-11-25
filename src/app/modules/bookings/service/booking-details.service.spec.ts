@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NotificationService } from "@core/services/notification.service";
 import { ApiResponse } from "@shared/model/api_response.model";
+import { BARBER_REPOSITORY } from "../../barbers/repository/barber.repository";
 import { BookingDetails, BookingStatus, BookingType, PaymentMethod } from "../model/booking.model";
 import { BOOKING_REPOSITORY } from "../repository/booking.repository";
 import { BookingDetailsService } from "./booking-details.service";
@@ -16,9 +17,9 @@ const details = (): BookingDetails => ({
   type: BookingType.Vip,
   startAt: "2026-11-13T19:00:00",
   durationMinutes: 50,
-  barber: { fullName: "Karim Adel", averageRating: 4.9 },
-  chair: { name: "VIP 1" },
-  branch: { nameAr: "مدينة نصر", nameEn: "Nasr City" },
+  barber: { id: 7, fullName: "Karim Adel", averageRating: 4.9 },
+  chair: { id: 3, name: "VIP 1" },
+  branch: { id: 1, nameAr: "مدينة نصر", nameEn: "Nasr City" },
   homeAddress: null,
   items: [],
   payment: { method: PaymentMethod.InstaPay, totalPrice: 340, subtotal: 340 },
@@ -30,7 +31,8 @@ const details = (): BookingDetails => ({
     noShowCount: 1,
   },
   refund: null,
-  actions: { canComplete: true, canMarkRefunded: false },
+  cancellation: null,
+  actions: { canComplete: true, canMarkRefunded: false, canCancel: false, canReassign: false },
 });
 
 const envelope = <T>(over: Partial<ApiResponse<T>>): ApiResponse<T> => ({
@@ -48,7 +50,12 @@ describe("BookingDetailsService", () => {
   let repo: {
     getBookingById: (id: number) => Observable<ApiResponse<BookingDetails>>;
     completeBooking: (id: number) => Observable<ApiResponse<null>>;
+    markRefunded: (id: number) => Observable<ApiResponse<null>>;
+    cancelBooking: (id: number, reason: string) => Observable<ApiResponse<null>>;
+    markNoShow: (id: number) => Observable<ApiResponse<null>>;
+    reassignBarber: (id: number, barberId: number) => Observable<ApiResponse<null>>;
   };
+  let barbers: { getBarbers: ReturnType<typeof vi.fn> };
   let success: ReturnType<typeof vi.fn>;
 
   const read = async (id = 482) =>
@@ -59,10 +66,27 @@ describe("BookingDetailsService", () => {
     repo = {
       getBookingById: () => of(envelope({ data: details() })),
       completeBooking: () => of(envelope<null>({ data: null })),
+      markRefunded: () => of(envelope<null>({ data: null })),
+      cancelBooking: () => of(envelope<null>({ data: null })),
+      markNoShow: () => of(envelope<null>({ data: null })),
+      reassignBarber: () => of(envelope<null>({ data: null })),
+    };
+    barbers = {
+      getBarbers: vi.fn(() =>
+        of(
+          envelope({
+            data: [
+              { id: 7, fullName: "Karim Adel" },
+              { id: 8, fullName: "Youssef Samir" },
+            ] as never,
+          }),
+        ),
+      ),
     };
     TestBed.configureTestingModule({
       providers: [
         { provide: BOOKING_REPOSITORY, useValue: repo },
+        { provide: BARBER_REPOSITORY, useValue: barbers },
         { provide: NotificationService, useValue: { success } },
       ],
     });
@@ -160,6 +184,151 @@ describe("BookingDetailsService", () => {
       second.next(envelope<null>({ data: null }));
       second.complete();
       expect(service.saving()).toBe(false);
+    });
+  });
+
+  describe("markNoShow", () => {
+    const run = () => new Promise<boolean>((resolve) => service.markNoShow(482).subscribe(resolve));
+
+    it("resolves true and toasts the localized message", async () => {
+      const spy = vi.fn(() => of(envelope<null>({ data: null })));
+      repo.markNoShow = spy;
+
+      expect(await run()).toBe(true);
+      expect(spy).toHaveBeenCalledWith(482);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.MARKED_NO_SHOW");
+    });
+
+    it("resolves false, with no toast, when the request fails (409)", async () => {
+      repo.markNoShow = () => throwError(() => ({ status: 409 }));
+
+      expect(await run()).toBe(false);
+      expect(success).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("cancel", () => {
+    const run = () =>
+      new Promise<boolean>((resolve) => service.cancel(482, "Barber is sick").subscribe(resolve));
+
+    it("sends the reason and toasts the localized message", async () => {
+      const spy = vi.fn(() => of(envelope<null>({ data: null })));
+      repo.cancelBooking = spy;
+
+      expect(await run()).toBe(true);
+      expect(spy).toHaveBeenCalledWith(482, "Barber is sick");
+      expect(success).toHaveBeenCalledWith("BOOKINGS.CANCELLED");
+    });
+
+    it("resolves false when the request fails (409) or answers status:false", async () => {
+      repo.cancelBooking = () => throwError(() => ({ status: 409 }));
+      expect(await run()).toBe(false);
+
+      repo.cancelBooking = () => of(envelope<null>({ status: false, message: "no", data: null }));
+      expect(await run()).toBe(false);
+      expect(success).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("reassignBarber", () => {
+    const run = () =>
+      new Promise<boolean>((resolve) => service.reassignBarber(482, 8).subscribe(resolve));
+
+    it("sends the barber and toasts the localized message", async () => {
+      const spy = vi.fn(() => of(envelope<null>({ data: null })));
+      repo.reassignBarber = spy;
+
+      expect(await run()).toBe(true);
+      expect(spy).toHaveBeenCalledWith(482, 8);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.BARBER_CHANGED");
+    });
+
+    it("resolves false when the barber isn't available (409)", async () => {
+      repo.reassignBarber = () => throwError(() => ({ status: 409 }));
+
+      expect(await run()).toBe(false);
+      expect(success).not.toHaveBeenCalled();
+    });
+
+    it("counts as 'saving' while it runs", () => {
+      const hold = new Subject<ApiResponse<null>>();
+      repo.reassignBarber = () => hold;
+
+      service.reassignBarber(482, 8).subscribe();
+      expect(service.saving()).toBe(true);
+
+      hold.next(envelope<null>({ data: null }));
+      hold.complete();
+      expect(service.saving()).toBe(false);
+    });
+  });
+
+  describe("markRefunded", () => {
+    const run = () =>
+      new Promise<boolean>((resolve) => service.markRefunded(482).subscribe(resolve));
+
+    it("resolves true and toasts the localized message", async () => {
+      const spy = vi.fn(() => of(envelope<null>({ data: null })));
+      repo.markRefunded = spy;
+
+      expect(await run()).toBe(true);
+      expect(spy).toHaveBeenCalledWith(482);
+      expect(success).toHaveBeenCalledWith("BOOKINGS.REFUND_MARKED");
+    });
+
+    it("resolves false, with no toast, when it was already marked or has no refund (409)", async () => {
+      repo.markRefunded = () => throwError(() => ({ status: 409 }));
+
+      expect(await run()).toBe(false);
+      expect(success).not.toHaveBeenCalled();
+    });
+
+    it("counts as 'saving' while it runs", () => {
+      const hold = new Subject<ApiResponse<null>>();
+      repo.markRefunded = () => hold;
+
+      service.markRefunded(482).subscribe();
+      expect(service.saving()).toBe(true);
+
+      hold.next(envelope<null>({ data: null }));
+      hold.complete();
+      expect(service.saving()).toBe(false);
+    });
+  });
+
+  describe("loadReassignOptions", () => {
+    const load = () =>
+      new Promise((resolve) => service.loadReassignOptions(details()).subscribe(resolve));
+
+    it("lists the ACTIVE barbers of the booking's branch, found by id, without the booking's own", async () => {
+      expect(await load()).toEqual([{ id: 8, fullName: "Youssef Samir" }]);
+      expect(barbers.getBarbers).toHaveBeenCalledWith({
+        branchId: 1, // branch.id of the booking
+        isActive: true,
+        pageNumber: 1,
+        pageSize: 100,
+      });
+    });
+
+    it("excludes the booking's barber by id, not by name (two barbers may share a name)", async () => {
+      barbers.getBarbers = vi.fn(() =>
+        of(
+          envelope({
+            data: [
+              { id: 7, fullName: "Karim Adel" },
+              { id: 12, fullName: "Karim Adel" },
+            ] as never,
+          }),
+        ),
+      );
+
+      expect(await load()).toEqual([{ id: 12, fullName: "Karim Adel" }]);
+    });
+
+    it("gives an empty list when reading the barbers fails", async () => {
+      barbers.getBarbers = vi.fn(() => throwError(() => ({ status: 500 })));
+
+      expect(await load()).toEqual([]);
     });
   });
 });

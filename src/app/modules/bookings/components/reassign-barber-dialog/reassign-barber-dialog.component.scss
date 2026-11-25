@@ -1,0 +1,115 @@
+@use "styles/variables" as v;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: v.$z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: v.$space-4;
+  background: v.$overlay;
+  backdrop-filter: blur(2px);
+  animation: fade 0.16s ease-out;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - #{v.$space-8});
+  overflow-y: auto;
+  padding: v.$space-8 v.$space-6 v.$space-6;
+  background: v.$surface-raised;
+  border: 1px solid v.$border;
+  border-radius: v.$radius-xl;
+  box-shadow: v.$shadow-lg;
+  text-align: center;
+  animation: pop 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: v.$radius-full;
+    background: v.$primary-soft;
+    color: v.$primary-text;
+    font-size: v.$text-xl;
+  }
+  &__title {
+    margin: v.$space-4 0 0;
+    font-size: v.$text-xl;
+    font-weight: v.$fw-semibold;
+  }
+  &__hint {
+    margin: v.$space-2 0 v.$space-4;
+    color: v.$text-secondary;
+  }
+  &__empty {
+    margin: v.$space-4 0;
+    color: v.$text-secondary;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: v.$space-3;
+    margin-top: v.$space-5;
+  }
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-align: start;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  padding: v.$space-3;
+  background: v.$surface;
+  border: 1px solid v.$border-strong;
+  border-radius: v.$radius-md;
+  cursor: pointer;
+  transition:
+    border-color v.$transition-normal,
+    background v.$transition-normal;
+
+  &:hover {
+    border-color: v.$text-muted;
+  }
+  &:has(input:focus-visible) {
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px v.tint(v.$primary, 22%);
+  }
+
+  input {
+    accent-color: v.$primary;
+  }
+
+  &--selected {
+    background: v.$primary-soft;
+    border-color: v.$primary-soft-border;
+    color: v.$primary-text;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}

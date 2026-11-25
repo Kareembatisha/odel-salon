@@ -91,4 +91,11 @@ describe("buildBookingsParams", () => {
       buildBookingsParams({ pageNumber: 1, pageSize: 20, search: "  #482 " }).get("search"),
     ).toBe("#482");
   });
+
+  it("sends customerId when it is set, and omits it otherwise", () => {
+    expect(
+      buildBookingsParams({ pageNumber: 1, pageSize: 20, customerId: 1203 }).get("customerId"),
+    ).toBe("1203");
+    expect(buildBookingsParams({ pageNumber: 1, pageSize: 20 }).has("customerId")).toBe(false);
+  });
 });

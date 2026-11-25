@@ -123,6 +123,13 @@ export const NAV_SECTIONS: NavSection[] = [
         route: "/main/bookings/payment-reviews",
         permission: PERMISSIONS.Booking.View,
       },
+      {
+        id: "customers",
+        labelKey: "LAYOUT.NAV.CUSTOMERS",
+        icon: "pi pi-users",
+        route: "/main/customers",
+        permission: PERMISSIONS.Customer.View,
+      },
     ],
   },
   // Developer reference — never shipped to production (environment.showDesignSystem = false).

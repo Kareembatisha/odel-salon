@@ -33,4 +33,20 @@ export class BookingApiRepository implements IBookingRepository {
   completeBooking(id: number): Observable<ApiResponse<null>> {
     return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/complete`, null);
   }
+
+  cancelBooking(id: number, reason: string): Observable<ApiResponse<null>> {
+    return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/cancel`, { reason });
+  }
+
+  markRefunded(id: number): Observable<ApiResponse<null>> {
+    return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/refund`, null);
+  }
+
+  markNoShow(id: number): Observable<ApiResponse<null>> {
+    return this.http.patch<ApiResponse<null>>(`${this.url}/${id}/no-show`, null);
+  }
+
+  reassignBarber(id: number, barberId: number): Observable<ApiResponse<null>> {
+    return this.http.put<ApiResponse<null>>(`${this.url}/${id}/barber`, { barberId });
+  }
 }

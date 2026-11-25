@@ -5,12 +5,16 @@ import { Observable } from "rxjs";
 import { MockBooking, MockDb } from "@core/mock/mock-db";
 import {
   bookingDuration,
+  bookingEndAt,
   bookingTotal,
+  canCancelBooking,
   canCompleteBooking,
   customerStats,
   isBookingInProgress,
+  isOpenBooking,
   isRefundWaiting,
   isUpcomingBooking,
+  noShowRefund,
 } from "@core/mock/mock-bookings";
 import {
   mockFail,
@@ -28,12 +32,19 @@ import {
   BookingStatus,
   BookingTab,
   BookingsQuery,
+  RefundStatus,
 } from "../model/booking.model";
 import { bookingDay } from "../utils/booking-dates.util";
 import { IBookingRepository } from "./booking.repository";
 
 /** Largest page the API serves. */
 const MAX_PAGE_SIZE = 100;
+
+/** Longest reason the API accepts for a cancellation. */
+const MAX_REASON_LENGTH = 500;
+
+/** The staff member the mock records as the one who cancelled. */
+const MOCK_STAFF_NAME = "Branch staff";
 
 /** Mock barber ratings (null = no reviews yet), picked by barber id so a barber keeps one rating. */
 const RATINGS: Array<number | null> = [4.9, 4.7, null, 4.5, 4.8, 4.6];
@@ -43,9 +54,10 @@ const RATINGS: Array<number | null> = [4.9, 4.7, null, 4.5, 4.8, 4.6];
  *
  * Reads from and writes to the shared {@link MockDb} (the same bookings the payment-review queue and
  * the barbers' attendance use) and enforces the contract's rules: tabs and filters, ordering, the
- * "Today" / "Waiting" counters of the selected branch, 404 for a missing booking, and for "End
- * session" a 409 before the start time or when the booking isn't Confirmed. The time-driven changes
- * (expiry, auto-completion) are applied before every call.
+ * "Today" / "Waiting" counters of the selected branch (or customer), 404 for a missing booking, and
+ * for the actions their 400 / 409 answers: "End session" and "Missed" only after the start time of a
+ * Confirmed booking, "Cancel" and "Reassign barber" only while a pending / confirmed booking hasn't
+ * ended. The time-driven changes (expiry, auto-completion) are applied before every call.
  */
 @Injectable({ providedIn: "root" })
 export class BookingMockRepository implements IBookingRepository {
@@ -77,6 +89,7 @@ export class BookingMockRepository implements IBookingRepository {
         this.inTab(b, tab, today, now) &&
         (q.branchId === undefined || b.branchId === q.branchId) &&
         (q.barberId === undefined || b.barberId === q.barberId) &&
+        (q.customerId === undefined || b.customerId === q.customerId) &&
         (q.type === undefined || b.type === q.type) &&
         (!statuses.size || statuses.has(b.status)) &&
         (!q.dateFrom || day >= q.dateFrom) &&
@@ -99,9 +112,12 @@ export class BookingMockRepository implements IBookingRepository {
     const pageNumber = Math.max(1, q.pageNumber);
     const start = (pageNumber - 1) * pageSize;
 
-    // Counters belong to the selected branch only — the other filters and the search don't move them.
+    // Counters belong to the selected branch (and customer) only — the other filters and the search
+    // don't move them.
     const ofBranch = this.db.bookings.filter(
-      (b) => q.branchId === undefined || b.branchId === q.branchId,
+      (b) =>
+        (q.branchId === undefined || b.branchId === q.branchId) &&
+        (q.customerId === undefined || b.customerId === q.customerId),
     );
 
     return mockReplyWithMeta(
@@ -152,9 +168,127 @@ export class BookingMockRepository implements IBookingRepository {
     return mockReply(null, "Booking Updated Successfully");
   }
 
+  /** Pending / confirmed → Cancelled by the branch, with a full refund owed. */
+  cancelBooking(id: number, reason: string): Observable<ApiResponse<null>> {
+    const now = new Date();
+    this.db.settleBookings(now);
+
+    const text = reason.trim();
+    if (!text || text.length > MAX_REASON_LENGTH) {
+      return mockInvalid(this.notify, "Reason", "BOOKINGS.ERRORS.INVALID_REASON");
+    }
+
+    const booking = this.db.bookings.find((b) => b.id === id);
+    if (!booking) return this.fail("BOOKINGS.ERRORS.NOT_FOUND", 404);
+    if (!isOpenBooking(booking)) return this.fail("BOOKINGS.ERRORS.NOT_ALLOWED", 409);
+    if (!canCancelBooking(booking, now)) return this.fail("BOOKINGS.ERRORS.ALREADY_ENDED", 409);
+
+    booking.status = BookingStatus.Cancelled;
+    booking.refund = {
+      status: RefundStatus.Waiting,
+      amount: bookingTotal(booking),
+      feeAmount: null,
+    };
+    booking.cancellation = {
+      cancelledAt: now.toISOString(),
+      cancelledByBranch: true,
+      cancelledByName: MOCK_STAFF_NAME,
+      reason: null,
+      note: text,
+    };
+    return mockReply(null, "Booking Updated Successfully");
+  }
+
+  /**
+   * "Refund sent": the money was returned outside the app. Only a booking with a refund still
+   * Waiting can be marked; its status doesn't change.
+   */
+  markRefunded(id: number): Observable<ApiResponse<null>> {
+    this.db.settleBookings(new Date());
+
+    const booking = this.db.bookings.find((b) => b.id === id);
+    if (!booking) return this.fail("BOOKINGS.ERRORS.NOT_FOUND", 404);
+    if (!booking.refund) return this.fail("BOOKINGS.ERRORS.NOT_ALLOWED", 409);
+    if (booking.refund.status === RefundStatus.Sent) {
+      return this.fail("BOOKINGS.ERRORS.REFUND_ALREADY_SENT", 409);
+    }
+
+    booking.refund.status = RefundStatus.Sent;
+    return mockReply(null, "Booking Updated Successfully");
+  }
+
+  /** Confirmed → NoShow after the start time; the price minus the no-show fee becomes owed. */
+  markNoShow(id: number): Observable<ApiResponse<null>> {
+    const now = new Date();
+    this.db.settleBookings(now);
+
+    const booking = this.db.bookings.find((b) => b.id === id);
+    if (!booking) return this.fail("BOOKINGS.ERRORS.NOT_FOUND", 404);
+    if (booking.status !== BookingStatus.Confirmed) {
+      return this.fail("BOOKINGS.ERRORS.NOT_ALLOWED", 409);
+    }
+    if (!canCompleteBooking(booking, now)) return this.fail("BOOKINGS.ERRORS.NOT_STARTED", 409);
+
+    booking.status = BookingStatus.NoShow;
+    booking.refund = { status: RefundStatus.Waiting, ...noShowRefund(bookingTotal(booking)) };
+    return mockReply(null, "Booking Updated Successfully");
+  }
+
+  /**
+   * Moves a pending / confirmed booking that hasn't ended to another barber of the same branch.
+   * The new barber must be active, present today (when the booking is today) and free at that time.
+   * (The real API also counts the travel time of Home bookings; the mock doesn't.)
+   */
+  reassignBarber(id: number, barberId: number): Observable<ApiResponse<null>> {
+    const now = new Date();
+    this.db.settleBookings(now);
+
+    const booking = this.db.bookings.find((b) => b.id === id);
+    if (!booking) return this.fail("BOOKINGS.ERRORS.NOT_FOUND", 404);
+
+    const barber = this.db.barbers.find((b) => b.id === barberId);
+    if (!barber) return mockInvalid(this.notify, "BarberId", "BOOKINGS.ERRORS.BARBER_NOT_FOUND");
+    if (barber.branchId !== booking.branchId) {
+      return mockInvalid(this.notify, "BarberId", "BOOKINGS.ERRORS.BARBER_OTHER_BRANCH");
+    }
+
+    if (!isOpenBooking(booking)) return this.fail("BOOKINGS.ERRORS.NOT_ALLOWED", 409);
+    if (!canCancelBooking(booking, now)) return this.fail("BOOKINGS.ERRORS.ALREADY_ENDED", 409);
+    if (barber.id === booking.barberId) return mockReply(null, "Booking Updated Successfully");
+
+    if (!this.isBarberFree(barber.id, booking, now)) {
+      return this.fail("BOOKINGS.ERRORS.BARBER_UNAVAILABLE", 409);
+    }
+
+    booking.barberId = barber.id;
+    return mockReply(null, "Booking Updated Successfully");
+  }
+
   // ----------------------------------------------------------
   // Helpers
   // ----------------------------------------------------------
+
+  /** Active, present today (only the day's sheet exists), and no other open booking overlapping. */
+  private isBarberFree(barberId: number, booking: MockBooking, now: Date): boolean {
+    const barber = this.db.barbers.find((b) => b.id === barberId);
+    if (!barber?.isActive) return false;
+
+    const today = cairoToday(now);
+    if (bookingDay(booking.startAt) === today) {
+      const entry = this.db.barberAttendance[barberId];
+      if (!entry || entry.date !== today || !entry.isPresent) return false;
+    }
+
+    const end = bookingEndAt(booking);
+    return !this.db.bookings.some(
+      (b) =>
+        b.id !== booking.id &&
+        b.barberId === barberId &&
+        isOpenBooking(b) &&
+        b.startAt < end &&
+        bookingEndAt(b) > booking.startAt,
+    );
+  }
 
   private fail(key: string, status: number): Observable<never> {
     return mockFail(this.notify, this.translate.instant(key), status);
@@ -229,11 +363,12 @@ export class BookingMockRepository implements IBookingRepository {
       startAt: b.startAt,
       durationMinutes: bookingDuration(b),
       barber: {
+        id: b.barberId,
         fullName: barber?.fullName ?? "",
         averageRating: RATINGS[b.barberId % RATINGS.length],
       },
-      chair: chair ? { name: chair.name } : null,
-      branch: { nameAr: branch?.nameAr ?? "", nameEn: branch?.nameEn ?? "" },
+      chair: chair ? { id: chair.id, name: chair.name } : null,
+      branch: { id: b.branchId, nameAr: branch?.nameAr ?? "", nameEn: branch?.nameEn ?? "" },
       homeAddress: b.homeAddress,
       items: b.items.map((i) => ({
         nameAr: i.nameAr,
@@ -249,9 +384,12 @@ export class BookingMockRepository implements IBookingRepository {
         ...customerStats(this.db.bookings, b.customerId),
       },
       refund: b.refund ? { ...b.refund } : null,
+      cancellation: b.cancellation ? { ...b.cancellation } : null,
       actions: {
         canComplete: canCompleteBooking(b, now),
         canMarkRefunded: isRefundWaiting(b),
+        canCancel: canCancelBooking(b, now),
+        canReassign: canCancelBooking(b, now),
       },
     };
   }

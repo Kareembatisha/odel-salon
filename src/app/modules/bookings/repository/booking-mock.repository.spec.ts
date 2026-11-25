@@ -65,14 +65,14 @@ describe("BookingMockRepository", () => {
 
   describe("getBookings — paging and counters", () => {
     it("pages the selected branch, newest first (the 'All' tab)", async () => {
-      const res = await settle(repo.getBookings({ pageNumber: 1, pageSize: 20, branchId: 1 }));
+      const res = await settle(repo.getBookings({ pageNumber: 1, pageSize: 4, branchId: 1 }));
 
-      expect(res.data).toHaveLength(20);
+      expect(res.data).toHaveLength(4);
       expect(res.meta).toMatchObject({
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 4,
         totalPages: 3,
-        totalCount: 42,
+        totalCount: 9,
         hasPreviousPage: false,
         hasNextPage: true,
       });
@@ -81,9 +81,9 @@ describe("BookingMockRepository", () => {
     });
 
     it("serves the last page with what is left", async () => {
-      const res = await settle(repo.getBookings({ pageNumber: 3, pageSize: 20, branchId: 1 }));
+      const res = await settle(repo.getBookings({ pageNumber: 3, pageSize: 4, branchId: 1 }));
 
-      expect(res.data).toHaveLength(2);
+      expect(res.data).toHaveLength(1);
       expect(res.meta).toMatchObject({ currentPage: 3, hasPreviousPage: true, hasNextPage: false });
     });
 
@@ -101,7 +101,7 @@ describe("BookingMockRepository", () => {
         refundWaitingCount: inBranch.filter((b) => b.refund?.status === RefundStatus.Waiting)
           .length,
       });
-      expect(res.meta!.additionalData).toEqual({ todayCount: 13, refundWaitingCount: 6 });
+      expect(res.meta!.additionalData).toEqual({ todayCount: 6, refundWaitingCount: 3 });
     });
 
     it("does not let the other filters or the search move the counters", async () => {
@@ -118,8 +118,8 @@ describe("BookingMockRepository", () => {
     });
 
     it("counts another branch on its own, and every branch when none is selected", async () => {
-      expect((await page({ branchId: 2 })).meta!.totalCount).toBe(6);
-      expect((await page({ branchId: undefined })).meta!.totalCount).toBe(62);
+      expect((await page({ branchId: 2 })).meta!.totalCount).toBe(0); // the seed has none there
+      expect((await page({ branchId: undefined })).meta!.totalCount).toBe(9);
       expect((await page({ branchId: 2 })).meta!.additionalData).toMatchObject({
         todayCount: db.bookings.filter((b) => b.branchId === 2 && b.startAt.startsWith(TODAY))
           .length,
@@ -131,7 +131,7 @@ describe("BookingMockRepository", () => {
     it("Today: the branch's bookings of today, soonest first", async () => {
       const res = await page({ tab: BookingTab.Today });
 
-      expect(res.data).toHaveLength(13);
+      expect(res.data).toHaveLength(6);
       expect(res.data!.every((b) => b.startAt.startsWith(TODAY))).toBe(true);
       const starts = res.data!.map((b) => b.startAt);
       expect(starts).toEqual([...starts].sort());
@@ -140,7 +140,7 @@ describe("BookingMockRepository", () => {
     it("Upcoming: pending / confirmed bookings that haven't ended, soonest first", async () => {
       const res = await page({ tab: BookingTab.Upcoming });
 
-      expect(res.data).toHaveLength(10); // 5 waiting + 4 confirmed + 1 in progress
+      expect(res.data).toHaveLength(3); // 1 waiting + 1 confirmed + 1 in progress
       expect(
         res.data!.every((b) =>
           [BookingStatus.PendingReview, BookingStatus.Confirmed].includes(b.status),
@@ -154,8 +154,8 @@ describe("BookingMockRepository", () => {
       const past = await page({ tab: BookingTab.Past });
       const upcoming = await page({ tab: BookingTab.Upcoming });
 
-      expect(past.data).toHaveLength(32);
-      expect(past.data!.length + upcoming.data!.length).toBe(42);
+      expect(past.data).toHaveLength(6);
+      expect(past.data!.length + upcoming.data!.length).toBe(9);
       const starts = past.data!.map((b) => b.startAt);
       expect(starts).toEqual([...starts].sort().reverse());
       expect(past.data!.some((b) => b.status === BookingStatus.Rejected)).toBe(true);
@@ -197,7 +197,7 @@ describe("BookingMockRepository", () => {
     it("filters by status 0 (PendingReview) — zero is a real value", async () => {
       const res = await page({ statuses: [BookingStatus.PendingReview] });
 
-      expect(res.data).toHaveLength(5);
+      expect(res.data).toHaveLength(1);
     });
 
     it("filters by an inclusive date range", async () => {
@@ -233,11 +233,11 @@ describe("BookingMockRepository", () => {
       const waiting = await page({ refundStatus: RefundStatus.Waiting });
       const sent = await page({ refundStatus: RefundStatus.Sent });
 
-      expect(waiting.data).toHaveLength(6);
+      expect(waiting.data).toHaveLength(3);
       expect(waiting.data!.every((b) => b.refund?.status === RefundStatus.Waiting)).toBe(true);
       expect(sent.data!.length).toBeGreaterThan(0);
       expect(sent.data!.every((b) => b.refund?.status === RefundStatus.Sent)).toBe(true);
-      expect((await page()).data!.length).toBe(42);
+      expect((await page()).data!.length).toBe(9);
     });
 
     it("combines filters (all of them must match)", async () => {
@@ -283,7 +283,7 @@ describe("BookingMockRepository", () => {
 
     it("returns nothing for a term that matches nothing, and ignores a blank one", async () => {
       expect((await page({ search: "zzzzzz" })).data).toEqual([]);
-      expect((await page({ search: "   " })).data).toHaveLength(42);
+      expect((await page({ search: "   " })).data).toHaveLength(9);
     });
   });
 
@@ -301,7 +301,9 @@ describe("BookingMockRepository", () => {
         refund: null,
       });
       expect(item.customer).toEqual({ fullName: "Ahmed Hassan", phoneNumber: "+201001234567" });
-      expect(item.items.map((i) => i.nameEn)).toEqual(["Haircut", "Beard trim"]);
+      expect(item.items.map((i) => i.nameEn)).toEqual(
+        first((b) => b.id === 401).items.map((i) => i.nameEn),
+      );
       expect(item.items[0].nameAr).toBeTruthy();
       expect(item.barber.fullName).toBeTruthy();
       expect(item.payment.totalPrice).toBe(bookingTotal(first((b) => b.id === 401)));
@@ -324,23 +326,23 @@ describe("BookingMockRepository", () => {
     });
 
     it("hands out a copy: editing a result never changes the stored booking", async () => {
-      const item = (await page({ search: "OD-000413" })).data![0];
+      const item = (await page({ search: "OD-000407" })).data![0];
       item.refund!.amount = 0;
 
-      expect(first((b) => b.id === 413).refund!.amount).toBeGreaterThan(0);
+      expect(first((b) => b.id === 407).refund!.amount).toBeGreaterThan(0);
     });
   });
 
   describe("getBookingById", () => {
     it("returns the full details of a booking", async () => {
-      const stored = first((b) => b.id === 410); // the one in progress
-      const res = await settle(repo.getBookingById(410));
+      const stored = first((b) => b.id === 403); // the one in progress
+      const res = await settle(repo.getBookingById(403));
       const d = res.data!;
 
       expect(res.status).toBe(true);
       expect(d).toMatchObject({
-        id: 410,
-        bookingNumber: "OD-000410",
+        id: 403,
+        bookingNumber: "OD-000403",
         status: BookingStatus.Confirmed,
         isInProgress: true,
         type: BookingType.Regular,
@@ -349,7 +351,7 @@ describe("BookingMockRepository", () => {
         homeAddress: null,
         refund: null,
       });
-      expect(d.branch).toEqual({ nameAr: "الزمالك", nameEn: "Zamalek" });
+      expect(d.branch).toEqual({ id: 1, nameAr: "الزمالك", nameEn: "Zamalek" });
       expect(d.chair!.name).toMatch(/^R\d$/);
       expect(d.items).toHaveLength(2);
       expect(d.items[0]).toMatchObject({ nameEn: "Haircut", durationMinutes: 30 });
@@ -372,11 +374,15 @@ describe("BookingMockRepository", () => {
     });
 
     it("gives a Home booking an address and no chair", async () => {
-      const home = first((b) => b.type === BookingType.Home);
+      const home = first((b) => b.id === 401);
+      home.type = BookingType.Home;
+      home.chairId = null;
+      home.homeAddress = "14 Al Nozha St, Heliopolis, Cairo";
+
       const d = (await settle(repo.getBookingById(home.id))).data!;
 
       expect(d.chair).toBeNull();
-      expect(d.homeAddress).toBe(home.homeAddress);
+      expect(d.homeAddress).toBe("14 Al Nozha St, Heliopolis, Cairo");
     });
 
     it("gives the barber a rating, or none while they have no reviews", async () => {
@@ -390,8 +396,8 @@ describe("BookingMockRepository", () => {
     });
 
     it("offers 'End session' only to a booking that is Confirmed and has started", async () => {
-      const started = (await settle(repo.getBookingById(410))).data!;
-      const future = (await settle(repo.getBookingById(406))).data!;
+      const started = (await settle(repo.getBookingById(403))).data!;
+      const future = (await settle(repo.getBookingById(402))).data!;
       const pending = (await settle(repo.getBookingById(401))).data!;
 
       expect(started.actions.canComplete).toBe(true);
@@ -407,7 +413,7 @@ describe("BookingMockRepository", () => {
       expect((await settle(repo.getBookingById(sent.id))).data!.actions.canMarkRefunded).toBe(
         false,
       );
-      expect((await settle(repo.getBookingById(410))).data!.actions.canMarkRefunded).toBe(false);
+      expect((await settle(repo.getBookingById(403))).data!.actions.canMarkRefunded).toBe(false);
     });
 
     it("answers a status:false 404 body (no toast) when the booking doesn't exist", async () => {
@@ -420,32 +426,32 @@ describe("BookingMockRepository", () => {
 
   describe("completeBooking", () => {
     it("ends a started, Confirmed booking", async () => {
-      const res = await settle(repo.completeBooking(410));
+      const res = await settle(repo.completeBooking(403));
 
       expect(res).toMatchObject({
         status: true,
         message: "Booking Updated Successfully",
         data: null,
       });
-      expect(first((b) => b.id === 410).status).toBe(BookingStatus.Completed);
-      const d = (await settle(repo.getBookingById(410))).data!;
+      expect(first((b) => b.id === 403).status).toBe(BookingStatus.Completed);
+      const d = (await settle(repo.getBookingById(403))).data!;
       expect(d.status).toBe(BookingStatus.Completed);
       expect(d.isInProgress).toBe(false);
       expect(d.actions.canComplete).toBe(false);
     });
 
     it("answers 409 before the start time — and changes nothing", async () => {
-      const error = await failure(repo.completeBooking(406));
+      const error = await failure(repo.completeBooking(402));
 
       expect(error.status).toBe(409);
       expect(error.message).toBe("This booking hasn’t started yet.");
       expect(warning).toHaveBeenCalledWith("This booking hasn’t started yet.");
-      expect(first((b) => b.id === 406).status).toBe(BookingStatus.Confirmed);
+      expect(first((b) => b.id === 402).status).toBe(BookingStatus.Confirmed);
     });
 
     it("answers 409 when the booking isn't Confirmed", async () => {
-      for (const id of [401, 411]) {
-        // 401 is waiting for a review, 411 is already completed
+      for (const id of [401, 406]) {
+        // 401 is waiting for a review, 406 is already completed
         const error = await failure(repo.completeBooking(id));
         expect(error.status).toBe(409);
         expect(error.message).toBe("This action isn’t allowed for the booking’s current status.");
@@ -461,24 +467,403 @@ describe("BookingMockRepository", () => {
     });
 
     it("can't end the same booking twice", async () => {
-      await settle(repo.completeBooking(410));
+      await settle(repo.completeBooking(403));
 
-      expect((await failure(repo.completeBooking(410))).status).toBe(409);
+      expect((await failure(repo.completeBooking(403))).status).toBe(409);
     });
 
     it("lets a barber leave once their last open booking is ended", async () => {
-      const barberId = first((b) => b.id === 410).barberId;
+      const barberId = first((b) => b.id === 403).barberId;
       const before = db.upcomingBookingsCount(barberId, NOW);
 
-      await settle(repo.completeBooking(410));
+      await settle(repo.completeBooking(403));
 
       expect(db.upcomingBookingsCount(barberId, NOW)).toBe(before - 1);
     });
   });
 
+  describe("cancelBooking (by the branch)", () => {
+    it("cancels a pending booking: Cancelled, a full refund owed, and who / why on record", async () => {
+      const total = bookingTotal(first((b) => b.id === 401));
+
+      const res = await settle(repo.cancelBooking(401, "  The barber is sick  "));
+
+      expect(res).toMatchObject({
+        status: true,
+        message: "Booking Updated Successfully",
+        data: null,
+      });
+      const stored = first((b) => b.id === 401);
+      expect(stored.status).toBe(BookingStatus.Cancelled);
+      expect(stored.refund).toEqual({
+        status: RefundStatus.Waiting,
+        amount: total,
+        feeAmount: null,
+      });
+      expect(stored.cancellation).toMatchObject({
+        cancelledByBranch: true,
+        reason: null,
+        note: "The barber is sick",
+      });
+      const d = (await settle(repo.getBookingById(401))).data!;
+      expect(d.cancellation?.cancelledByName).toBeTruthy();
+      expect(d.actions).toMatchObject({ canCancel: false, canMarkRefunded: true });
+    });
+
+    it("also cancels a booking that is in progress", async () => {
+      await settle(repo.cancelBooking(403, "The customer asked by phone"));
+
+      expect(first((b) => b.id === 403).status).toBe(BookingStatus.Cancelled);
+    });
+
+    it("adds to the refund-waiting counter", async () => {
+      const before = (await page()).meta!.additionalData!["refundWaitingCount"] as number;
+
+      await settle(repo.cancelBooking(401, "Branch closed"));
+
+      expect((await page()).meta!.additionalData!["refundWaitingCount"]).toBe(before + 1);
+    });
+
+    it("answers 400 for an empty or too long reason — and changes nothing", async () => {
+      for (const reason of ["", "   ", "x".repeat(501)]) {
+        expect((await failure(repo.cancelBooking(401, reason))).status).toBe(400);
+      }
+      expect(first((b) => b.id === 401).status).toBe(BookingStatus.PendingReview);
+    });
+
+    it("accepts a reason of exactly 500 characters", async () => {
+      await settle(repo.cancelBooking(401, "x".repeat(500)));
+
+      expect(first((b) => b.id === 401).status).toBe(BookingStatus.Cancelled);
+    });
+
+    it("answers 409 when the booking isn't pending or confirmed", async () => {
+      const error = await failure(repo.cancelBooking(406, "Too late")); // completed
+
+      expect(error.status).toBe(409);
+      expect(error.message).toBe("This action isn’t allowed for the booking’s current status.");
+    });
+
+    it("answers 409 once the booking has ended", async () => {
+      first((b) => b.id === 402).startAt = "2026-11-13T10:00:00"; // ended, not yet auto-completed
+
+      const error = await failure(repo.cancelBooking(402, "Too late"));
+
+      expect(error.status).toBe(409);
+      expect(error.message).toBe("This booking has already ended.");
+    });
+
+    it("answers 404 for a booking that doesn't exist", async () => {
+      expect((await failure(repo.cancelBooking(999999, "Why"))).status).toBe(404);
+    });
+
+    it("can't cancel the same booking twice", async () => {
+      await settle(repo.cancelBooking(401, "First"));
+
+      expect((await failure(repo.cancelBooking(401, "Second"))).status).toBe(409);
+    });
+  });
+
+  describe("markRefunded", () => {
+    /** A cancelled booking with a refund still owed. */
+    const owed = async () => {
+      await settle(repo.cancelBooking(401, "Branch closed"));
+      return first((b) => b.id === 401);
+    };
+
+    it("records the refund as sent without changing the booking's status", async () => {
+      const booking = await owed();
+      expect(booking.refund!.status).toBe(RefundStatus.Waiting);
+
+      const res = await settle(repo.markRefunded(401));
+
+      expect(res).toMatchObject({
+        status: true,
+        message: "Booking Updated Successfully",
+        data: null,
+      });
+      expect(booking.refund!.status).toBe(RefundStatus.Sent);
+      expect(booking.status).toBe(BookingStatus.Cancelled);
+      expect((await settle(repo.getBookingById(401))).data!.actions.canMarkRefunded).toBe(false);
+    });
+
+    it("moves the booking out of the refund-waiting counter", async () => {
+      await owed();
+      const before = (await page()).meta!.additionalData!["refundWaitingCount"] as number;
+
+      await settle(repo.markRefunded(401));
+
+      expect((await page()).meta!.additionalData!["refundWaitingCount"]).toBe(before - 1);
+    });
+
+    it("works for a missed booking and an expired one", async () => {
+      await settle(repo.markNoShow(403));
+      await settle(repo.markRefunded(403));
+      expect(first((b) => b.id === 403).refund!.status).toBe(RefundStatus.Sent);
+
+      const expired = db.bookings.find(
+        (b) => b.status === BookingStatus.Expired && b.refund?.status === RefundStatus.Waiting,
+      );
+      if (expired) {
+        await settle(repo.markRefunded(expired.id));
+        expect(expired.refund!.status).toBe(RefundStatus.Sent);
+      }
+    });
+
+    it("answers 409 'already marked' the second time", async () => {
+      await owed();
+      await settle(repo.markRefunded(401));
+
+      const error = await failure(repo.markRefunded(401));
+
+      expect(error.status).toBe(409);
+      expect(error.message).toBe("This booking’s refund is already marked as paid.");
+    });
+
+    it("answers 409 for a booking whose status has no refund", async () => {
+      for (const id of [401, 402, 406]) {
+        const error = await failure(repo.markRefunded(id)); // pending, confirmed, completed
+        expect(error.status).toBe(409);
+        expect(error.message).toBe("This action isn’t allowed for the booking’s current status.");
+      }
+    });
+
+    it("answers 404 for a booking that doesn't exist", async () => {
+      expect((await failure(repo.markRefunded(999999))).status).toBe(404);
+    });
+  });
+
+  describe("details carry the ids Change barber needs", () => {
+    it("gives branch.id, barber.id and chair.id, and canReassign", async () => {
+      const b = first((x) => x.id === 402);
+
+      const d = (await settle(repo.getBookingById(402))).data!;
+
+      expect(d.branch.id).toBe(b.branchId);
+      expect(d.barber.id).toBe(b.barberId);
+      expect(d.chair?.id).toBe(b.chairId);
+      expect(d.actions.canReassign).toBe(true);
+    });
+
+    it("canReassign follows the same rule as canCancel: open and not ended", async () => {
+      const completed = (await settle(repo.getBookingById(406))).data!;
+      expect(completed.actions).toMatchObject({ canCancel: false, canReassign: false });
+
+      first((b) => b.id === 402).startAt = "2026-11-13T10:00:00"; // ended, not yet auto-completed
+      const ended = (await settle(repo.getBookingById(402))).data!;
+      expect(ended.actions).toMatchObject({ canCancel: false, canReassign: false });
+    });
+
+    it("a Home booking has no chair id", async () => {
+      const home = db.bookings.find((b) => b.chairId === null);
+      if (!home) return;
+
+      expect((await settle(repo.getBookingById(home.id))).data!.chair).toBeNull();
+    });
+  });
+
+  describe("markNoShow", () => {
+    it("marks a started, Confirmed booking as missed: the price minus the fee is owed", async () => {
+      const total = bookingTotal(first((b) => b.id === 403));
+
+      const res = await settle(repo.markNoShow(403));
+
+      expect(res).toMatchObject({ status: true, data: null });
+      const stored = first((b) => b.id === 403);
+      expect(stored.status).toBe(BookingStatus.NoShow);
+      const fee = Math.round(total * 20) / 100;
+      expect(stored.refund).toEqual({
+        status: RefundStatus.Waiting,
+        amount: Math.round((total - fee) * 100) / 100,
+        feeAmount: fee,
+      });
+      const d = (await settle(repo.getBookingById(403))).data!;
+      expect(d.actions).toMatchObject({ canComplete: false, canMarkRefunded: true });
+    });
+
+    it("answers 409 before the start time — and changes nothing", async () => {
+      const error = await failure(repo.markNoShow(402));
+
+      expect(error.status).toBe(409);
+      expect(error.message).toBe("This booking hasn’t started yet.");
+      expect(first((b) => b.id === 402).status).toBe(BookingStatus.Confirmed);
+    });
+
+    it("answers 409 when the booking isn't Confirmed", async () => {
+      for (const id of [401, 406]) {
+        expect((await failure(repo.markNoShow(id))).status).toBe(409);
+      }
+    });
+
+    it("answers 404 for a booking that doesn't exist", async () => {
+      expect((await failure(repo.markNoShow(999999))).status).toBe(404);
+    });
+  });
+
+  describe("reassignBarber", () => {
+    /** A free, active barber of the booking's branch, present today. */
+    function freeBarber(branchId: number, over: Record<string, unknown> = {}) {
+      const barber = {
+        ...db.barbers[0],
+        id: 9001,
+        fullName: "Test Barber",
+        branchId,
+        isActive: true,
+        ...over,
+      };
+      db.barbers.push(barber);
+      db.barberAttendance[barber.id] = { date: TODAY, isPresent: true };
+      return barber;
+    }
+
+    it("moves a pending booking to a free barber of its branch (nothing else changes)", async () => {
+      const booking = first((b) => b.id === 401);
+      const { startAt, chairId } = booking;
+      const barber = freeBarber(booking.branchId);
+
+      const res = await settle(repo.reassignBarber(401, barber.id));
+
+      expect(res).toMatchObject({
+        status: true,
+        message: "Booking Updated Successfully",
+        data: null,
+      });
+      expect(booking.barberId).toBe(barber.id);
+      expect(booking.status).toBe(BookingStatus.PendingReview);
+      expect(booking.startAt).toBe(startAt);
+      expect(booking.chairId).toBe(chairId);
+      expect((await settle(repo.getBookingById(401))).data!.barber.fullName).toBe("Test Barber");
+    });
+
+    it("answers 200 without changes for the barber it already has", async () => {
+      const booking = first((b) => b.id === 401);
+      const before = booking.barberId;
+
+      await settle(repo.reassignBarber(401, before));
+
+      expect(booking.barberId).toBe(before);
+    });
+
+    it("answers 400 for a barber that doesn't exist or works in another branch", async () => {
+      const booking = first((b) => b.id === 401);
+      const other = db.barbers.find((b) => b.branchId !== booking.branchId)!;
+
+      expect((await failure(repo.reassignBarber(401, 999999))).status).toBe(400);
+      expect((await failure(repo.reassignBarber(401, other.id))).status).toBe(400);
+    });
+
+    it("answers 409 for an inactive barber, one absent today, or one busy at that time", async () => {
+      const booking = first((b) => b.id === 402); // today
+      const inactive = freeBarber(booking.branchId, { id: 9002, isActive: false });
+      const absent = freeBarber(booking.branchId, { id: 9003 });
+      db.barberAttendance[absent.id] = { date: TODAY, isPresent: false };
+      const busy = freeBarber(booking.branchId, { id: 9004 });
+      const other = first((b) => b.id !== booking.id && b.status === BookingStatus.Confirmed);
+      other.barberId = busy.id;
+      other.startAt = booking.startAt;
+
+      for (const id of [inactive.id, absent.id, busy.id]) {
+        const error = await failure(repo.reassignBarber(402, id));
+        expect(error.status).toBe(409);
+        expect(error.message).toBe(
+          "This barber isn’t available at this time. Please choose another barber or time.",
+        );
+      }
+    });
+
+    it("answers 409 when the booking isn't pending or confirmed, or has ended", async () => {
+      const booking = first((b) => b.id === 401);
+      const barber = freeBarber(booking.branchId);
+
+      expect((await failure(repo.reassignBarber(406, barber.id))).status).toBe(409); // completed
+
+      first((b) => b.id === 402).startAt = "2026-11-13T10:00:00"; // ended
+      const error = await failure(
+        repo.reassignBarber(402, freeBarber(first((b) => b.id === 402).branchId, { id: 9005 }).id),
+      );
+      expect(error.message).toBe("This booking has already ended.");
+    });
+
+    it("answers 404 for a booking that doesn't exist", async () => {
+      expect((await failure(repo.reassignBarber(999999, db.barbers[0].id))).status).toBe(404);
+    });
+
+    it("frees the old barber: their open-booking count drops", async () => {
+      const booking = first((b) => b.id === 401);
+      const old = booking.barberId;
+      const before = db.upcomingBookingsCount(old, NOW);
+
+      await settle(repo.reassignBarber(401, freeBarber(booking.branchId).id));
+
+      expect(db.upcomingBookingsCount(old, NOW)).toBe(before - 1);
+    });
+  });
+
+  describe("customerId", () => {
+    /** The customer of booking 401 also has a completed booking in ANOTHER branch. */
+    const withBookingElsewhere = () => {
+      const base = first((b) => b.id === 401);
+      db.bookings.push({
+        ...base,
+        id: 9501,
+        bookingNumber: "OD-009501",
+        branchId: 2,
+        status: BookingStatus.Completed,
+        startAt: "2026-11-12T10:00:00",
+        approvedAt: base.submittedAt,
+      });
+      return base.customerId;
+    };
+
+    it("lists only that customer's bookings, across branches, with counters narrowed to them", async () => {
+      const customerId = withBookingElsewhere();
+      const mine = db.bookings.filter((b) => b.customerId === customerId);
+
+      const res = await settle(repo.getBookings({ pageNumber: 1, pageSize: 100, customerId }));
+
+      expect(mine).toHaveLength(2); // one in each branch
+      expect(res.data!.map((b) => b.bookingNumber).sort()).toEqual(
+        mine.map((b) => b.bookingNumber).sort(),
+      );
+      expect(res.meta!.totalCount).toBe(2);
+      expect(res.meta!.additionalData).toEqual({
+        todayCount: mine.filter((b) => b.startAt.startsWith(TODAY)).length,
+        refundWaitingCount: 0,
+      });
+    });
+
+    it("leaves other customers out", async () => {
+      const customerId = withBookingElsewhere();
+
+      const res = await settle(repo.getBookings({ pageNumber: 1, pageSize: 100, customerId }));
+
+      expect(res.data!.every((b) => b.customer.fullName === "Ahmed Hassan")).toBe(true);
+      expect(res.data!.length).toBeLessThan(db.bookings.length);
+    });
+
+    it("combines with the other filters", async () => {
+      const customerId = withBookingElsewhere();
+
+      const completed = await settle(
+        repo.getBookings({
+          pageNumber: 1,
+          pageSize: 100,
+          customerId,
+          statuses: [BookingStatus.Completed],
+        }),
+      );
+      const inBranch2 = await settle(
+        repo.getBookings({ pageNumber: 1, pageSize: 100, customerId, branchId: 2 }),
+      );
+
+      expect(completed.data!.map((b) => b.bookingNumber)).toEqual(["OD-009501"]);
+      expect(inBranch2.data!.map((b) => b.bookingNumber)).toEqual(["OD-009501"]);
+    });
+  });
+
   describe("time moves on", () => {
     it("expires an unreviewed booking at its start time and lists its refund", async () => {
-      vi.setSystemTime(new Date(NOW.getTime() + 60 * 60_000)); // 13:00 — the +45 booking has started
+      vi.setSystemTime(new Date(NOW.getTime() + 120 * 60_000)); // 14:00 — #401 started at 13:30
 
       const d = (await settle(repo.getBookingById(401))).data!;
 
@@ -492,9 +877,9 @@ describe("BookingMockRepository", () => {
     });
 
     it("completes an open Confirmed booking 2 hours after it ends", async () => {
-      vi.setSystemTime(new Date(NOW.getTime() + 3 * 60 * 60_000)); // 15:00 — #410 ended 12:20
+      vi.setSystemTime(new Date(NOW.getTime() + 3 * 60 * 60_000)); // 15:00 — #403 ended 12:20
 
-      expect((await settle(repo.getBookingById(410))).data!.status).toBe(BookingStatus.Completed);
+      expect((await settle(repo.getBookingById(403))).data!.status).toBe(BookingStatus.Completed);
     });
   });
 });

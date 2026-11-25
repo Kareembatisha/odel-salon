@@ -1,0 +1,139 @@
+<div class="odl-page">
+  <a class="back" routerLink="/main/customers">
+    <i class="pi pi-arrow-left" aria-hidden="true"></i>{{ 'CUSTOMERS.PROFILE.BACK' | translate }}
+  </a>
+
+  @if (state() === 'notFound') {
+    <div class="odl-card">
+      <app-empty-state
+        [title]="'CUSTOMERS.PROFILE.NOT_FOUND_TITLE' | translate"
+        [description]="'CUSTOMERS.PROFILE.NOT_FOUND_TEXT' | translate"
+        icon="pi pi-user"
+      />
+    </div>
+  } @else if (state() === 'failed') {
+    <div class="odl-card"><app-failed-state (retry)="load()" /></div>
+  } @else if (state() === 'loading' || !view()) {
+    <div class="skeletons" aria-busy="true">
+      <app-skeleton width="40%" height="36px" />
+      <app-skeleton width="25%" height="16px" />
+      <div class="layout">
+        <div class="odl-card sk-card"><app-skeleton height="160px" /></div>
+        <div class="odl-card sk-card"><app-skeleton height="160px" /></div>
+      </div>
+    </div>
+  } @else {
+    <header class="head">
+      <app-avatar size="xl" [name]="view()!.name" [src]="view()!.imageUrl" />
+      <div class="head__text">
+        <h1 class="head__name">{{ view()!.name }}</h1>
+        <p class="head__since">{{ 'CUSTOMERS.PROFILE.SINCE' | translate: { date: view()!.since } }}</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <div class="stack">
+        <!-- Visits and missed bookings (all branches) -->
+        <section class="stats" [attr.aria-label]="'CUSTOMERS.PROFILE.STATS' | translate">
+          <div class="odl-card stat">
+            <span class="stat__label">{{ 'CUSTOMERS.PROFILE.VISITS' | translate }}</span>
+            <span class="stat__value u-num">{{ view()!.visits }}</span>
+          </div>
+          <div class="odl-card stat">
+            <span class="stat__label">{{ 'CUSTOMERS.PROFILE.MISSED' | translate }}</span>
+            <span class="stat__value u-num">{{ view()!.missed }}</span>
+            @if (view()!.lastMissed) {
+              <span class="stat__hint">{{ 'CUSTOMERS.PROFILE.LAST_MISSED' | translate: { date: view()!.lastMissed } }}</span>
+            }
+          </div>
+        </section>
+
+        <!-- The latest 5 bookings, newest first -->
+        <section class="odl-card panel" aria-labelledby="sec-bookings">
+          <div class="panel__head">
+            <h2 class="panel__title" id="sec-bookings">{{ 'CUSTOMERS.PROFILE.BOOKINGS' | translate }}</h2>
+            @if (view()!.bookingsCount > 0) {
+              <a class="link" [routerLink]="['/main/bookings']" [queryParams]="{ customerId: id }">
+                {{ 'CUSTOMERS.PROFILE.ALL_BOOKINGS' | translate: { count: view()!.bookingsCountText } }}
+              </a>
+            }
+          </div>
+
+          @if (!view()!.bookings.length) {
+            <p class="muted empty">{{ 'CUSTOMERS.PROFILE.NO_BOOKINGS' | translate }}</p>
+          } @else {
+            <ul class="bookings">
+              @for (b of view()!.bookings; track b.id) {
+                <li class="booking">
+                  <div class="booking__top">
+                    <a class="number" [routerLink]="['/main/bookings', b.id]">{{ b.number }}</a>
+                    @if (b.typeLabel) {
+                      <app-status-badge [variant]="b.typeVariant" [dot]="false">{{ b.typeLabel }}</app-status-badge>
+                    }
+                    <span class="booking__spacer"></span>
+                    <app-status-badge [variant]="b.statusVariant">{{ b.statusLabel }}</app-status-badge>
+                  </div>
+
+                  <div class="booking__body">
+                    <span class="booking__services">{{ b.services }}</span>
+                    <span class="strong u-num">{{ b.amount }}</span>
+                  </div>
+
+                  <div class="booking__meta muted">
+                    <span>{{ b.when }}</span>
+                    <span>{{ b.where }}</span>
+                    @if (b.rating) {
+                      <span class="rating">
+                        <i class="pi pi-star-fill" aria-hidden="true"></i>
+                        <span class="sr-only">{{ 'CUSTOMERS.PROFILE.RATING' | translate }}</span>
+                        <span class="u-num">{{ b.rating }}</span>
+                      </span>
+                    }
+                  </div>
+
+                  @if (b.cancelledBy || b.refundText) {
+                    <div class="booking__notes">
+                      @if (b.cancelledBy) {
+                        <span class="muted">{{ b.cancelledBy }}</span>
+                      }
+                      @if (b.refundText) {
+                        <span class="refund" [class.refund--waiting]="b.refundWaiting">{{ b.refundText }}</span>
+                      }
+                      @if (b.feeText) {
+                        <span class="muted">{{ b.feeText }}</span>
+                      }
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      </div>
+
+      <!-- Contact -->
+      <section class="odl-card panel" aria-labelledby="sec-contact">
+        <h2 class="panel__title" id="sec-contact">{{ 'CUSTOMERS.PROFILE.CONTACT' | translate }}</h2>
+
+        <dl class="facts">
+          <div class="fact">
+            <dt><i class="pi pi-phone" aria-hidden="true"></i>{{ 'CUSTOMERS.PROFILE.PHONE' | translate }}</dt>
+            <dd>
+              <a class="link u-num" dir="ltr" [attr.href]="'tel:' + view()!.phone">{{ view()!.phone }}</a>
+            </dd>
+          </div>
+          <div class="fact">
+            <dt><i class="pi pi-envelope" aria-hidden="true"></i>{{ 'CUSTOMERS.PROFILE.EMAIL' | translate }}</dt>
+            <dd>
+              <a class="link" dir="ltr" [attr.href]="'mailto:' + view()!.email">{{ view()!.email }}</a>
+            </dd>
+          </div>
+        </dl>
+
+        <a class="call" [attr.href]="'tel:' + view()!.phone">
+          <i class="pi pi-phone" aria-hidden="true"></i>{{ 'CUSTOMERS.PROFILE.CALL' | translate }}
+        </a>
+      </section>
+    </div>
+  }
+</div>

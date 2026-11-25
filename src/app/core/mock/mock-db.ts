@@ -9,6 +9,7 @@ import {
 import { ChairDetails, ChairType } from "@modules/chairs/model/chair.model";
 import { BarberDetails } from "@modules/barbers/model/barber.model";
 import {
+  BookingCancellation,
   BookingRefund,
   BookingStatus,
   BookingType,
@@ -119,11 +120,14 @@ export interface MockBookingItem {
   price: number;
 }
 
-/** A customer of the salon (only what the booking screens show). */
+/** A customer of the salon (what the booking and customer screens show). */
 export interface MockCustomer {
   id: number;
   fullName: string;
   phoneNumber: string;
+  email: string;
+  /** UTC ISO — "customer since". */
+  createdAt: string;
 }
 
 /**
@@ -159,6 +163,8 @@ export interface MockBooking {
   rejectionReason: string | null;
   /** Cancelled / Expired / NoShow bookings only. */
   refund: BookingRefund | null;
+  /** Cancelled bookings only: who cancelled it and why. */
+  cancellation: BookingCancellation | null;
 }
 
 // ============================================================
@@ -171,6 +177,7 @@ export const MOCK_MANAGER_PERMISSIONS: string[] = [
   "Booking.Review",
   "Booking.Manage",
   "Booking.Cancel",
+  "Customer.View",
   "Session.View",
   "Session.Manage",
   "Availability.View",
@@ -194,6 +201,7 @@ export const MOCK_MANAGER_PERMISSIONS: string[] = [
 export const MOCK_RECEPTIONIST_PERMISSIONS: string[] = [
   "Booking.View",
   "Booking.Cancel",
+  "Customer.View",
   "Session.View",
   "Availability.View",
 ];

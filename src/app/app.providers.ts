@@ -22,6 +22,9 @@ import { OFFER_REPOSITORY } from "@modules/offers/repository/offer.repository";
 import { BookingApiRepository } from "@modules/bookings/repository/booking-api.repository";
 import { BookingMockRepository } from "@modules/bookings/repository/booking-mock.repository";
 import { BOOKING_REPOSITORY } from "@modules/bookings/repository/booking.repository";
+import { CustomerApiRepository } from "@modules/customers/repository/customer-api.repository";
+import { CustomerMockRepository } from "@modules/customers/repository/customer-mock.repository";
+import { CUSTOMER_REPOSITORY } from "@modules/customers/repository/customer.repository";
 import { PaymentReviewApiRepository } from "@modules/payment-reviews/repository/payment-review-api.repository";
 import { PaymentReviewMockRepository } from "@modules/payment-reviews/repository/payment-review-mock.repository";
 import { PAYMENT_REVIEW_REPOSITORY } from "@modules/payment-reviews/repository/payment-review.repository";
@@ -74,6 +77,10 @@ export const DATA_PROVIDERS: Provider[] = [
   {
     provide: BOOKING_REPOSITORY,
     useClass: environment.useMock ? BookingMockRepository : BookingApiRepository,
+  },
+  {
+    provide: CUSTOMER_REPOSITORY,
+    useClass: environment.useMock ? CustomerMockRepository : CustomerApiRepository,
   },
   {
     provide: PAYMENT_REVIEW_REPOSITORY,

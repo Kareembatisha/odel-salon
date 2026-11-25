@@ -329,6 +329,62 @@ describe("BookingsService", () => {
     });
   });
 
+  describe("one customer's bookings (customerId)", () => {
+    it("lists that customer's bookings in every branch: no branchId is sent", () => {
+      service.initialize(1203);
+
+      expect(bookings.last).toMatchObject({ customerId: 1203, tab: BookingTab.All, pageNumber: 1 });
+      expect(bookings.last.branchId).toBeUndefined();
+      expect(service.customerId()).toBe(1203);
+    });
+
+    it("still loads the branches and the first branch's barbers in the background", () => {
+      service.initialize(1203);
+
+      expect(service.branches().map((b) => b.id)).toEqual([1, 2]);
+      expect(service.branchId()).toBe(1);
+      expect(barbers.asked).toEqual([1]);
+    });
+
+    it("lists the customer's bookings even when there is no branch at all", () => {
+      branchList = [];
+
+      service.initialize(1203);
+
+      expect(bookings.last).toMatchObject({ customerId: 1203 });
+      expect(service.noBranches()).toBe(false);
+      expect(service.bookings().length).toBeGreaterThan(0);
+    });
+
+    it("keeps the customer when the other filters are cleared", () => {
+      service.initialize(1203);
+      service.setTab(BookingTab.Past);
+
+      service.clearFilters();
+
+      expect(bookings.last).toMatchObject({ customerId: 1203, tab: BookingTab.All, pageNumber: 1 });
+    });
+
+    it("clearCustomer goes back to the selected branch's list from page 1", () => {
+      service.initialize(1203);
+
+      service.clearCustomer();
+
+      expect(service.customerId()).toBeUndefined();
+      expect(bookings.last).toMatchObject({ branchId: 1, pageNumber: 1 });
+      expect(bookings.last.customerId).toBeUndefined();
+    });
+
+    it("opening the page again without a customer forgets the previous one", () => {
+      service.initialize(1203);
+
+      service.initialize();
+
+      expect(service.customerId()).toBeUndefined();
+      expect(bookings.last).toMatchObject({ branchId: 1 });
+    });
+  });
+
   describe("selectBranch", () => {
     beforeEach(() => service.initialize());
 

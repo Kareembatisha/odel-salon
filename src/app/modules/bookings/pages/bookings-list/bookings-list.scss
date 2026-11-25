@@ -8,6 +8,20 @@
   min-height: 42px;
 }
 
+.customer-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-3;
+  background: v.$primary-soft;
+  border: 1px solid v.$primary-soft-border;
+  border-radius: v.$radius-md;
+  color: v.$primary-text;
+  font-size: v.$text-sm;
+  font-weight: v.$fw-medium;
+}
+
 .panel {
   display: flex;
   flex-direction: column;

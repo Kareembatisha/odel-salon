@@ -27,7 +27,7 @@ describe("Bookings wiring", () => {
     expect(component).toBe(BookingsList);
   });
 
-  it("adds a Bookings sidebar section: Bookings, then Payment reviews, both needing Booking.View", () => {
+  it("adds a Bookings sidebar section: Bookings and Payment reviews (Booking.View), then Customers (Customer.View)", () => {
     const section = NAV_SECTIONS.find((s) => s.id === "bookings");
 
     expect(section).toBeDefined();
@@ -44,6 +44,12 @@ describe("Bookings wiring", () => {
         labelKey: "LAYOUT.NAV.PAYMENT_REVIEWS",
         route: "/main/bookings/payment-reviews",
         permission: PERMISSIONS.Booking.View,
+      }),
+      expect.objectContaining({
+        id: "customers",
+        labelKey: "LAYOUT.NAV.CUSTOMERS",
+        route: "/main/customers",
+        permission: PERMISSIONS.Customer.View,
       }),
     ]);
     for (const item of section!.items) expect(item.icon).toMatch(/^pi pi-/);

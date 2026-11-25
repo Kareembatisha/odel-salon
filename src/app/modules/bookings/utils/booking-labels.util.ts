@@ -3,6 +3,7 @@ import {
   BookingItemName,
   BookingStatus,
   BookingType,
+  CancelReason,
   PaymentMethod,
   RefundStatus,
 } from "../model/booking.model";
@@ -118,6 +119,18 @@ export function refundStatusKey(status: RefundStatus): string {
 
 export function refundStatusVariant(status: RefundStatus): StatusBadgeVariant {
   return REFUND_VARIANTS[status] ?? "neutral";
+}
+
+const CANCEL_REASON_KEYS: Record<CancelReason, string> = {
+  [CancelReason.ChangeOfPlans]: "BOOKINGS.CANCEL_REASON.CHANGE_OF_PLANS",
+  [CancelReason.BookedByMistake]: "BOOKINGS.CANCEL_REASON.BOOKED_BY_MISTAKE",
+  [CancelReason.WantAnotherTime]: "BOOKINGS.CANCEL_REASON.WANT_ANOTHER_TIME",
+  [CancelReason.Other]: "BOOKINGS.CANCEL_REASON.OTHER",
+};
+
+/** Why a customer cancelled; an unknown reason maps to `UNKNOWN`. */
+export function cancelReasonKey(reason: CancelReason): string {
+  return CANCEL_REASON_KEYS[reason] ?? "BOOKINGS.CANCEL_REASON.UNKNOWN";
 }
 
 /** One service name for the active UI language, falling back to the other if it is empty. */

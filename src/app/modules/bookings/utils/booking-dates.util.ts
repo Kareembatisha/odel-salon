@@ -90,6 +90,36 @@ export function formatBookingTime(startAt: string, lang: string): string {
   }).format(utcDate(p));
 }
 
+/**
+ * A UTC instant (an audit timestamp such as `cancelledAt` or `createdAt`) as a Cairo date and time:
+ * "Nov 20, 2026, 5:30 PM". An unreadable value is returned unchanged.
+ */
+export function formatCairoDateTime(iso: string, lang: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale(lang), {
+    timeZone: CAIRO_TIME_ZONE,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+}
+
+/** A UTC instant as a Cairo date: "Mar 4, 2026". An unreadable value is returned unchanged. */
+export function formatCairoDate(iso: string, lang: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale(lang), {
+    timeZone: CAIRO_TIME_ZONE,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
 /** The calendar day of a `startAt` (`yyyy-MM-dd`), or null when unreadable. */
 export function bookingDay(startAt: string): string | null {
   return parseStartAt(startAt)?.date ?? null;

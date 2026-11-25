@@ -1,0 +1,68 @@
+@use "styles/variables" as v;
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: v.$space-3;
+  min-height: 42px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-3;
+  outline: 0;
+}
+
+.stale {
+  padding: 0;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+  min-width: 0;
+}
+
+.strong {
+  font-weight: v.$fw-semibold;
+}
+
+// Phones stay left-to-right (and readable) inside an RTL page.
+.phone {
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  unicode-bidi: isolate;
+  &:hover {
+    color: v.$primary-text;
+    text-decoration: underline;
+  }
+}
+
+// A customer with missed bookings stands out.
+.missed {
+  color: v.$danger-text;
+  font-weight: v.$fw-semibold;
+}
+
+// ── Card layout (narrow viewport) ─────────────────────
+.card__top {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+}
+.card__phone {
+  display: inline-block;
+  margin-block: v.$space-2;
+}
+.card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+  color: v.$text-secondary;
+  font-size: v.$text-sm;
+}

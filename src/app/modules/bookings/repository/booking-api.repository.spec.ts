@@ -76,4 +76,49 @@ describe("BookingApiRepository", () => {
     http.expectOne((r) => r.url === URL).flush(body);
     expect(received).toEqual(body);
   });
+
+  it("PATCH /bookings/{id}/cancel with the reason", () => {
+    repo.cancelBooking(482, "The barber is sick").subscribe();
+
+    const req = http.expectOne(`${URL}/482/cancel`);
+    expect(req.request.method).toBe("PATCH");
+    expect(req.request.body).toEqual({ reason: "The barber is sick" });
+    req.flush({});
+  });
+
+  it("PATCH /bookings/{id}/no-show with no body", () => {
+    repo.markNoShow(482).subscribe();
+
+    const req = http.expectOne(`${URL}/482/no-show`);
+    expect(req.request.method).toBe("PATCH");
+    expect(req.request.body).toBeNull();
+    req.flush({});
+  });
+
+  it("PUT /bookings/{id}/barber with the new barber", () => {
+    repo.reassignBarber(482, 7).subscribe();
+
+    const req = http.expectOne(`${URL}/482/barber`);
+    expect(req.request.method).toBe("PUT");
+    expect(req.request.body).toEqual({ barberId: 7 });
+    req.flush({});
+  });
+
+  it("GET /bookings sends customerId when it is set", () => {
+    repo.getBookings({ pageNumber: 1, pageSize: 20, customerId: 1203 }).subscribe();
+
+    const req = http.expectOne((r) => r.url === URL);
+    expect(req.request.params.get("customerId")).toBe("1203");
+    expect(req.request.params.has("branchId")).toBe(false);
+    req.flush({});
+  });
+
+  it("PATCH /bookings/{id}/refund with no body", () => {
+    repo.markRefunded(476).subscribe();
+
+    const req = http.expectOne(`${URL}/476/refund`);
+    expect(req.request.method).toBe("PATCH");
+    expect(req.request.body).toBeNull();
+    req.flush({});
+  });
 });

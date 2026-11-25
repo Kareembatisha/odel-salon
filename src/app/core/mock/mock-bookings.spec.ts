@@ -54,9 +54,44 @@ describe("mock bookings", () => {
   describe("seed", () => {
     const inBranch = (id: number) => db.bookings.filter((b) => b.branchId === id);
 
-    it("has 62 bookings: 42 in the first branch (the one the pages open on) and a few elsewhere", () => {
-      expect(db.bookings).toHaveLength(62);
-      expect([1, 2, 3, 4, 5].map((id) => inBranch(id).length)).toEqual([42, 6, 7, 4, 3]);
+    it("has 9 bookings, all in the first branch (the one the pages open on); the others have none", () => {
+      expect(db.bookings).toHaveLength(9);
+      expect([1, 2, 3, 4, 5].map((id) => inBranch(id).length)).toEqual([9, 0, 0, 0, 0]);
+    });
+
+    it("has one booking per status (two Cancelled: by the customer and by the branch)", () => {
+      const byStatus = (status: BookingStatus) => db.bookings.filter((b) => b.status === status);
+
+      for (const status of [
+        BookingStatus.PendingReview,
+        BookingStatus.Confirmed,
+        BookingStatus.Rejected,
+        BookingStatus.Expired,
+        BookingStatus.Completed,
+        BookingStatus.NoShow,
+      ]) {
+        // Confirmed has two: one to come and one started.
+        expect(byStatus(status), `status ${status}`).toHaveLength(
+          status === BookingStatus.Confirmed ? 2 : 1,
+        );
+      }
+      const cancelled = byStatus(BookingStatus.Cancelled);
+      expect(cancelled.map((b) => b.cancellation!.cancelledByBranch).sort()).toEqual([false, true]);
+      expect(db.bookings.filter((b) => isBookingInProgress(b, NOW))).toHaveLength(1);
+    });
+
+    it("numbers them 401 to 409 in status order", () => {
+      expect(db.bookings.map((b) => [b.id, b.status])).toEqual([
+        [401, BookingStatus.PendingReview],
+        [402, BookingStatus.Confirmed],
+        [403, BookingStatus.Confirmed],
+        [404, BookingStatus.Rejected],
+        [405, BookingStatus.Expired],
+        [406, BookingStatus.Completed],
+        [407, BookingStatus.NoShow],
+        [408, BookingStatus.Cancelled],
+        [409, BookingStatus.Cancelled],
+      ]);
     });
 
     it("gives every booking its own id and a matching `OD-000xxx` number", () => {
@@ -104,29 +139,28 @@ describe("mock bookings", () => {
       }
     });
 
-    it("fills the review queue of the first branch: 5 waiting, 2 of them late, one with a short proof", () => {
+    it("has ONE booking waiting for a review: late, with the right amount", () => {
       const pending = inBranch(1).filter((b) => b.status === BookingStatus.PendingReview);
-      const waiting = pending.map((b) => waitingMinutesOf(b, NOW)).sort((a, b) => a - b);
 
-      expect(waiting).toEqual([5, 12, 20, 39, 55]);
-      expect(waiting.filter((m) => m >= REVIEW_TARGET_MINUTES)).toHaveLength(2);
-      expect(pending.filter((b) => b.proofShortfall > 0)).toHaveLength(1);
-      for (const b of pending) expect(b.startAt > "2026-11-13T12:00:00").toBe(true); // not expired
+      expect(pending).toHaveLength(1);
+      expect(waitingMinutesOf(pending[0], NOW)).toBe(39);
+      expect(waitingMinutesOf(pending[0], NOW)).toBeGreaterThanOrEqual(REVIEW_TARGET_MINUTES);
+      expect(pending[0].proofShortfall).toBe(0);
+      expect(pending[0].startAt > "2026-11-13T12:00:00").toBe(true); // not expired
     });
 
-    it("has 2 approvals and 1 rejection TODAY in the first branch, and older ones before", () => {
+    it("has 1 approval and 1 rejection TODAY (the rejected proof was for less than the total)", () => {
       const approvedToday = inBranch(1).filter(
         (b) => b.approvedAt && cairoDayOf(b.approvedAt) === TODAY,
       );
       const rejected = inBranch(1).filter((b) => b.rejectedAt);
 
-      expect(approvedToday).toHaveLength(2);
-      expect(rejected.filter((b) => cairoDayOf(b.rejectedAt!) === TODAY)).toHaveLength(1);
-      expect(rejected.length).toBeGreaterThan(1);
-      for (const b of rejected) {
-        expect(b.status).toBe(BookingStatus.Rejected);
-        expect(b.rejectionReason).toBeTruthy();
-      }
+      expect(approvedToday.map((b) => b.id)).toEqual([402]);
+      expect(rejected.map((b) => b.id)).toEqual([404]);
+      expect(cairoDayOf(rejected[0].rejectedAt!)).toBe(TODAY);
+      expect(rejected[0].status).toBe(BookingStatus.Rejected);
+      expect(rejected[0].rejectionReason).toBeTruthy();
+      expect(rejected[0].proofShortfall).toBeGreaterThan(0);
     });
 
     it("has exactly one booking in progress in the first branch", () => {
@@ -159,9 +193,11 @@ describe("mock bookings", () => {
       expect(statuses.has(RefundStatus.Sent)).toBe(true);
     });
 
-    it("covers every status, type and payment method", () => {
+    it("covers every status, both chair types (no Home: the first branch doesn't take it) and both payment methods", () => {
       expect(new Set(db.bookings.map((b) => b.status)).size).toBe(7);
-      expect(new Set(db.bookings.map((b) => b.type)).size).toBe(3);
+      expect(new Set(db.bookings.map((b) => b.type))).toEqual(
+        new Set([BookingType.Regular, BookingType.Vip]),
+      );
       expect(new Set(db.bookings.map((b) => b.paymentMethod)).size).toBe(2);
     });
 
@@ -170,7 +206,7 @@ describe("mock bookings", () => {
         .filter((b) => b.branchId === 1 && b.isActive)
         .map((b) => db.upcomingBookingsCount(b.id, NOW));
 
-      expect(counts).toEqual([5, 0, 5]);
+      expect(counts).toEqual([1, 0, 2]);
     });
 
     it("can be built again from the same data with the same result", () => {
@@ -337,16 +373,17 @@ describe("mock bookings", () => {
       ]);
     });
 
-    it("keeps time moving in the seeded data: an hour later the 45-minute-away booking has expired", () => {
-      vi.setSystemTime(new Date(NOW.getTime() + 60 * 60_000));
+    it("keeps time moving in the seeded data: two hours later the unreviewed booking has expired", () => {
+      vi.setSystemTime(new Date(NOW.getTime() + 120 * 60_000));
       db.settleBookings();
 
-      const expired = db.bookings.filter(
-        (b) =>
-          b.branchId === 1 && b.status === BookingStatus.Expired && b.refund?.feeAmount === null,
-      );
-      // the 2 seeded Expired + the pending booking that started 45 minutes after seeding
-      expect(expired.length).toBeGreaterThanOrEqual(3);
+      const expired = db.bookings.find((b) => b.id === 401)!;
+      expect(expired.status).toBe(BookingStatus.Expired);
+      expect(expired.refund).toEqual({
+        status: RefundStatus.Waiting,
+        amount: bookingTotal(expired),
+        feeAmount: null,
+      });
     });
   });
 

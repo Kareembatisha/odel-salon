@@ -159,7 +159,8 @@
       "OFFERS": "العروض",
       "BARBER_ATTENDANCE": "الحضور",
       "BOOKINGS": "الحجوزات",
-      "PAYMENT_REVIEWS": "مراجعة الدفع"
+      "PAYMENT_REVIEWS": "مراجعة الدفع",
+      "CUSTOMERS": "العملاء"
     }
   },
   "BOOKING_STATUS": {
@@ -203,6 +204,7 @@
   "PERMISSIONS": {
     "MODULES": {
       "Booking": "الحجوزات",
+      "Customer": "العملاء",
       "Session": "الجلسات الحية",
       "Availability": "الإتاحة",
       "Branch": "الفروع",
@@ -1070,7 +1072,8 @@
     "Code": "رمز التحقق",
     "Token": "رمز إعادة التعيين",
     "Reason": "السبب",
-    "DateTo": "إلى تاريخ"
+    "DateTo": "إلى تاريخ",
+    "BarberId": "الحلاق"
   },
   "BOOKINGS": {
     "TITLE": "الحجوزات",
@@ -1147,7 +1150,13 @@
       "NOT_FOUND": "هذا الحجز لم يعد موجودًا.",
       "NOT_STARTED": "لم يبدأ هذا الحجز بعد.",
       "NOT_ALLOWED": "هذا الإجراء غير مسموح به في حالة الحجز الحالية.",
-      "INVALID_DATE_RANGE": "تاريخ النهاية لا يمكن أن يسبق تاريخ البداية."
+      "INVALID_DATE_RANGE": "تاريخ النهاية لا يمكن أن يسبق تاريخ البداية.",
+      "ALREADY_ENDED": "انتهى هذا الحجز بالفعل.",
+      "INVALID_REASON": "اكتب سببًا لا يزيد عن 500 حرف.",
+      "BARBER_NOT_FOUND": "هذا الحلاق غير موجود.",
+      "BARBER_OTHER_BRANCH": "يجب أن يعمل الحلاق في فرع الحجز.",
+      "BARBER_UNAVAILABLE": "هذا الحلاق غير متاح في هذا الوقت. اختر حلاقًا آخر أو وقتًا آخر.",
+      "REFUND_ALREADY_SENT": "تم تسجيل استرداد هذا الحجز كمدفوع من قبل."
     },
     "SESSION_ENDED": "تم إنهاء الجلسة.",
     "DETAILS": {
@@ -1183,8 +1192,49 @@
       "END_SESSION": "إنهاء الجلسة",
       "END_TITLE": "إنهاء هذه الجلسة؟",
       "END_MESSAGE": "سيتم تسجيل الحجز {{number}} الخاص بـ {{name}} كمكتمل.",
-      "END_AFTER_START": "يمكنك إنهاء الجلسة بعد أن تبدأ."
-    }
+      "END_AFTER_START": "يمكنك إنهاء الجلسة أو تسجيلها كفائتة بعد أن تبدأ.",
+      "NO_SHOW": "تسجيل كفائت",
+      "NO_SHOW_TITLE": "تسجيل الحجز كفائت؟",
+      "NO_SHOW_MESSAGE": "سيتم تسجيل الحجز {{number}} الخاص بـ {{name}} كفائت، وسيُستحق للعميل استرداد المبلغ بعد خصم رسوم الحجز الفائت.",
+      "CHANGE_BARBER": "تغيير الحلاق",
+      "CANCEL_BOOKING": "إلغاء الحجز",
+      "KEEP_BOOKING": "إبقاء الحجز",
+      "CANCEL_TITLE": "إلغاء هذا الحجز؟",
+      "CANCEL_HINT": "سيرى العميل هذا السبب ويستحق استردادًا كاملًا. لا يتم إشعاره تلقائيًا، فاتصل به.",
+      "CANCEL_REASON_LABEL": "السبب",
+      "CANCEL_REASON_PLACEHOLDER": "مثال: الحلاق مريض ولا يوجد حلاق آخر متاح",
+      "CANCEL_REASON_REQUIRED": "اكتب سبب الإلغاء.",
+      "REASSIGN_TITLE": "تغيير الحلاق",
+      "REASSIGN_HINT": "يحتفظ الحجز بموعده وكرسيه وسعره. لا يتم إشعار العميل تلقائيًا، فاتصل به.",
+      "REASSIGN_LABEL": "حلاقو هذا الفرع",
+      "REASSIGN_LOADING": "جارٍ تحميل الحلاقين…",
+      "REASSIGN_EMPTY": "لا يوجد حلاق نشط آخر في هذا الفرع.",
+      "REASSIGN_CONFIRM": "تغيير الحلاق",
+      "CANCELLATION": "الإلغاء",
+      "CANCELLED_BY": "تم الإلغاء بواسطة",
+      "BY_CUSTOMER": "العميل",
+      "BY_BRANCH": "الفرع",
+      "CANCELLED_AT": "تاريخ الإلغاء",
+      "CANCEL_REASON": "السبب",
+      "CUSTOMER_PROFILE": "ملف العميل",
+      "REFUND_SENT": "تم الاسترداد",
+      "REFUND_HINT": "يُرد المبلغ للعميل خارج التطبيق. اضغط الزر بعد أن ترسله.",
+      "REFUND_TITLE": "تسجيل الاسترداد كمُرسَل؟",
+      "REFUND_MESSAGE": "أكّد أنك أعدت {{amount}} إلى {{name}} عن الحجز {{number}}. لا يمكن التراجع عن هذا."
+    },
+    "MARKED_NO_SHOW": "تم تسجيل الحجز كفائت.",
+    "CANCELLED": "تم إلغاء الحجز.",
+    "BARBER_CHANGED": "تم تغيير الحلاق.",
+    "CUSTOMER_FILTER": "عرض حجوزات {{name}}",
+    "CUSTOMER_FILTER_CLEAR": "عرض الكل",
+    "CANCEL_REASON": {
+      "CHANGE_OF_PLANS": "تغيّرت خططه",
+      "BOOKED_BY_MISTAKE": "حجز بالخطأ",
+      "WANT_ANOTHER_TIME": "يريد موعدًا آخر",
+      "OTHER": "سبب آخر",
+      "UNKNOWN": "غير معروف"
+    },
+    "REFUND_MARKED": "تم تسجيل الاسترداد."
   },
   "PAYMENT_REVIEWS": {
     "TITLE": "مراجعة الدفع",
@@ -1244,6 +1294,62 @@
     "ERRORS": {
       "REASON_REQUIRED": "اكتب سبب رفض هذا الحجز.",
       "REASON_TOO_LONG": "السبب لا يمكن أن يزيد عن 500 حرف."
+    }
+  },
+  "CUSTOMERS": {
+    "TITLE": "العملاء",
+    "SUBTITLE": "من حجزوا في الصالون، وكم مرة حضروا.",
+    "SEARCH": "ابحث بالاسم أو الموبايل",
+    "TABS_LABEL": "العملاء حسب المجموعة",
+    "TAB": {
+      "ALL": "الكل",
+      "VISITED_THIS_MONTH": "زاروا هذا الشهر",
+      "HAS_MISSED": "لديهم حجوزات فائتة",
+      "NOT_BACK": "لم يعودوا منذ 60 يومًا"
+    },
+    "FILTER": {
+      "BRANCH": "الفرع",
+      "ALL_BRANCHES": "كل الفروع"
+    },
+    "COL": {
+      "CUSTOMER": "العميل",
+      "PHONE": "الموبايل",
+      "VISITS": "الزيارات",
+      "LAST_VISIT": "آخر زيارة",
+      "MISSED": "الفائتة"
+    },
+    "LAST_VISIT": {
+      "NEVER": "لم يزر بعد",
+      "TODAY": "اليوم",
+      "YESTERDAY": "أمس"
+    },
+    "EMPTY_TITLE": "لا يوجد عملاء بعد",
+    "EMPTY_TEXT": "يظهر العملاء هنا بمجرد تسجيلهم في التطبيق.",
+    "NO_RESULTS_TITLE": "لا يوجد عملاء مطابقون",
+    "NO_RESULTS_TEXT": "جرّب تبويبًا آخر أو امسح البحث.",
+    "CLEAR_FILTERS": "مسح الفلاتر",
+    "RESULTS": "عرض {{count}} من {{total}} عميل",
+    "RESULTS_NONE": "لا يوجد عملاء",
+    "PROFILE": {
+      "BREADCRUMB": "ملف العميل",
+      "BACK": "العودة إلى العملاء",
+      "NOT_FOUND_TITLE": "هذا العميل غير موجود",
+      "NOT_FOUND_TEXT": "عُد إلى قائمة العملاء.",
+      "SINCE": "عميل منذ {{date}}",
+      "STATS": "الزيارات والحجوزات الفائتة",
+      "VISITS": "الزيارات المكتملة",
+      "MISSED": "الحجوزات الفائتة",
+      "LAST_MISSED": "آخر مرة: {{date}}",
+      "BOOKINGS": "آخر الحجوزات",
+      "ALL_BOOKINGS": "كل الحجوزات ({{count}})",
+      "NO_BOOKINGS": "لم يحجز هذا العميل بعد.",
+      "BY_CUSTOMER": "ألغاه العميل",
+      "BY_BRANCH": "ألغاه الفرع",
+      "RATING": "التقييم",
+      "CONTACT": "التواصل",
+      "PHONE": "الموبايل",
+      "EMAIL": "البريد الإلكتروني",
+      "CALL": "اتصال"
     }
   }
 }
