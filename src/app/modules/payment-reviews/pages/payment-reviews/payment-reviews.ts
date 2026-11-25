@@ -156,7 +156,6 @@ export class PaymentReviewsPage implements OnInit {
 
   protected readonly panelId = PANEL_ID;
   protected readonly skeletons = SKELETON_CARDS;
-  protected readonly ToReview = PaymentReviewTab.ToReview;
 
   protected readonly items = this.service.items;
   protected readonly meta = this.service.meta;
@@ -177,6 +176,19 @@ export class PaymentReviewsPage implements OnInit {
   /** Lazy on purpose: the route guard stays the real boundary. */
   protected readonly canReview = computed(() =>
     this.auth.hasPermission(PERMISSIONS.Booking.Review),
+  );
+
+  /**
+   * Approve / Reject show only for a user who may review AND on cards that really are the To review
+   * ones. The selected tab alone is not enough: it changes the instant a tab is clicked, while the
+   * cards on screen change only when their response arrives — so this follows the tab the cards were
+   * loaded for, and the buttons can never flash on another tab's cards.
+   */
+  protected readonly canAct = computed(
+    () =>
+      this.canReview() &&
+      this.tab() === PaymentReviewTab.ToReview &&
+      this.service.itemsTab() === PaymentReviewTab.ToReview,
   );
 
   /** Booking whose proof is open large / is being approved / is being rejected. */

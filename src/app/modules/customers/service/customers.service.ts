@@ -37,6 +37,7 @@ export class CustomersService {
   private readonly _branches = signal<CustomerBranchOption[]>([]);
   private readonly _branchId = signal<number | null>(null);
   private readonly _loading = signal(false);
+  private readonly _branchesLoading = signal(false);
   private readonly _hasError = signal(false);
 
   private branchesLoaded = false;
@@ -51,7 +52,13 @@ export class CustomersService {
   readonly branches = this._branches.asReadonly();
   /** The selected branch, or `null` for "All branches". */
   readonly branchId = this._branchId.asReadonly();
-  readonly loading = this._loading.asReadonly();
+  /**
+   * The list is loading: from the moment the page opens — while the branch options are still on
+   * their way, before the first list request even starts — until its response arrives. The page
+   * shows its skeleton for this whole span, so the empty state can only ever mean "loaded, and
+   * there is genuinely nothing".
+   */
+  readonly loading = computed(() => this._loading() || this._branchesLoading());
   readonly hasError = this._hasError.asReadonly();
 
   readonly tab = computed(() => this._query().tab ?? CustomerTab.All);
@@ -80,12 +87,16 @@ export class CustomersService {
       return;
     }
 
-    this.branchesService.loadOptions().subscribe((options) => {
-      // The Branches API lists newest first; the selector reads oldest first.
-      this._branches.set([...options].sort((a, b) => a.id - b.id));
-      this.branchesLoaded = true;
-      this.ensureBranchAndLoad();
-    });
+    this._branchesLoading.set(true);
+    this.branchesService
+      .loadOptions()
+      .pipe(finalize(() => this._branchesLoading.set(false)))
+      .subscribe((options) => {
+        // The Branches API lists newest first; the selector reads oldest first.
+        this._branches.set([...options].sort((a, b) => a.id - b.id));
+        this.branchesLoaded = true;
+        this.ensureBranchAndLoad();
+      });
   }
 
   /** Request a page of customers (of the selected branch, or of all of them). */

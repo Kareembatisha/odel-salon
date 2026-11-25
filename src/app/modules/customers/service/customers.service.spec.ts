@@ -88,6 +88,32 @@ describe("CustomersService", () => {
       expect(service.customers().map((c) => c.id)).toEqual([1, 2]);
     });
 
+    it("counts as loading while the branch options are on their way, so the page never shows its empty state first", () => {
+      const branches = new Subject<typeof branchList>();
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: CUSTOMER_REPOSITORY, useValue: repo },
+          { provide: BranchesService, useValue: { loadOptions: () => branches } },
+        ],
+      });
+      const held = TestBed.inject(CustomersService);
+
+      held.initialize();
+
+      // No list request exists yet — but the page is already loading (skeleton), never "empty".
+      expect(repo.queries).toHaveLength(0);
+      expect(held.loading()).toBe(true);
+      expect(held.customers()).toEqual([]);
+
+      branches.next(branchList);
+      branches.complete();
+
+      expect(repo.queries).toHaveLength(1);
+      expect(held.loading()).toBe(false);
+      expect(held.customers().length).toBeGreaterThan(0);
+    });
+
     it("lists the branches oldest first", () => {
       service.initialize();
 

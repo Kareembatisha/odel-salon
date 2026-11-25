@@ -125,7 +125,13 @@ export class ServicesService {
   /** The branch whose price table is shown; `null` until the options load (or if there are none). */
   readonly branchId = this._branchId.asReadonly();
   readonly query = this._query.asReadonly();
-  readonly loading = this._loading.asReadonly();
+  /**
+   * The list is loading: from the moment the page opens — while the branch options are still on
+   * their way, before the first list request even starts — until its response arrives. The pages
+   * show their skeleton for this whole span, so the empty state can only ever mean "loaded, and
+   * there is genuinely nothing".
+   */
+  readonly loading = computed(() => this._loading() || this._branchesLoading());
   readonly branchesLoading = this._branchesLoading.asReadonly();
   readonly hasError = this._hasError.asReadonly();
   /** A mutation (create / update / status / delete / copy / adjust) is in flight. */
@@ -159,7 +165,16 @@ export class ServicesService {
    * opens — options are not re-requested.
    */
   initialize(): void {
+    const q = this._query();
+    const wasElsewhere =
+      q.pageNumber !== 1 ||
+      !!q.search ||
+      q.isActive !== undefined ||
+      q.isHomeAvailable !== undefined;
+
     this._query.set({ pageNumber: 1, pageSize: PAGE_SIZE });
+    // Rows of another filter / search must not show under the reset widgets: the skeleton does.
+    if (wasElsewhere) this._services.set([]);
 
     if (this.branchesLoaded) {
       this.ensureBranchAndLoad();

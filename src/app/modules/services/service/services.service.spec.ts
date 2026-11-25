@@ -88,6 +88,36 @@ describe("ServicesService", () => {
     service = TestBed.inject(ServicesService);
   });
 
+  it("counts as loading while the branch options are on their way, so a page never shows its empty state first", () => {
+    const branches = new Subject<typeof BRANCHES>();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: SERVICE_REPOSITORY, useValue: repo },
+        { provide: BranchesService, useValue: { loadOptions: () => branches } },
+        { provide: NotificationService, useValue: { success: vi.fn(), warning: vi.fn() } },
+      ],
+    });
+    const held = TestBed.inject(ServicesService);
+
+    held.initialize();
+
+    // No list request exists yet — but the page is already loading (skeleton), never "empty".
+    expect(repo.calls).toHaveLength(0);
+    expect(held.loading()).toBe(true);
+    expect(held.services()).toEqual([]);
+
+    branches.next(BRANCHES);
+    branches.complete();
+
+    expect(repo.calls).toHaveLength(1);
+    expect(held.loading()).toBe(true); // now the list request is the one in flight
+    repo.last.next(page([item(1)]));
+    repo.last.complete();
+    expect(held.loading()).toBe(false);
+    expect(held.services()).toHaveLength(1);
+  });
+
   it("selects the FIRST branch by default and loads its table", () => {
     service.initialize();
     expect(service.branchId()).toBe(3);

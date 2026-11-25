@@ -24,7 +24,9 @@
     "RESEND_AVAILABLE_IN": "إعادة الإرسال متاحة خلال",
     "RESEND_CODE": "إعادة إرسال الرمز",
     "CHANGE_EMAIL": "تغيير البريد الإلكتروني",
-    "OTP_INVALID": "يرجى إدخال الرمز المكوّن من 4 أرقام",
+    "OTP_INVALID": "يرجى إدخال الرمز المكوّن من 6 أرقام",
+    "OTP_GROUP_LABEL": "رمز التحقق",
+    "OTP_DIGIT_LABEL": "الرقم {{index}} من {{total}}",
     "CREATE_PASSWORD_TITLE": "إنشاء كلمة مرور جديدة",
     "CREATE_PASSWORD_SUBTITLE": "يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمات المرور المستخدمة سابقاً.",
     "NEW_PASSWORD_LABEL": "كلمة المرور الجديدة",
@@ -1262,7 +1264,11 @@
       "METHOD": "طريقة الدفع",
       "CUSTOMER": "العميل",
       "SERVICES": "الخدمات",
-      "STARTS": "يبدأ"
+      "STARTS": "يبدأ",
+      "PHONE": "الموبايل",
+      "DATE": "التاريخ",
+      "START_TIME": "وقت البدء",
+      "ZOOM": "تكبير"
     },
     "VIEW_PROOF": "عرض إثبات الدفع للحجز {{id}}",
     "PROOF_ALT": "إثبات الدفع للحجز {{id}}",

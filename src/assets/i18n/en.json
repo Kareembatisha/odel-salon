@@ -24,7 +24,9 @@
     "RESEND_AVAILABLE_IN": "Resend available in",
     "RESEND_CODE": "Resend Code",
     "CHANGE_EMAIL": "Change Email Address",
-    "OTP_INVALID": "Please enter the 4-digit code",
+    "OTP_INVALID": "Please enter the 6-digit code",
+    "OTP_GROUP_LABEL": "Verification code",
+    "OTP_DIGIT_LABEL": "Digit {{index}} of {{total}}",
     "CREATE_PASSWORD_TITLE": "Create New Password",
     "CREATE_PASSWORD_SUBTITLE": "Your new password must be different from previously used passwords.",
     "NEW_PASSWORD_LABEL": "New Password",
@@ -1262,7 +1264,11 @@
       "METHOD": "Payment method",
       "CUSTOMER": "Customer",
       "SERVICES": "Services",
-      "STARTS": "Starts"
+      "STARTS": "Starts",
+      "PHONE": "Phone",
+      "DATE": "Date",
+      "START_TIME": "Start time",
+      "ZOOM": "Zoom"
     },
     "VIEW_PROOF": "View payment proof of {{id}}",
     "PROOF_ALT": "Payment proof of {{id}}",

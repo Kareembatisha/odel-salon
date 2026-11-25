@@ -18,7 +18,7 @@
 <!-- Form -->
 <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="auth-form">
 
-  <div class="otp-row" (paste)="onPaste($event)">
+  <div class="otp-row" role="group" [attr.aria-label]="'AUTH.OTP_GROUP_LABEL' | translate">
     @for (key of digitKeys; track key; let i = $index) {
       <input
         #digitInput
@@ -26,10 +26,18 @@
         [class.otp-box--error]="form.controls[key].invalid && form.controls[key].touched"
         type="text"
         inputmode="numeric"
-        maxlength="1"
+        pattern="[0-9]*"
+        autocomplete="one-time-code"
+        autocapitalize="off"
+        spellcheck="false"
+        [attr.maxlength]="otpLength"
+        [attr.aria-label]="'AUTH.OTP_DIGIT_LABEL' | translate: { index: i + 1, total: otpLength }"
+        [attr.aria-invalid]="form.controls[key].invalid && form.controls[key].touched"
         [formControlName]="key"
         (input)="onDigitInput(i, $event)"
         (keydown)="onDigitKeydown(i, $event)"
+        (paste)="onPaste($event, i)"
+        (focus)="selectDigit($event)"
       />
     }
   </div>

@@ -278,6 +278,33 @@ describe("OffersService", () => {
       expect(empty.branchId()).toBeNull();
       expect(repo.calls).toHaveLength(0);
     });
+
+    it("counts as loading while the branch options are on their way, so a page never shows its empty state first", () => {
+      const branches = new Subject<typeof BRANCHES>();
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: OFFER_REPOSITORY, useValue: repo },
+          { provide: BranchesService, useValue: { loadOptions: () => branches } },
+          { provide: NotificationService, useValue: { success, warning: vi.fn() } },
+        ],
+      });
+      const held = TestBed.inject(OffersService);
+
+      held.initialize();
+
+      // No list request exists yet — but the page is already loading (skeleton), never "empty".
+      expect(repo.calls).toHaveLength(0);
+      expect(held.loading()).toBe(true);
+      expect(held.offers()).toEqual([]);
+
+      branches.next(BRANCHES);
+      branches.complete();
+
+      // The branch options arrived and the list request took over: still loading, no gap between.
+      expect(repo.calls.length).toBeGreaterThan(0);
+      expect(held.loading()).toBe(true);
+    });
   });
 
   describe("mutations", () => {

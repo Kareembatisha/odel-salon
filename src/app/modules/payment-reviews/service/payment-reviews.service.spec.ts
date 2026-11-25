@@ -215,6 +215,82 @@ describe("PaymentReviewsService", () => {
     });
   });
 
+  describe("which tab the cards belong to", () => {
+    beforeEach(() => service.initialize());
+
+    it("says the cards belong to the tab they were loaded for", () => {
+      expect(service.itemsTab()).toBe(PaymentReviewTab.ToReview);
+    });
+
+    it("clicking another tab drops the cards at once — they never show under the new tab", () => {
+      const hold = new Subject<ApiResponse<PaymentReviewItem[]>>();
+      repo.respond = () => hold;
+
+      service.setTab(PaymentReviewTab.ApprovedToday);
+
+      expect(service.tab()).toBe(PaymentReviewTab.ApprovedToday); // the selection moved…
+      expect(service.itemsTab()).toBeNull(); // …no card on screen belongs to it yet
+      expect(service.items()).toEqual([]);
+      expect(service.loading()).toBe(true);
+    });
+
+    it("the cards take their tab from the response (and the badges stay while they load)", () => {
+      const hold = new Subject<ApiResponse<PaymentReviewItem[]>>();
+      repo.respond = () => hold;
+      service.setTab(PaymentReviewTab.ApprovedToday);
+
+      hold.next(ok([item(9)]));
+
+      expect(service.itemsTab()).toBe(PaymentReviewTab.ApprovedToday);
+      expect(service.items().map((i) => i.id)).toEqual([9]);
+    });
+
+    it("clicking the tab that is already selected keeps its cards", () => {
+      repo.respond = () => new Subject<ApiResponse<PaymentReviewItem[]>>();
+
+      service.setTab(PaymentReviewTab.ToReview);
+
+      expect(service.items()).toHaveLength(2);
+      expect(service.itemsTab()).toBe(PaymentReviewTab.ToReview);
+    });
+
+    it("keeps the badges while another tab loads (they are the branch's, not the tab's)", () => {
+      repo.respond = () => new Subject<ApiResponse<PaymentReviewItem[]>>();
+
+      service.setTab(PaymentReviewTab.RejectedToday);
+
+      expect(service.counters()).not.toBeNull();
+    });
+
+    it("a quiet reload that comes after a tab click is a full load, never a silent one", () => {
+      repo.respond = () => new Subject<ApiResponse<PaymentReviewItem[]>>();
+      service.setTab(PaymentReviewTab.ApprovedToday);
+
+      service.load(true); // e.g. the reload after an approve / reject that finished meanwhile
+
+      expect(service.loading()).toBe(true);
+      expect(service.refreshing()).toBe(false);
+    });
+
+    it("a quiet reload of the tab that IS on screen stays quiet", () => {
+      repo.respond = () => new Subject<ApiResponse<PaymentReviewItem[]>>();
+
+      service.load(true);
+
+      expect(service.refreshing()).toBe(true);
+      expect(service.loading()).toBe(false);
+      expect(service.items()).toHaveLength(2);
+    });
+
+    it("forgets the tab of the cards when the branch changes", () => {
+      repo.respond = () => new Subject<ApiResponse<PaymentReviewItem[]>>();
+
+      service.selectBranch(2);
+
+      expect(service.itemsTab()).toBeNull();
+    });
+  });
+
   describe("tabs, branches and paging", () => {
     beforeEach(() => service.initialize());
 
@@ -275,7 +351,7 @@ describe("PaymentReviewsService", () => {
     it("keeps the rows and flags the error when a normal reload fails", () => {
       repo.respond = () => throwError(() => ({ status: 500 }));
 
-      service.setTab(PaymentReviewTab.ApprovedToday);
+      service.load();
 
       expect(service.hasError()).toBe(true);
       expect(service.items().map((i) => i.id)).toEqual([1, 2]);

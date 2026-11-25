@@ -259,7 +259,7 @@ describe("PaymentReviewsPage", () => {
       expect(plain(card.textContent)).toContain("Customer 489");
       expect(plain(card.textContent)).toContain("Haircut, Beard trim");
       expect(plain(card.textContent)).toContain("InstaPay");
-      expect(plain(card.querySelector(".amount")?.textContent)).toBe("EGP 340");
+      expect(plain(card.querySelector(".amount__value")?.textContent)).toBe("EGP 340");
       expect(plain(card.textContent)).toContain("Nov 13, 2026");
       expect(plain(card.textContent)).toContain("9:30 PM");
       const phone = card.querySelector<HTMLAnchorElement>("a.phone")!;
@@ -273,7 +273,7 @@ describe("PaymentReviewsPage", () => {
 
       expect(plain(card.textContent)).toContain("Mobile wallet");
       expect(card.querySelector("i.pi-mobile")).not.toBeNull();
-      expect(plain(card.querySelector(".amount")?.textContent)).toBe("EGP 260");
+      expect(plain(card.querySelector(".amount__value")?.textContent)).toBe("EGP 260");
     });
 
     it("badges only VIP and Home bookings", async () => {
@@ -674,6 +674,169 @@ describe("PaymentReviewsPage", () => {
     });
   });
 
+  describe("the card", () => {
+    const part = (card: HTMLElement, selector: string) => card.querySelector(selector);
+    const infoOf = (card: HTMLElement) =>
+      Array.from(card.querySelectorAll(".info__item")).map((i) => [
+        plain(i.querySelector("dt")?.textContent),
+        plain(i.querySelector("dd")?.textContent),
+      ]);
+
+    it("has a header, a two-column body and — for a reviewer — a footer", async () => {
+      await open(sample());
+      const card = cards()[0];
+
+      expect(part(card, ".review__head")).not.toBeNull();
+      expect(card.querySelector(".review__body > .proof")).not.toBeNull();
+      expect(card.querySelector(".review__body > .review__details")).not.toBeNull();
+      expect(part(card, "footer.review__actions")).not.toBeNull();
+    });
+
+    it("puts the id, the status badge and the waiting time in the header; Late only when late", async () => {
+      await open(sample());
+      const [onTime, late] = cards();
+
+      expect(plain(onTime.querySelector(".review__id")?.textContent)).toBe("#489");
+      expect(plain(onTime.querySelector(".review__state app-status-badge")?.textContent)).toBe(
+        "Waiting for branch",
+      );
+      expect(plain(onTime.querySelector(".wait")?.textContent)).toContain("Waiting");
+      expect(onTime.querySelector(".review__state")?.textContent).not.toContain("Late");
+      expect(late.classList.contains("review--late")).toBe(true);
+      expect(plain(late.querySelector(".review__state")?.textContent)).toContain("Late");
+    });
+
+    it("shows the status badge but no waiting time on the reviewed tabs", async () => {
+      await open(sample());
+      repo.respond = () =>
+        of(
+          envelope([
+            review(5, { status: BookingStatus.Confirmed, waitingMinutes: null, isLate: false }),
+          ]),
+        );
+      tabs()[1].click();
+      await settle();
+
+      const card = cards()[0];
+      expect(plain(card.querySelector(".review__state app-status-badge")?.textContent)).toBe(
+        "Confirmed",
+      );
+      expect(card.querySelector(".wait")).toBeNull();
+    });
+
+    it("makes the amount due the prominent figure, above the details", async () => {
+      await open(sample());
+      const details = cards()[0].querySelector(".review__details")!;
+
+      expect(details.firstElementChild?.classList.contains("amount")).toBe(true);
+      expect(plain(details.querySelector(".amount__label")?.textContent)).toBe("Amount due");
+      expect(plain(details.querySelector(".amount__value")?.textContent)).toBe("EGP 340");
+    });
+
+    it("lays the details out as a grid: customer, phone, method, services, date, start time", async () => {
+      await open(sample());
+
+      expect(infoOf(cards()[0])).toEqual([
+        ["Customer", "Customer 489"],
+        ["Phone", "+201017772310"],
+        ["Payment method", "InstaPay"],
+        ["Services", "Haircut, Beard trim"],
+        ["Date", expect.stringMatching(/\d{4}/)],
+        ["Start time", expect.stringMatching(/\d/)],
+      ]);
+    });
+
+    it("offers the zoom on the screenshot as a visible action", async () => {
+      await open(sample());
+      const proof = cards()[0].querySelector<HTMLButtonElement>(".proof")!;
+
+      expect(plain(proof.querySelector(".proof__zoom")?.textContent)).toBe("Zoom");
+      proof.click();
+      await settle();
+      expect(el().querySelector('[role="dialog"]')).not.toBeNull();
+    });
+
+    it("gives Reject and Approve the same size (both fill their grid cell)", async () => {
+      await open(sample());
+      const buttons = Array.from(
+        cards()[0].querySelectorAll<HTMLElement>(".review__actions app-button button"),
+      );
+
+      expect(buttons).toHaveLength(2);
+      for (const b of buttons) expect(b.classList.contains("btn--full")).toBe(true);
+    });
+
+    it("has a skeleton in the same two-column shape while loading", () => {
+      repo.respond = () => new Subject<ApiResponse<PaymentReviewItem[]>>();
+      fixture = TestBed.createComponent(PaymentReviewsPage);
+      fixture.detectChanges();
+
+      expect(el().querySelectorAll(".review .review__body").length).toBeGreaterThan(0);
+      expect(el().querySelector(".review .proof")).toBeNull();
+    });
+  });
+
+  describe("actions follow the cards on screen, not just the selected tab", () => {
+    const footers = () => el().querySelectorAll(".review__actions").length;
+
+    it("never shows them on another tab's cards while that tab loads (the reported flash)", async () => {
+      await open(sample());
+      repo.respond = () =>
+        of(envelope([review(5, { status: BookingStatus.Rejected, waitingMinutes: null })]));
+      tabs()[2].click(); // Rejected today: its cards, no buttons
+      await settle();
+      expect(cards()).toHaveLength(1);
+      expect(footers()).toBe(0);
+
+      // Back to To review, whose response is still on its way.
+      const hold = new Subject<ApiResponse<PaymentReviewItem[]>>();
+      repo.respond = () => hold;
+      tabs()[0].click();
+      fixture.detectChanges();
+
+      expect(tabs()[0].getAttribute("aria-selected")).toBe("true");
+      expect(cards()).toHaveLength(0); // the rejected cards are gone, not shown under To review
+      expect(footers()).toBe(0); // …and so are their buttons
+
+      hold.next(sample());
+      await settle();
+      expect(cards()).toHaveLength(2);
+      expect(footers()).toBe(2);
+    });
+
+    it("rejecting and then switching tab never flashes buttons on the cards in between", async () => {
+      await open(sample());
+      const hold = new Subject<ApiResponse<PaymentReviewItem[]>>();
+      repo.respond = () => hold;
+
+      tabs()[1].click(); // straight after a review, before anything has loaded
+      fixture.detectChanges();
+      tabs()[0].click();
+      fixture.detectChanges();
+
+      expect(cards()).toHaveLength(0);
+      expect(footers()).toBe(0);
+    });
+
+    it("shows them again on To review, and only to a user who may review", async () => {
+      granted = ["Booking.View"];
+      await open(sample());
+
+      expect(cards()).toHaveLength(2);
+      expect(footers()).toBe(0);
+    });
+
+    it("never shows them on the reviewed tabs, even for a reviewer", async () => {
+      await open(sample());
+      repo.respond = () => of(envelope([review(5, { status: BookingStatus.Confirmed })]));
+      tabs()[1].click();
+      await settle();
+
+      expect(cards()).toHaveLength(1);
+      expect(footers()).toBe(0);
+    });
+  });
+
   describe("permission", () => {
     it("is read-only without Booking.Review: no Approve / Reject, the proof can still be opened", async () => {
       granted = ["Booking.View"];
@@ -766,11 +929,18 @@ describe("PaymentReviewsPage", () => {
       expect(el().querySelector("app-failed-state")).toBeNull();
     });
 
+    const page2 = () =>
+      Array.from(el().querySelectorAll<HTMLButtonElement>("app-pagination button")).find(
+        (b) => plain(b.textContent) === "2",
+      )!;
+
     it("keeps the cards when a normal reload fails", async () => {
-      await open(sample());
+      await open(
+        envelope([review(1), review(2)], { totalCount: 42, totalPages: 3, hasNextPage: true }),
+      );
       repo.respond = () => throwError(() => ({ status: 500 }));
 
-      tabs()[1].click();
+      page2().click(); // a reload of the SAME tab: its cards stay
       await settle();
 
       expect(cards()).toHaveLength(2);

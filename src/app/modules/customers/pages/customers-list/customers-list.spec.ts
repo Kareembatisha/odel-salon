@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Router, provideRouter } from "@angular/router";
 import { TranslateModule, TranslateService } from "@ngx-translate/core";
-import { Observable, of, throwError } from "rxjs";
+import { Observable, Subject, of, throwError } from "rxjs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import ar from "../../../../../assets/i18n/ar.json";
@@ -77,6 +77,8 @@ class FakeRepo {
 describe("CustomersList", () => {
   let repo: FakeRepo;
   let fixture: ComponentFixture<CustomersList>;
+  /** Where the branch options come from (a held Subject lets a test freeze the page mid-load). */
+  let branchesSource: () => Observable<Array<{ id: number; nameAr: string; nameEn: string }>>;
 
   const el = () => fixture.nativeElement as HTMLElement;
   const text = () => plain(el().textContent);
@@ -105,6 +107,11 @@ describe("CustomersList", () => {
 
   beforeEach(() => {
     repo = new FakeRepo();
+    branchesSource = () =>
+      of([
+        { id: 2, nameAr: "فرع ب", nameEn: "Branch B" },
+        { id: 1, nameAr: "فرع أ", nameEn: "Branch A" },
+      ]);
     TestBed.configureTestingModule({
       imports: [CustomersList, TranslateModule.forRoot()],
       providers: [
@@ -113,11 +120,7 @@ describe("CustomersList", () => {
         {
           provide: BranchesService,
           useValue: {
-            loadOptions: () =>
-              of([
-                { id: 2, nameAr: "فرع ب", nameEn: "Branch B" },
-                { id: 1, nameAr: "فرع أ", nameEn: "Branch A" },
-              ]),
+            loadOptions: () => branchesSource(),
           },
         },
       ],
@@ -153,6 +156,40 @@ describe("CustomersList", () => {
         "Branch A",
         "Branch B",
       ]);
+    });
+
+    it("shows the skeleton — never the empty state — from the first moment, while the branch options load", () => {
+      const hold = new Subject<Array<{ id: number; nameAr: string; nameEn: string }>>();
+      branchesSource = () => hold;
+      fixture = TestBed.createComponent(CustomersList);
+      fixture.detectChanges();
+
+      expect(repo.queries).toHaveLength(0); // no list request yet…
+      expect(el().querySelector(".dt__row--skeleton")).not.toBeNull(); // …and already the skeleton
+      expect(text()).not.toContain("No customers yet");
+    });
+
+    it("shows the skeleton while the list loads, then the rows — the empty state never appears in between", async () => {
+      const seen: boolean[] = [];
+      const hold = new Subject<ApiResponse<CustomerListItem[]>>();
+      repo.respond = () => hold;
+      fixture = TestBed.createComponent(CustomersList);
+      fixture.detectChanges();
+      seen.push(text().includes("No customers yet"));
+
+      hold.next(envelope([customer(1)]));
+      hold.complete();
+      await settle();
+      seen.push(text().includes("No customers yet"));
+
+      expect(seen).toEqual([false, false]);
+      expect(tableRows()).toHaveLength(1);
+    });
+
+    it("says 'No customers yet' only when the request succeeded with nothing", async () => {
+      await open(envelope([]));
+
+      expect(text()).toContain("No customers yet");
     });
 
     it("shows a skeleton-free empty state when there are no customers", async () => {

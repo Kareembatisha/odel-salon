@@ -29,21 +29,25 @@
   word-break: break-all;
 }
 
+// Six boxes share the row and shrink with it (a phone is ~330px wide inside the card).
 .otp-row {
   display: flex;
   justify-content: center;
-  gap: v.$space-3;
+  gap: v.$space-2;
   direction: ltr;
 }
 .otp-box {
-  width: 64px;
-  height: 68px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 56px;
+  height: 64px;
+  padding: 0;
   background: v.$surface;
   border: 1px solid v.$border-strong;
   border-radius: v.$radius-md;
   color: v.$text;
   font-family: v.$font-display;
-  font-size: v.$text-4xl;
+  font-size: v.$text-3xl;
   font-weight: v.$fw-semibold;
   text-align: center;
   transition:
@@ -58,8 +62,8 @@
     border-color: v.$danger;
   }
   @media (max-width: v.$bp-sm) {
-    width: 54px;
-    height: 60px;
+    height: 56px;
+    font-size: v.$text-2xl;
   }
 }
 .otp-error {

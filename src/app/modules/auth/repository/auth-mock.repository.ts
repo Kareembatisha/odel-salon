@@ -167,7 +167,7 @@ export class AuthMockRepository implements IAuthRepository {
   verifyPasswordCode(
     payload: VerifyPasswordCodeRequest,
   ): Observable<ApiResponse<VerifyPasswordCodeResponseData>> {
-    if (payload.code !== "1234") {
+    if (payload.code !== "123456") {
       return throwError(() => ({
         error: {
           status: false,

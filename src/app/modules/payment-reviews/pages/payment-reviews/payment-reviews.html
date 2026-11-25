@@ -50,10 +50,13 @@
         <div class="grid" aria-busy="true">
           @for (n of skeletons; track n) {
             <div class="odl-card review">
-              <app-skeleton width="40%" height="20px" />
+              <div class="review__head"><app-skeleton width="40%" height="20px" /><app-skeleton width="30%" height="20px" /></div>
               <div class="review__body">
-                <app-skeleton width="128px" height="180px" />
-                <div class="review__facts"><app-skeleton height="16px" /><app-skeleton height="16px" /><app-skeleton height="16px" /></div>
+                <app-skeleton height="220px" />
+                <div class="review__details">
+                  <app-skeleton height="52px" />
+                  <div class="info"><app-skeleton height="34px" /><app-skeleton height="34px" /><app-skeleton height="34px" /><app-skeleton height="34px" /></div>
+                </div>
               </div>
             </div>
           }
@@ -74,21 +77,23 @@
           @for (card of cards(); track card.id) {
             <li class="odl-card review" [class.review--late]="card.isLate" [attr.aria-labelledby]="'review-' + card.id">
               <header class="review__head">
-                <h3 class="review__id" [id]="'review-' + card.id">{{ card.idLabel }}</h3>
-                @if (card.typeLabel) {
-                  <app-status-badge [variant]="card.typeVariant" [dot]="false">{{ card.typeLabel }}</app-status-badge>
-                }
-                <span class="review__spacer"></span>
-                @if (card.waiting !== null) {
-                  <span class="wait" [class.wait--late]="card.isLate">
-                    <i class="pi pi-clock" aria-hidden="true"></i>{{ waitingLabel(card) }}
-                  </span>
-                  @if (card.isLate) {
-                    <app-status-badge variant="danger" [dot]="false">{{ 'PAYMENT_REVIEWS.LATE' | translate }}</app-status-badge>
+                <div class="review__title">
+                  <h3 class="review__id" [id]="'review-' + card.id">{{ card.idLabel }}</h3>
+                  @if (card.typeLabel) {
+                    <app-status-badge [variant]="card.typeVariant" [dot]="false">{{ card.typeLabel }}</app-status-badge>
                   }
-                } @else {
+                </div>
+                <div class="review__state">
                   <app-status-badge [variant]="card.statusVariant">{{ card.statusLabel }}</app-status-badge>
-                }
+                  @if (card.waiting !== null) {
+                    <span class="wait" [class.wait--late]="card.isLate">
+                      <i class="pi pi-clock" aria-hidden="true"></i>{{ waitingLabel(card) }}
+                    </span>
+                    @if (card.isLate) {
+                      <app-status-badge variant="danger" [dot]="false">{{ 'PAYMENT_REVIEWS.LATE' | translate }}</app-status-badge>
+                    }
+                  }
+                </div>
               </header>
 
               <div class="review__body">
@@ -99,41 +104,53 @@
                   (click)="proofTarget.set(card)"
                 >
                   <img [src]="card.proofUrl" [alt]="proofAlt(card)" loading="lazy" />
-                  <span class="proof__zoom" aria-hidden="true"><i class="pi pi-search-plus"></i></span>
+                  <span class="proof__zoom" aria-hidden="true">
+                    <i class="pi pi-search-plus"></i>{{ 'PAYMENT_REVIEWS.CARD.ZOOM' | translate }}
+                  </span>
                 </button>
 
-                <dl class="review__facts">
-                  <div class="fact fact--amount">
-                    <dt>{{ 'PAYMENT_REVIEWS.CARD.AMOUNT_DUE' | translate }}</dt>
-                    <dd class="amount u-num">{{ card.amount }}</dd>
+                <div class="review__details">
+                  <div class="amount">
+                    <span class="amount__label">{{ 'PAYMENT_REVIEWS.CARD.AMOUNT_DUE' | translate }}</span>
+                    <span class="amount__value u-num">{{ card.amount }}</span>
                   </div>
-                  <div class="fact">
-                    <dt>{{ 'PAYMENT_REVIEWS.CARD.METHOD' | translate }}</dt>
-                    <dd class="method"><i [class]="card.methodIcon" aria-hidden="true"></i>{{ card.methodLabel }}</dd>
-                  </div>
-                  <div class="fact">
-                    <dt>{{ 'PAYMENT_REVIEWS.CARD.CUSTOMER' | translate }}</dt>
-                    <dd>
-                      <span class="cell-text">{{ card.customerName }}</span>
-                      <a class="phone" dir="ltr" [attr.href]="'tel:' + card.customerPhone">{{ card.customerPhone }}</a>
-                    </dd>
-                  </div>
-                  <div class="fact">
-                    <dt>{{ 'PAYMENT_REVIEWS.CARD.SERVICES' | translate }}</dt>
-                    <dd>{{ card.services }}</dd>
-                  </div>
-                  <div class="fact">
-                    <dt>{{ 'PAYMENT_REVIEWS.CARD.STARTS' | translate }}</dt>
-                    <dd>{{ card.startDate }} · <span class="u-num">{{ card.startTime }}</span></dd>
-                  </div>
-                </dl>
+
+                  <dl class="info">
+                    <div class="info__item">
+                      <dt>{{ 'PAYMENT_REVIEWS.CARD.CUSTOMER' | translate }}</dt>
+                      <dd class="cell-text">{{ card.customerName }}</dd>
+                    </div>
+                    <div class="info__item">
+                      <dt>{{ 'PAYMENT_REVIEWS.CARD.PHONE' | translate }}</dt>
+                      <dd><a class="phone" dir="ltr" [attr.href]="'tel:' + card.customerPhone">{{ card.customerPhone }}</a></dd>
+                    </div>
+                    <div class="info__item">
+                      <dt>{{ 'PAYMENT_REVIEWS.CARD.METHOD' | translate }}</dt>
+                      <dd class="method"><i [class]="card.methodIcon" aria-hidden="true"></i>{{ card.methodLabel }}</dd>
+                    </div>
+                    <div class="info__item">
+                      <dt>{{ 'PAYMENT_REVIEWS.CARD.SERVICES' | translate }}</dt>
+                      <dd>{{ card.services }}</dd>
+                    </div>
+                    <div class="info__item">
+                      <dt>{{ 'PAYMENT_REVIEWS.CARD.DATE' | translate }}</dt>
+                      <dd>{{ card.startDate }}</dd>
+                    </div>
+                    <div class="info__item">
+                      <dt>{{ 'PAYMENT_REVIEWS.CARD.START_TIME' | translate }}</dt>
+                      <dd class="u-num">{{ card.startTime }}</dd>
+                    </div>
+                  </dl>
+                </div>
               </div>
 
-              @if (canReview() && tab() === ToReview) {
+              <!-- Only for a user who may review, on cards that really ARE the To review ones. -->
+              @if (canAct()) {
                 <footer class="review__actions">
                   <app-button
                     variant="danger"
                     iconClass="pi pi-times"
+                    [fullWidth]="true"
                     [disabled]="isPending(card.id)"
                     [ariaLabel]="'PAYMENT_REVIEWS.REJECT_LABEL' | translate: { id: card.idLabel }"
                     (clicked)="askReject(card)"
@@ -143,6 +160,7 @@
                   <app-button
                     variant="primary"
                     iconClass="pi pi-check"
+                    [fullWidth]="true"
                     [loading]="isPending(card.id)"
                     [ariaLabel]="'PAYMENT_REVIEWS.APPROVE_LABEL' | translate: { id: card.idLabel }"
                     (clicked)="askApprove(card)"

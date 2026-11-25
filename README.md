@@ -25,7 +25,7 @@ npm run build        # production build (real API, design-system page hidden)
 npm test
 ```
 
-**Mock sign-in** (any password with 6+ characters; OTP code is `1234`)
+**Mock sign-in** (any password with 6+ characters; OTP code is `123456`)
 
 | Email | Role | Access |
 |---|---|---|
@@ -134,7 +134,7 @@ Implements `API_Contract_Authentication.md` (all 9 endpoints). Email + password 
 | Endpoint | Where it lives |
 |---|---|
 | `POST /auth/login` · `POST /auth/logout` · `POST /auth/refresh-token` | `AuthService` → login page, header, error interceptor |
-| `POST /auth/password/forgot` → `/verify` → `PATCH /reset` | forgot-password → 4-digit OTP → new-password pages |
+| `POST /auth/password/forgot` → `/verify` → `PATCH /reset` | forgot-password → 6-digit OTP → new-password pages |
 | `PATCH /auth/password/change` | `AuthService.changePassword()` → Profile → Password card |
 | `GET /auth/profile` · `PUT /auth/profile` (multipart) | `ProfileService` → Profile page |
 
@@ -142,6 +142,15 @@ Implements `API_Contract_Authentication.md` (all 9 endpoints). Email + password 
 - Routes: `canActivate: [permissionGuard]` with `data: { permission }`. The sidebar filters by the same permissions, so a user only sees what they can open.
 - **The profile only requires being signed in.** `/main` has no page of its own: `homeRedirectGuard` sends the user to the first sidebar item they can open (or to their profile). Add new permission keys to `permissions.ts` as the backend introduces them.
 - Breadcrumbs build themselves from route `data.breadcrumb`.
+
+### Email verification (OTP)
+
+The code is **exactly 6 digits**, one box each (`OTP_LENGTH` in `pages/email-verification/email-verification.ts`; the mock backend accepts `123456`). Inputs are numeric on mobile (`inputmode="numeric"`) and carry `autocomplete="one-time-code"`, so an SMS autofill works.
+
+- **Typing** moves to the next box; typing over a filled box replaces its digit; letters and symbols are ignored (Arabic-Indic digits ٠-٩ are converted).
+- **Paste / SMS autofill / keyboard suggestions** that put the whole code in one box are spread over the boxes: a full code always starts at the first box, a shorter paste starts at the box it was pasted into. It fills in ONE update, so the code is verified once — never half old, half new.
+- **Keys** — Backspace on an empty box clears the previous box and goes back to it; Arrow Left / Right, Home and End move between the boxes (the row stays left-to-right on the RTL page).
+- The code is verified by itself as soon as the sixth box is filled; every box is named for a screen reader (*Digit 3 of 6*) and the row is a labelled group.
 
 ### Profile page (`/main/profile`)
 
@@ -171,7 +180,9 @@ Only sections that exist are routed and shown in the sidebar. When a new feature
 | Offers | `/main/offers` | `Offer.View` (+ `Create` for "Add offer", `Edit` for the edit drawer and Stop / Resume, `Delete` for delete) |
 | Bookings | `/main/bookings` | `Booking.View` |
 | Payment reviews | `/main/bookings/payment-reviews` | `Booking.View` (approve / reject need `Booking.Review`) |
-| Booking details | `/main/bookings/:id` | `Booking.View` ("End session" needs `Booking.Manage`) |
+| Booking details | `/main/bookings/:id` | `Booking.View` ("End session", "Mark as missed", "Cancel booking" and "Change barber" need `Booking.Manage`) |
+| Customers | `/main/customers` | `Customer.View` |
+| Customer profile | `/main/customers/:id` | `Customer.View` |
 | My profile | `/main/profile` | sign-in only |
 | Design system (dev builds only) | `/main/design-system` | — |
 
@@ -287,7 +298,7 @@ An offer discounts a bundle of **at least ONE service of ONE branch** for a peri
 
 ## Bookings
 
-Implements `API Contract — Admin Bookings` (Get Bookings, Get Booking By Id, Complete Booking) in `modules/bookings/`, built as `model → repository (interface + api + mock) → service (signals) → pages`. Payment reviews share its enums and building blocks (next section).
+Implements `API Contract — Admin Bookings` (Get Bookings, Get Booking By Id, Complete Booking) and its additions — `Admin Booking Cancellation` (Cancel Booking) and `Admin Booking Actions` (Mark No-Show, Mark Booking Refunded, Reassign Booking Barber) — in `modules/bookings/`, built as `model → repository (interface + api + mock) → service (signals) → pages`. Payment reviews share its enums and building blocks (next section).
 
 The pages show ONE branch (the first, oldest, by default — there is no "all branches" view), because the counters belong to one branch. Like Offers and Packages, **opening a page again starts it clean**: the tab, search, filters and page are reset and the widgets are empty; only the selected branch is kept.
 
@@ -297,28 +308,74 @@ The pages show ONE branch (the first, oldest, by default — there is no "all br
 - **Details** (`/main/bookings/:id`) — header (number, long date, time, status, type, duration), **Appointment** (barber with rating or *No reviews yet*, chair, branch, home address for Home), **Services & payment** (each service with duration and price, subtotal, method, total), **Refund** (status, amount, fee — only when the booking has one) and **Customer** (name, call link, completed visits, missed bookings).
 - **End session** — `PATCH /bookings/{id}/complete`, gated by `Booking.Manage` and shown only while the server says `actions.canComplete`. It asks for confirmation, then the booking is **re-read** so the status and the allowed actions are the server's — after a failure too (`409` "hasn't started yet" / "not allowed for the current status", `404`): what the page showed was out of date. A Confirmed booking that hasn't started says *You can end the session once it starts.* A missing booking (`404`) gets its own message, not a retry. Confirmed bookings left open are completed automatically 2 hours after they end (the backend's rule).
 - **Dates** — `startAt` is salon-local (Cairo) time WITHOUT an offset. It is never passed to `new Date()`: `utils/booking-dates.util.ts` splits and formats it as a pure calendar value, so the browser's time zone can't move the day or the hour.
-- **Not built, on purpose** — *Refund sent*: the contract has `actions.canMarkRefunded` but no endpoint to mark a refund; the page never offers it (ask the backend for an endpoint, then add it next to *End session*). *Customer profile*: there is no Customers module, so the customer card has a call link and the visit / missed counts but no profile link. The status filter sends ONE status from the UI (the service and the query builder accept a list — the key is repeated, `?statuses=1&statuses=4`).
-- **Accessibility** — tabs ↔ panel (`aria-controls` / `aria-labelledby`), a polite live region (*Showing 20 of 42 bookings*), table caption, `aria-pressed` on the chip, booking numbers, phones and dates stay left-to-right inside RTL.
-- **Permissions** — `Booking.View` opens the list and the details; `Booking.Manage` shows *End session*. The mock `BranchManager` has `Booking.View`, `Booking.Review` and `Booking.Manage`; sign in as `receptionist@odel.com` to try a user who can look but not act (`View` / `Cancel` only). `Booking.Cancel` is in the catalog but this contract doesn't use it.
+- **Mark as missed** — `PATCH /bookings/{id}/no-show`, next to *End session* (the same rule: a Confirmed booking that has started, so it shows whenever `actions.canComplete` is true). It asks for confirmation; the booking becomes **Missed** and the price minus the no-show fee (`AppSetting.NoShowFeePercent`; the mock uses 20%) is owed.
+- **Cancel booking** — `PATCH /bookings/{id}/cancel`, `Booking.Manage`, shown while `actions.canCancel` (pending / confirmed and not ended; an in-progress booking can be cancelled too). A dialog (the same one Reject uses) asks for the **reason**: required, max 500 characters, **the customer sees it as written**. The booking becomes Cancelled, its barber / chair time is freed and a **full refund** is owed. Use Reject instead when the transfer itself is invalid (no refund).
+- **Change barber** — `PUT /bookings/{id}/barber`, `Booking.Manage`, shown while `actions.canReassign` (pending / confirmed and not ended). The dialog lists the **active barbers of the booking's branch** (`branch.id` of the details; the booking's own barber, `barber.id`, is left out); whether one is free at that time is only known to the server, so the `409` "isn't available" is the check (there is no endpoint that lists the available barbers). Chair, time and price stay.
+- **The customer is not notified automatically** (no notifications module): the cancel and change-barber dialogs say so, and the customer card keeps its call link — call them.
+- **Cancellation card** (Cancelled bookings only) — who cancelled (*The customer* / *The branch · Mona Ibrahim*), when (`cancelledAt` is UTC, shown in Cairo time) and why (the reason the staff wrote, or the one the customer picked: change of plans / booked by mistake / wants another time / other; blank when the customer gave none).
+- **One customer's bookings** — `/main/bookings?customerId=1203` (the *All bookings (N)* link of the customer profile) lists that customer's bookings in **every branch**: the branch and barber filters give way to a chip (*Showing bookings of …* with *Show all*), no `branchId` is sent and the counters narrow to the customer. The other tabs and filters still combine with it.
+- **Customer profile link** — the customer card links to `/main/customers/:id` for users with `Customer.View`.
+- **Refund sent** — `PATCH /bookings/{id}/refund`, `Booking.Manage`, a button in the **refund card** while `actions.canMarkRefunded` (a Cancelled / Expired / Missed booking whose refund is still Waiting). The branch returns the money to the customer **outside the app** (cash or the same payment method); this only RECORDS it, so it asks first (the amount and the customer are named) — it **can't be undone** (a second try answers `409` "already marked as paid"). The booking's status doesn't change: `refund.status` becomes Sent, the booking leaves the *Refund waiting* filter and the counters are re-read from the server. Only the details page has it: the list response carries no `canMarkRefunded`, so the *Refund waiting* chip is how you reach those bookings.
+- The status filter sends ONE status from the UI (the service and the query builder accept a list — the key is repeated, `?statuses=1&statuses=4`).
+- **Accessibility** — tabs ↔ panel (`aria-controls` / `aria-labelledby`), a polite live region (*Showing 9 of 9 bookings*), table caption, `aria-pressed` on the chip, booking numbers, phones and dates stay left-to-right inside RTL.
+- **Permissions** — `Booking.View` opens the list and the details; `Booking.Manage` shows *End session*, *Mark as missed*, *Cancel booking*, *Change barber* and *Refund sent*. The mock `BranchManager` has `Booking.View`, `Booking.Review` and `Booking.Manage`; sign in as `receptionist@odel.com` to try a user who can look but not act (`View` / `Cancel` only). `Booking.Cancel` is in the catalog but the contracts don't use it (cancelling needs `Booking.Manage`).
 
 ## Payment reviews
 
 Implements the review half of the same contract (Get Payment Reviews, Approve Booking, Reject Booking) in `modules/payment-reviews/`.
 
 - **Queue** (`/main/bookings/payment-reviews`) — tabs *To review / Approved today / Rejected today*, each with the branch's count; *Review time 30 min* (from `reviewTargetMinutes`, hidden when the server doesn't send it). To review is ordered by start time (an unreviewed booking **expires at its start time**); the reviewed tabs, latest review first.
-- **Card** — `#id` (this list has no booking number), VIP / Home badge, **Waiting N min** with a red edge **and a *Late* badge** when `isLate`, the transfer screenshot (a button that opens it large), the **amount due** — the number to compare with the screenshot (the amount actually sent isn't provided; it has to be read from the image) —, method, customer with a call link, services and start. The reviewed tabs show the booking's status instead and no actions.
+- **Card** — `#id` (this list has no booking number), the payment status, the waiting time with a *Late* badge, the screenshot, the **amount due** and the booking details — see *The review card* below.
 - **Approve** (`Booking.Review`) — asks for confirmation that repeats the amount due and the method, then `PATCH /bookings/{id}/approve`: PendingReview → Confirmed. `409` when the booking isn't PendingReview or its start time passed.
 - **Reject** (`Booking.Review`) — a dialog asks for the **reason**: required (blank counts as empty), max 500 characters (typing and pasting, with a live counter), shown to the customer, and it starts empty every time. `PATCH /bookings/{id}/reject` frees the barber's and chair's time.
 - **Stays fresh** — the queue is time-critical, so it reloads **quietly** (rows stay, no skeleton, a failed background reload is ignored): every 60 seconds while the tab is visible, when the tab regains focus, and from the *Refresh* button, which shows *Updated 12:05 PM* in salon time. After approve / reject it reloads either way — a `409` / `404` means someone else got there first. Only the booking being saved is locked, so other cards stay usable.
 - **Proof viewer** — Escape, the backdrop or the close button close it; focus is trapped inside and restored; *Open original* shows only for real web addresses.
 - **Read-only without `Booking.Review`** — the queue and the screenshots stay visible, the Approve / Reject buttons don't.
-- **Mock backend** — `core/mock/mock-bookings.ts` seeds **62 bookings** with dates relative to *now* in Cairo (42 in the first branch): 5 waiting for review (two late, one whose screenshot shows LESS than the total, to practise rejecting), 4 confirmed to come (two approved today), one in progress, one rejected today, and a history of completed, cancelled, missed, expired and rejected bookings with their refunds; Home bookings live in the branches that allow them (Nasr City, Heliopolis, New Cairo). Screenshots are generated receipt images (`data:` URLs — offline, no files). The mock applies the backend's time rules before every call (unreviewed → **Expired** at the start time with a full refund owed; open Confirmed → **Completed** 2 h after the end) and the contract's errors (`400` empty / over-long reason or `dateTo < dateFrom`, `404`, `409`). **Bookings, payment reviews and the barbers' attendance share one database**: rejecting a waiting booking or ending a session frees a present barber.
+- **Mock backend** — `core/mock/mock-bookings.ts` seeds **9 bookings, ONE per status**, all in the first branch (Zamalek; the other branches have none), with dates relative to *now* in Cairo, so every state is easy to find, review and test: **401** waiting for a review (39 min — late), **402** Confirmed (VIP, approved today, starts in 2 h), **403** Confirmed and *Started*, **404** Rejected today (its screenshot shows LESS than the total), **405** Expired (full refund owed), **406** Completed, **407** Missed (refund owed minus the fee), **408** Cancelled by the customer (refund sent), **409** Cancelled by the branch (refund owed). The open ones (401-403) belong to the first and third barbers, so the second one can leave freely. There is no Home booking in the seed (the first branch doesn't take Home); tests make one when they need it. Screenshots are generated receipt images (`data:` URLs — offline, no files). The mock applies the backend's time rules before every call (unreviewed → **Expired** at the start time with a full refund owed; open Confirmed → **Completed** 2 h after the end) and the contract's errors (`400` empty / over-long reason or `dateTo < dateFrom`, `404`, `409`). **Bookings, payment reviews and the barbers' attendance share one database**: rejecting a waiting booking or ending a session frees a present barber.
+
+### The review card (redesign)
+
+A **balanced two-column card** built only from the existing tokens and shared components (works in light / dark and LTR / RTL):
+
+- **Header** — the booking id (`#489`) with its VIP / Home badge, the **payment status badge** (*Waiting for branch* on To review; Confirmed / Rejected on the reviewed tabs), the **waiting time** and the **Late** badge (only when the proof has waited past the review target).
+- **Body** — left: the payment proof (a button, always showing a *Zoom* chip, opens the large viewer); right: the **amount due** as the most prominent figure (display face, tinted band), then a plain two-column grid — customer, phone, payment method, services, date, start time — with no boxes around the facts. Below 480px the proof moves on top and the details follow.
+- **Footer** — under a subtle divider: **Reject** (danger) and **Approve** (primary), both `fullWidth` in equal grid cells so their size and alignment match.
+- The footer is shown only when the user may review **and** the cards on screen are the *To review* ones.
+
+### Actions never flash on the wrong cards
+
+The selected tab changes the instant it is clicked, but the cards change only when their response arrives. The buttons used to follow the selected tab, so clicking *To review* from another tab put Reject / Approve on that tab's cards until the response landed. The fix is in the state, not in CSS:
+
+- the service keeps **`itemsTab`** — the tab the cards on screen were loaded for (set from the response, `null` while none are);
+- **clicking another tab clears the cards** (and `itemsTab`) at once, so the skeleton shows instead of another tab's cards; the badges stay (they belong to the branch);
+- the page's `canAct` is `canReview && tab === ToReview && itemsTab === ToReview`;
+- a *quiet* reload (the one after an approve / reject) is only quiet while the cards on screen belong to the tab it reloads — after a tab click it is a normal load, so it can't leave an empty state behind.
+
+
+## Customers
+
+Implements `API Contract — Customers` (Get Customers, Get Customer By Id) in `modules/customers/`, built like Bookings: `model → repository (interface + api + mock) → service (signals) → pages`. Customers are the app users who registered and verified their email (staff never appear).
+
+- **List** (`/main/customers`, `Customer.View`) — tabs *All / Visited this month / Has missed bookings / Not back in 60 days*, each with its count; a **branch** select that defaults to **All branches** (unlike Bookings the branch is optional: with none, every customer is listed and the numbers cover all branches; with one, only the customers who booked there are listed and every number — and the tab counts — count that branch only); a name / phone search; 20 per page. The tab counts come from `meta.additionalData` and ignore the search. Opening the page again resets the tab, search and page (the selected branch is kept).
+- **Row** — avatar and name, phone (a left-to-right `tel:` link), visits (completed bookings), last visit (*Today* / *Yesterday* / a date / *Never*) and missed bookings (highlighted when there is one). A row opens the profile; narrow screens show cards.
+- **Profile** (`/main/customers/:id`) — name and *Customer since* (UTC `createdAt`, shown in Cairo time), **Visits** and **Missed** cards (with the date of the last no-show), the **latest 5 bookings** (booking number linked to its details, services, amount, barber · branch, status or *Started*, who cancelled, the refund line and fee, the rating) and the contact card (call and email links). *All bookings (N)* opens `/main/bookings?customerId=…`. Everything covers all branches. A missing customer (`404`) gets its own message, not a retry.
+- **Not built, on purpose** (the contract says so) — points, total paid, blocked tab, repeated no-show badge, Excel export, addresses, block from booking.
+- **Mock backend** — shares the bookings database: the 9 customers with a booking (plus two who never booked) get their visits, no-shows and last visit from the same bookings the Bookings screens show. Ratings of completed bookings are made up from the booking id. The *Not back in 60 days* tab is empty with the seed (its oldest booking is three days old); the logic is covered by tests.
+
+## Loading states of the list pages
+
+One strategy for every list page: **skeleton → data / empty / error**, never *empty → skeleton → data*.
+
+- **Skeleton** from the first moment: the page is *loading* from the instant it opens until its first response. That includes the time the **branch options** are still loading, before the list request even starts (Offers, Packages, Services and Customers load the branches first; their `loading` signal covers it — Bookings, Payment reviews and Attendance combine `branchesLoading` with it in their `busy`).
+- **Empty state** only after a request **succeeded** and returned nothing (`!loading && !hasError && rows.length === 0`).
+- **Error state** when the request failed and there is nothing to show (*Try again*); when rows are already on screen a failed reload keeps them and shows a compact error above.
+- **First load vs refresh** — the skeleton replaces the list when there is nothing to show (`loading && rows.length === 0`); a reload with rows already on screen (a refresh, a page change) keeps them and only marks them busy. Rows of **another** view (another tab, filter or search) are cleared when the page opens or the tab changes, so they never show under widgets that were reset.
 
 ## Notes and assumptions
 
 - Branch payment methods: `instaPayAccount` (max 100 characters, trimmed) and `walletNumber` (Egyptian mobile in international format) are optional on the branch form; an empty field is sent as an explicit `null` because the API removes a value that is not sent. The branch **list** does not return them.
 - Attendance: responses are assumed to match the contract PDF; the localized "has upcoming bookings" message is built from the sheet (`BARBERS.ERRORS.ATTENDANCE_HAS_BOOKINGS`) instead of the server's English text. The page has no success toast on purpose (one line in `BarberAttendanceService.setPresent` if you want one).
-- Bookings: `homeAddress` is read as free text (the contract only shows `null`); the payment-review list carries no `bookingNumber`, so cards show `#<id>`; page size is the contract's default 20 (max 100). `meta.additionalData` counters are the selected branch's only. The mock treats a booking whose start time passed while unreviewed as Expired — the contract says the backend does this at the start time.
+- Bookings: `homeAddress` is read as free text (the contract only shows `null`); the booking details carry `branch.id`, `barber.id`, `chair.id` and `actions.canReassign` (the *Change barber* dialog needs them); the payment-review list carries no `bookingNumber`, so cards show `#<id>`; page size is the contract's default 20 (max 100). `meta.additionalData` counters are the selected branch's only. The mock treats a booking whose start time passed while unreviewed as Expired — the contract says the backend does this at the start time.
 - The AlSalam README says Angular 22 / PrimeNG 19; its `package.json` and lockfile say Angular 21 / PrimeNG 21. The latter were followed.
 - The reference had no `fileReplacements`, so production builds silently used the dev environment. Fixed here.
 - Build-time font inlining is off (it needs network access to Google Fonts and breaks offline CI); fonts load from the `<link>` in `index.html`.

@@ -90,7 +90,13 @@ export class OffersService {
   /** The active status tab. */
   readonly tab = this._tab.asReadonly();
   readonly query = this._query.asReadonly();
-  readonly loading = this._loading.asReadonly();
+  /**
+   * The list is loading: from the moment the page opens — while the branch options are still on
+   * their way, before the first list request even starts — until its response arrives. The pages
+   * show their skeleton for this whole span, so the empty state can only ever mean "loaded, and
+   * there is genuinely nothing".
+   */
+  readonly loading = computed(() => this._loading() || this._branchesLoading());
   readonly branchesLoading = this._branchesLoading.asReadonly();
   readonly hasError = this._hasError.asReadonly();
   /** A mutation (create / update / toggle / delete) is in flight. */
@@ -118,8 +124,13 @@ export class OffersService {
    * selected one vanished), then load its offers. The selected branch is kept between visits.
    */
   initialize(): void {
+    const q = this._query();
+    const wasElsewhere = this._tab() !== "all" || q.pageNumber !== 1 || !!q.search;
+
     this._query.set({ pageNumber: 1, pageSize: CARD_PAGE_SIZE });
     this._tab.set("all");
+    // Cards of another tab / search must not show under the reset widgets: the skeleton does.
+    if (wasElsewhere) this._offers.set([]);
 
     if (this.branchesLoaded) {
       this.ensureBranchAndLoad();

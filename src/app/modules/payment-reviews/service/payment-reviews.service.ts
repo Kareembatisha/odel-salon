@@ -41,6 +41,8 @@ export class PaymentReviewsService {
   private readonly notify = inject(NotificationService);
 
   private readonly _items = signal<PaymentReviewItem[]>([]);
+  /** The tab the cards in `_items` were loaded for — they are never shown under another one. */
+  private readonly _itemsTab = signal<PaymentReviewTab | null>(null);
   private readonly _meta = signal<PaginationMeta | null>(null);
   private readonly _query = signal<PaymentReviewsQuery>(this.freshQuery());
   private readonly _branches = signal<ReviewBranchOption[]>([]);
@@ -63,6 +65,12 @@ export class PaymentReviewsService {
   // ----------------------------------------------------------
 
   readonly items = this._items.asReadonly();
+  /**
+   * The tab the cards on screen belong to (`null` while none are). The selected {@link tab} changes
+   * the moment a tab is clicked, the cards only when their response arrives: anything that depends on
+   * WHICH cards are shown (the Approve / Reject buttons) must follow this, not the selected tab.
+   */
+  readonly itemsTab = this._itemsTab.asReadonly();
   readonly meta = this._meta.asReadonly();
   readonly query = this._query.asReadonly();
   readonly branches = this._branches.asReadonly();
@@ -129,7 +137,10 @@ export class PaymentReviewsService {
     const branchId = this._branchId();
     if (branchId === null) return;
 
-    const background = quiet && this._meta() !== null;
+    const requestTab = this._query().tab ?? PaymentReviewTab.ToReview;
+    // Quiet only while the cards on screen ARE this tab's: after a tab switch there is nothing
+    // to keep on screen, so the reload shows the skeleton like any first load.
+    const background = quiet && this._meta() !== null && this._itemsTab() === requestTab;
     const currentRequest = ++this.requestId;
 
     this.inFlight?.unsubscribe();
@@ -157,6 +168,7 @@ export class PaymentReviewsService {
       .subscribe((res) => {
         if (!res) return;
         this._items.set(res.data ?? []);
+        this._itemsTab.set(requestTab);
         this._meta.set(res.meta);
         this._hasError.set(false);
         this._updatedAt.set(new Date());
@@ -187,6 +199,9 @@ export class PaymentReviewsService {
   }
 
   setTab(tab: PaymentReviewTab): void {
+    // Cards of the tab being left must not show under the new one while it loads (the skeleton
+    // does) — least of all with the To review buttons on them.
+    if (tab !== this.tab()) this.clearItems();
     this._query.update((q) => ({ ...q, tab, pageNumber: 1 }));
     this.load();
   }
@@ -223,7 +238,7 @@ export class PaymentReviewsService {
 
     this._query.set(this.freshQuery());
     // Only then: the first tab's queue can stay on screen while it refreshes, instead of flashing empty.
-    if (wasElsewhere) this._items.set([]);
+    if (wasElsewhere) this.clearItems();
   }
 
   /** Keep the selected branch if it still exists, otherwise take the first; then load. */
@@ -247,8 +262,14 @@ export class PaymentReviewsService {
 
   /** Rows and badges of the branch that was left must not show under the new one. */
   private resetResults(): void {
-    this._items.set([]);
+    this.clearItems();
     this._meta.set(null);
+  }
+
+  /** No cards on screen (and none that belong to any tab). */
+  private clearItems(): void {
+    this._items.set([]);
+    this._itemsTab.set(null);
   }
 
   /**
